@@ -23,7 +23,8 @@ namespace Activities.Web.Controllers.Api
         public async Task<dynamic> Get()
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var activities = await _activitiesClient.GetActivities(accessToken, DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1));
+            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
+            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
 
             return activities
                 .GroupBy(activity => activity.StartDate.ToString("MMM yyyy"))
@@ -35,18 +36,7 @@ namespace Activities.Web.Controllers.Api
                         NordicSki = month.Where(activity => activity.Type == "NordicSki").Sum(activity => activity.MovingTime).ToTimeString(),
                         Ride = month.Where(activity => activity.Type == "Ride").Sum(activity => activity.MovingTime).ToTimeString(),
                         VirtualRide = month.Where(activity => activity.Type == "VirtualRide").Sum(activity => activity.MovingTime).ToTimeString(),
-                        Total = month.Sum(activity => activity.MovingTime).ToTimeString(),
-                        Activities = month
-                            .OrderByDescending(activity => activity.StartDate)
-                            .Select(activity => new
-                            {
-                                activity.Id,
-                                activity.Name,
-                                activity.Type,
-                                Date = activity.StartDate.ToString("dd.MM.yyyy"),
-                                MovingTime = activity.MovingTime.ToTimeString()
-                            })
-                            .ToList()
+                        Total = month.Sum(activity => activity.MovingTime).ToTimeString()
                     })
                 .ToList();
         }

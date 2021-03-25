@@ -23,7 +23,8 @@ namespace Activities.Web.Controllers.Api
         public async Task<dynamic> Get()
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var activities = await _activitiesClient.GetActivities(accessToken, DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1));
+            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
+            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
 
             return activities
                 .Select(

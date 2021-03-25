@@ -25,13 +25,14 @@ namespace Activities.Web.Controllers.Api
         public async Task<dynamic> Get(double minSpeed, double maxSpeed)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
+            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
             minSpeed = minSpeed.ToMetersPerSecond();
             maxSpeed = maxSpeed.ToMetersPerSecond();
             var laps = new List<Lap>();
             
-            var activities = await _activitiesClient.GetActivities(accessToken, DateTime.Today.AddYears(-1), DateTime.Today.AddDays(1));
+            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
             
-            foreach (var activity in activities.Where(activity => activity.Type == "Run"))
+            foreach (var activity in activities.Where(activity => activity.Type == "Run" && activity.StartDate > DateTime.Today.AddMonths(-6)))
             {
                 var activityDetails = await _activitiesClient.GetActivity(accessToken, activity.Id);
                 laps.AddRange(activityDetails.Laps?.Where(lap => lap.AverageSpeed >= minSpeed && lap.AverageSpeed <= maxSpeed) ?? Enumerable.Empty<Lap>());

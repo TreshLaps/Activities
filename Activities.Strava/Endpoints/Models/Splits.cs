@@ -2,7 +2,7 @@
 
 namespace Activities.Strava.Endpoints.Models
 {
-    public class SplitsMetric
+    public class Splits
     {
         [JsonProperty("distance")]
         public double Distance { get; set; }
@@ -11,7 +11,7 @@ namespace Activities.Strava.Endpoints.Models
         public int ElapsedTime { get; set; }
 
         [JsonProperty("elevation_difference")]
-        public double ElevationDifference { get; set; }
+        public double? ElevationDifference { get; set; }
 
         [JsonProperty("moving_time")]
         public int MovingTime { get; set; }

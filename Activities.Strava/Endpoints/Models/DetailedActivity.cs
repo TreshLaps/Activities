@@ -60,21 +60,6 @@ namespace Activities.Strava.Endpoints.Models
         [JsonProperty("end_latlng")]
         public List<double> EndLatlng { get; set; }
 
-        [JsonProperty("location_city")]
-        public object LocationCity { get; set; }
-
-        [JsonProperty("location_state")]
-        public object LocationState { get; set; }
-
-        [JsonProperty("location_country")]
-        public string LocationCountry { get; set; }
-
-        [JsonProperty("start_latitude")]
-        public double StartLatitude { get; set; }
-
-        [JsonProperty("start_longitude")]
-        public double StartLongitude { get; set; }
-
         [JsonProperty("achievement_count")]
         public int AchievementCount { get; set; }
 
@@ -181,10 +166,10 @@ namespace Activities.Strava.Endpoints.Models
         public List<SegmentEffort> SegmentEfforts { get; set; }
 
         [JsonProperty("splits_metric")]
-        public List<SplitsMetric> SplitsMetric { get; set; }
+        public List<Splits> SplitsMetric { get; set; }
 
         [JsonProperty("splits_standard")]
-        public List<SplitsStandard> SplitsStandard { get; set; }
+        public List<Splits> SplitsStandard { get; set; }
 
         [JsonProperty("laps")]
         public List<Lap> Laps { get; set; }

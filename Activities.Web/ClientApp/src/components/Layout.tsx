@@ -24,6 +24,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                 {isAuthenticated &&
                     <React.Fragment>
                         <li><Link to="/activities">Activities</Link></li>
+                        <li><Link to="/intervals">Intervals</Link></li>
                     </React.Fragment>
                 }
                 <li><a href={isAuthenticated ? '/signout' : '/signin'}>{isAuthenticated ? 'Sign out' : 'Sign in'}</a></li>

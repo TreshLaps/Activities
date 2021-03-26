@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
 using Activities.Strava.Endpoints;
@@ -25,7 +26,7 @@ namespace Activities.Web.Controllers.Api
         public async Task<dynamic> Get(double minSpeed, double maxSpeed)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value);
+            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
             minSpeed = minSpeed.ToMetersPerSecond();
             maxSpeed = maxSpeed.ToMetersPerSecond();
             var laps = new List<Lap>();

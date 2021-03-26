@@ -9,7 +9,7 @@ namespace Activities.Strava.Endpoints.Models
         public List<double> Speeds { get; set; }
 
         [JsonProperty("current_activity_index")]
-        public int CurrentActivityIndex { get; set; }
+        public int? CurrentActivityIndex { get; set; }
 
         [JsonProperty("min_speed")]
         public double MinSpeed { get; set; }

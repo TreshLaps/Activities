@@ -1,5 +1,7 @@
 ﻿using Humanizer.Localisation;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Humanizer;
 
 namespace Activities.Core.Extensions
@@ -35,6 +37,14 @@ namespace Activities.Core.Extensions
             }
 
             return TimeSpan.FromSeconds(seconds).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Day, precision: 2);
+        }
+
+        public static double Median(this IEnumerable<double> source)
+        {
+            return source
+                .OrderBy(s => s)
+                .Skip(source.Count() / 2)
+                .First();
         }
     }
 }

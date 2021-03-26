@@ -67,5 +67,7 @@ namespace Activities.Strava.Endpoints.Models
 
         [JsonProperty("pace_zone")]
         public int PaceZone { get; set; }
+
+        public bool IsInterval { get; set; }
     }
 }

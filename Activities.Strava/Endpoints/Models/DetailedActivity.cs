@@ -40,7 +40,7 @@ namespace Activities.Strava.Endpoints.Models
         public string ExternalId { get; set; }
 
         [JsonProperty("upload_id")]
-        public long UploadId { get; set; }
+        public long? UploadId { get; set; }
 
         [JsonProperty("start_date")]
         public DateTime StartDate { get; set; }
@@ -100,7 +100,7 @@ namespace Activities.Strava.Endpoints.Models
         public string GearId { get; set; }
 
         [JsonProperty("from_accepted_tag")]
-        public bool FromAcceptedTag { get; set; }
+        public bool? FromAcceptedTag { get; set; }
 
         [JsonProperty("upload_id_str")]
         public string UploadIdStr { get; set; }

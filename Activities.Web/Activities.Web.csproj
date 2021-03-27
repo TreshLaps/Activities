@@ -14,6 +14,7 @@
     <PackageReference Include="AspNet.Security.OAuth.Strava" Version="5.0.2" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.8.0" />
     <PackageReference Include="Humanizer.Core" Version="2.8.26" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.4" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
   </ItemGroup>

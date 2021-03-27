@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Table, Box } from '../../styles/styles';
+import Loader from '../utils/Loader';
 
 interface Activity {
     id: number;
@@ -10,46 +12,63 @@ interface Activity {
 };
 
 const ActivitiesPage: React.FC = () => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [message, setMessage] = useState<string>();
     const [activities, setActivities] = useState<Activity[]>();
 
     useEffect(() => {
-        if (activities != null) {
+        if (activities != null || isLoading) {
             return;
         }
+
+        setIsLoading(true);
+        setMessage("Loading activities ...");
 
         fetch(`/api/activities/`)
             .then(response => response.json() as Promise<Activity[]>)
             .then(data => {
                 setActivities(data);
+                setIsLoading(false);
+                setMessage(undefined);
             })
-            .catch(error => setActivities([]));
+            .catch(error => {
+                setActivities([])
+                setIsLoading(false);
+                setMessage("Failed to load activities.");
+            });
     });
 
+    if (isLoading || activities == null) {
+        return (<Loader message={message} />);
+    }
+
     return (
-        <table cellSpacing="10">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Distance</th>
-                    <th>Speed</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {activities?.map(activity => {
-                    return (
-                        <tr>
-                            <td>{activity.name}</td>
-                            <td>{activity.type}</td>
-                            <td>{activity.distance}</td>
-                            <td>{activity.averageSpeed}</td>
-                            <td>{activity.startDate}</td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </table>
+        <Box>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Distance</th>
+                        <th>Speed</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {activities?.map(activity => {
+                        return (
+                            <tr key={activity.id}>
+                                <td>{activity.name}</td>
+                                <td>{activity.type}</td>
+                                <td>{activity.distance}</td>
+                                <td>{activity.averageSpeed}</td>
+                                <td>{activity.startDate}</td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </Table>
+        </Box>        
     );
 }
     

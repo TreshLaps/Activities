@@ -12,22 +12,23 @@ interface ChartProps {
     children: any;
     height?: number;
     xAxisType?: axisTypes;
+    xType?: string;
     yDomain?: any;
     stack?: boolean;
 };
 
 const Chart: React.FC<ChartProps> = (props) => {
-    const { children, height, xAxisType, stack, yDomain } = props;
+    const { children, height, xAxisType, stack, yDomain, xType } = props;
 
     return (
         <div>
             <AutoSizer disableHeight={true}>
                 {(size) => 
-                    (<XYPlot height={height || 300} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain}>
+                    (<XYPlot height={height || 300} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain} xType={xType}>
                         <HorizontalGridLines />
                         <YAxis />
-                        {xAxisType == axisTypes.Date && <XAxis tickFormat={v => (new Date(v)).toUTCString().substr(8,8)} tickLabelAngle={30} tickPadding={30} />}
-                        {(xAxisType == null || xAxisType == axisTypes.Number) && <XAxis />}
+                        {xAxisType === axisTypes.Date && <XAxis tickFormat={v => (new Date(v)).toUTCString().substr(8,8)} tickLabelAngle={30} tickPadding={30} />}
+                        {(xAxisType == null || xAxisType === axisTypes.Number) && <XAxis />}
                         {children}
                     </XYPlot>)
                 }
@@ -38,7 +39,7 @@ const Chart: React.FC<ChartProps> = (props) => {
 
 export function getChartData<T>(
     data: T[], 
-    getX: (item: T) => Number | Date, 
+    getX: (item: T) => Number | Date | String, 
     getY: (item: T) => Number, 
     getLabel?: (item: T) => String
 ) {

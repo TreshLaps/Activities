@@ -51,6 +51,7 @@ namespace Activities.Web.Controllers.Api
 
                     return new
                     {
+                        activity.Id,
                         Name = $"{activity.StartDate:dd.MM.yyyy}: {activity.Name} - {activity.Description}",
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),

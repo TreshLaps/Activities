@@ -1,15 +1,30 @@
 import styled from "styled-components";
 
-export const Box = styled.div`
-    background: #fff;
-    padding: 20px;
+export const Container = styled.div`
     border-radius: 5px;
     margin-bottom: 20px;
+`;
+
+export const Box = styled(Container)`
+    background: #fff;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    padding: 20px;
 
     @media(max-width: 1440px) {
         padding: 10px;
+    }
+`;
+
+export const StackContainer = styled(Container)`
+    display: flex;
+    flex-wrap: wrap;
+
+    & > * {
+        margin-right: 20px;
+
+        &:last-child {
+            margin-right: 0;
+        }
     }
 `;
 
@@ -18,7 +33,7 @@ export const SubHeader = styled.h2`
     margin-bottom: 10px;
 `;
 
-export const Wrapper = styled.div<{columns: number}>`
+export const Grid = styled.div<{columns: number}>`
     @media(min-width: 1000px) {
         display: grid;
         column-gap: 20px;
@@ -84,4 +99,17 @@ export const Table = styled.table`
             padding-right: 20px;
         }
     }
+`;
+
+export const Dropdown = styled.select`    
+    border-radius: 3px;
+    border: 0;
+    padding: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    background: #fff;
+    color: #000;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
 `;

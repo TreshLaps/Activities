@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { Box, SubHeader, Table, Wrapper } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, Grid, Dropdown } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface Activity {
     id: number;
+    date: string;
     name: string;
+    description: string;
     interval_AverageSpeed: string;
     interval_AverageHeartrate: number;
     interval_Laps: string[];
@@ -28,6 +30,31 @@ const IntervalsPage: React.FC = () => {
     const [hint, setHint] = useState<any | null>();
     const [totalDistances, setTotalDistances] = useState<any[]>();
     const [intervalDistances, setIntervalDistances] = useState<any[]>();
+    const showLoader = isLoading || activities == null;
+
+    // Filters
+    const [typeFilter, setTypeFilter] = useState('Run');
+    const [durationFilter, setDurationFilter] = useState('Year');
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+
+    const appendArgument = function(url: string, key: string, value: any) {
+
+        return `${url}${url.indexOf('?') !== -1 ? '&' : '?'}${key}=${value}`;
+    };
+
+    const appendUrlArguments = function(url: string) {
+        if (typeFilter !== 'All') {
+            url = appendArgument(url, 'type', typeFilter);
+        }
+
+        url = appendArgument(url, 'duration', durationFilter);
+
+        if (durationFilter === 'Year') {
+            url = appendArgument(url, 'year', yearFilter);
+        }
+
+        return url;
+    };
 
     useEffect(() => {
         if (activities != null || isLoading) {
@@ -36,7 +63,7 @@ const IntervalsPage: React.FC = () => {
 
         setIsLoading(true);
         setMessage("Loading activities ...");
-        fetch(`/api/ActivitiesIntervals/`)
+        fetch(appendUrlArguments('/api/ActivitiesIntervals/'))
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setActivities(data.intervals);
@@ -69,100 +96,123 @@ const IntervalsPage: React.FC = () => {
             });
     });
 
-    if (isLoading || activities == null) {
-        return (<Loader message={message} />);
-    }
-
     return (
         <div>
-            <Wrapper columns={2}>
-                <Box>
-                    <SubHeader>Laktat</SubHeader>
-                    {laktat && laktat.length > 0 && 
-                        <Chart xAxisType={axisTypes.Date} yDomain={[0,5]}>                        
-                            <HexbinSeries 
-                                sizeHexagonsWithCount
-                                data={laktatAll}
-                                style={{opacity: 0.5, fill: '#ccc'}}
-                                stroke="gray"
-                            />
-                            <LineSeries 
-                                data={laktat}
-                                stroke="#2d76d8"
-                            />
-                            <MarkSeries 
-                                data={laktat}
-                                fill="#2d76d8"
-                                stroke="#2d76d8"
-                                onValueMouseOver={(value) => setHint(value)}
-                                onValueMouseOut={() => setHint(null)}
-                            />
-                            {hint?.label != null && 
-                                <Hint value={hint}>
-                                    <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
-                                </Hint>
-                            }
-                        </Chart>              
-                    }
-                </Box>
-                <Box>
-                    <SubHeader>Distance</SubHeader>
-                    {totalDistances && totalDistances.length > 0 && 
-                        <Chart xAxisType={axisTypes.Date} stack={true} xType="ordinal">       
-                            <VerticalBarSeries 
-                                barWidth={0.5}
-                                data={intervalDistances}
-                                fill="#2d76d8"
-                                stroke="#2d76d8"
-                                onValueMouseOver={(value) => setHint(value)}
-                                onValueMouseOut={() => setHint(null)}
-                            />                 
-                            <VerticalBarSeries
-                                barWidth={0.5}
-                                data={totalDistances}
-                                fill="#bdc9ce"
-                                stroke="#bdc9ce"
-                                onValueMouseOver={(value) => setHint(value)}
-                                onValueMouseOut={() => setHint(null)}
-                            />
-                            {hint?.label != null && 
-                                <Hint value={hint}>
-                                    <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
-                                </Hint>
-                            }
-                        </Chart>              
-                    }
-                </Box>                
-            </Wrapper>
-            <Box>
-                <Table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Speed</th>
-                            <th>BPM</th>
-                            <th>Laps</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {message && <tr><td>{message}</td></tr>}
-                        {activities?.map(activity => {
-                            return (
-                                <tr key={activity.id}>
-                                    <td>{activity.name}</td>
-                                    <td>{activity.interval_AverageSpeed}</td>
-                                    <td>{activity.interval_AverageHeartrate}</td>
-                                    <td>
-                                        <div style={{fontSize: "13px"}}>
-                                            {activity.interval_Laps.map(lap => (<div key={lap}>{lap}</div>))}
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
+            <StackContainer>
+                <Dropdown disabled={isLoading} value={typeFilter} onChange={(v) => { setTypeFilter(v.currentTarget.value); setActivities(undefined); }}>
+                    <option value="All">All activities</option>
+                    <option value="Run">Run</option>
+                    <option value="Ride">Ride</option>
+                    <option value="NordicSki">NordicSki</option>
+                </Dropdown>
+                <Dropdown disabled={isLoading} value={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
+                    <option value="Year">Year report</option>
+                    <option value="Custom">Custom report</option>
+                </Dropdown>
+                {durationFilter === 'Year' && 
+                    <Dropdown disabled={isLoading} value={yearFilter} onChange={(v) => { setYearFilter(parseInt(v.currentTarget.value, 10)); setActivities(undefined); }}>
+                        {new Array(10).fill(0).map((item, index) => {
+                            const year = new Date().getFullYear() - index;
+                            return (<option key={year} value={year}>{year}</option>);
                         })}
-                    </tbody>
-                </Table>
-            </Box>
+                    </Dropdown>
+                }
+            </StackContainer>
+            {showLoader && <Loader message={message} />}
+            {!showLoader && 
+                <div>
+                    <Grid columns={2}>
+                        <Box>
+                            <SubHeader>Distance</SubHeader>
+                            {totalDistances && totalDistances.length > 0 && 
+                                <Chart xAxisType={axisTypes.Date} stack={true} xType="ordinal">       
+                                    <VerticalBarSeries 
+                                        barWidth={0.5}
+                                        data={intervalDistances}
+                                        fill="#2d76d8"
+                                        stroke="#2d76d8"
+                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOut={() => setHint(null)}
+                                    />                 
+                                    <VerticalBarSeries
+                                        barWidth={0.5}
+                                        data={totalDistances}
+                                        fill="#bdc9ce"
+                                        stroke="#bdc9ce"
+                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOut={() => setHint(null)}
+                                    />
+                                    {hint?.label != null && 
+                                        <Hint value={hint}>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
+                                        </Hint>
+                                    }
+                                </Chart>              
+                            }
+                        </Box>
+                        <Box>
+                            <SubHeader>Laktat</SubHeader>
+                            {laktat && laktat.length > 0 && 
+                                <Chart xAxisType={axisTypes.Date} yDomain={[0,5]}>                        
+                                    <HexbinSeries 
+                                        sizeHexagonsWithCount
+                                        data={laktatAll}
+                                        style={{opacity: 0.5, fill: '#ccc'}}
+                                        stroke="gray"
+                                    />
+                                    <LineSeries 
+                                        data={laktat}
+                                        stroke="#2d76d8"
+                                    />
+                                    <MarkSeries 
+                                        data={laktat}
+                                        fill="#2d76d8"
+                                        stroke="#2d76d8"
+                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOut={() => setHint(null)}
+                                    />
+                                    {hint?.label != null && 
+                                        <Hint value={hint}>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
+                                        </Hint>
+                                    }
+                                </Chart>              
+                            }
+                        </Box>             
+                    </Grid>
+                    <Box>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Date</th>
+                                    <th>Speed</th>
+                                    <th>BPM</th>
+                                    <th>Laps</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {message && <tr><td>{message}</td></tr>}
+                                {activities?.map(activity => {
+                                    return (
+                                        <tr key={activity.id}>
+                                            <td><div style={{fontWeight: 500}}>{activity.name}</div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
+                                            <td>{activity.date}</td>
+                                            <td>{activity.interval_AverageSpeed}</td>
+                                            <td>{activity.interval_AverageHeartrate}</td>
+                                            <td>
+                                                <div style={{fontSize: "13px"}}>
+                                                    {activity.interval_Laps.map(lap => (<div key={lap}>{lap}</div>))}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </Table>
+                    </Box>
+                </div>
+            }            
         </div>        
     );
 }

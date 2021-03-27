@@ -25,20 +25,28 @@ namespace Activities.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<dynamic> Get()
+        public async Task<dynamic> Get(string type, string duration, int year)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
             var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
-            var detailedActivities = new List<DetailedActivity>();
             
-            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
-            
-            foreach (var activity in activities.Where(activity => activity.Type == "Run" && activity.StartDate > DateTime.Today.AddMonths(-12)))
+            var activities = (await _activitiesClient.GetActivities(accessToken, athleteId)).AsEnumerable();
+
+            if (type != null)
             {
-                var activityDetails = await _activitiesClient.GetActivity(accessToken, activity.Id);
-                detailedActivities.Add(activityDetails);
+                activities = activities.Where(activity => activity.Type == type);
             }
-            
+
+            if (duration == "Year")
+            {
+                activities = activities.Where(activity => activity.StartDate.Year == year);
+            }
+            else
+            {
+                activities = activities.Where(activity => activity.StartDate.Year == DateTime.Today.Year);
+            }
+
+            var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(accessToken, activity.Id));
             detailedActivities.TagIntervalLaps();
 
             var intervals = detailedActivities
@@ -52,7 +60,9 @@ namespace Activities.Web.Controllers.Api
                     return new
                     {
                         activity.Id,
-                        Name = $"{activity.StartDate:dd.MM.yyyy}: {activity.Name} - {activity.Description}",
+                        Date = activity.StartDate.ToString("dd.MM.yyyy"),
+                        activity.Name,
+                        activity.Description,
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
                         Interval_Laps = intervalLaps

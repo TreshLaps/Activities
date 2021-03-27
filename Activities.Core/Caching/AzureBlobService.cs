@@ -1,8 +1,10 @@
 ﻿using Azure.Storage.Blobs;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Models;
 
@@ -12,6 +14,7 @@ namespace Activities.Core.Caching
     {
         private readonly string _connectionString;
         private readonly string _containerName;
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> AsyncLocks = new();
 
         public AzureBlobService(string connectionString)
         {
@@ -23,10 +26,29 @@ namespace Activities.Core.Caching
         {
             var result = await Get<T>(key);
 
-            if (result == null)
+            if (result != null)
             {
+                return result;
+            }
+            
+            var semaphoreSlim = AsyncLocks.GetOrAdd(key, new SemaphoreSlim(1, 1));
+            await semaphoreSlim.WaitAsync();
+
+            try
+            {
+                result = await Get<T>(key);
+
+                if (result != null)
+                {
+                    return result;
+                }
+                
                 result = await action();
                 await Add(key, result);
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
 
             return result;

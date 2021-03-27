@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
@@ -9,6 +11,7 @@ namespace Activities.Core.Caching
     public class FileStorageService : IPermanentStorageService
     {
         private readonly string _storagePath;
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> AsyncLocks = new();
 
         public FileStorageService(IWebHostEnvironment webHostEnvironment)
         {
@@ -19,10 +22,29 @@ namespace Activities.Core.Caching
         {
             var result = await Get<T>(key);
 
-            if (result == null)
+            if (result != null)
             {
+                return result;
+            }
+            
+            var semaphoreSlim = AsyncLocks.GetOrAdd(key, new SemaphoreSlim(1, 1));
+            await semaphoreSlim.WaitAsync();
+
+            try
+            {
+                result = await Get<T>(key);
+
+                if (result != null)
+                {
+                    return result;
+                }
+                
                 result = await action();
                 await Add(key, result);
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
 
             return result;

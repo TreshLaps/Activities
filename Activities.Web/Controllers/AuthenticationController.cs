@@ -8,6 +8,8 @@ using AspNet.Security.OAuth.Strava;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Activities.Web.Controllers
 {
@@ -37,6 +39,19 @@ namespace Activities.Web.Controllers
             if (httpContext.User.Identity?.IsAuthenticated == false)
             {
                 return null;
+            }
+
+            var configuration = httpContext.RequestServices.GetService<IConfiguration>();
+            var validClubs = configuration["Strava:Clubs"]?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (validClubs?.Any() == true)
+            {
+                var userClubs = httpContext.User.Claims.FirstOrDefault(claim => claim.Type == "urn:strava:clubs")?.Value?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                if (userClubs == null || userClubs.All(userClub => validClubs.Contains(userClub) == false))
+                {
+                    return null;
+                }
             }
 
             return new StravaAthleteToken

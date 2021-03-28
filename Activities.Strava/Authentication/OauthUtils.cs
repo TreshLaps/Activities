@@ -58,7 +58,13 @@ namespace Activities.Core.Authentication
                 var json = await tokenResponse.Content.ReadAsStringAsync();
                 var refreshedToken = JsonConvert.DeserializeObject<RefresToken>(json);
 
-                context.Properties.StoreTokens(new[] { new AuthenticationToken { Name = "access_token", Value = refreshedToken.AccessToken }, new AuthenticationToken { Name = "refresh_token", Value = refreshedToken.RefreshToken }, new AuthenticationToken { Name = "token_type", Value = refreshedToken.TokenType }, new AuthenticationToken { Name = "expires_at", Value = DateTime.UtcNow.AddSeconds(refreshedToken.ExpiresIn).ToString("u") } });
+                context.Properties.StoreTokens(new[]
+                {
+                    new AuthenticationToken { Name = "access_token", Value = refreshedToken.AccessToken }, 
+                    new AuthenticationToken { Name = "refresh_token", Value = refreshedToken.RefreshToken }, 
+                    new AuthenticationToken { Name = "token_type", Value = refreshedToken.TokenType }, 
+                    new AuthenticationToken { Name = "expires_at", Value = DateTime.UtcNow.AddSeconds(refreshedToken.ExpiresIn).ToString("u") }
+                });
 
                 context.ShouldRenew = true;
             }

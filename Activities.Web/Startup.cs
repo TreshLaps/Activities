@@ -1,8 +1,14 @@
 using System.Globalization;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Activities.Core.Authentication;
 using Activities.Core.Caching;
+using Activities.Strava.Endpoints;
 using Activities.Web.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -57,6 +63,7 @@ namespace Activities.Web
                         options.SaveTokens = true;
                         options.Scope.Add("read_all");
                         options.Scope.Add("activity:read_all");
+                        options.Events.OnCreatingTicket = OnCreatingTicket;
                     });
                 
             services.AddControllersWithViews();
@@ -80,6 +87,13 @@ namespace Activities.Web
                 .UsingRegistrationStrategy(RegistrationStrategy.Skip)
                 .AsSelf()
                 .WithTransientLifetime());
+        }
+
+        private async Task OnCreatingTicket(OAuthCreatingTicketContext context)
+        {
+            var athleteClient = context.HttpContext.RequestServices.GetService<AthleteClient>();
+            var clubs = await athleteClient.GetAthleteClubs(context.AccessToken);
+            context.Identity.AddClaim(new Claim("urn:strava:clubs", clubs != null ? string.Join(",", clubs.Select(club => club.Id)) : ""));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

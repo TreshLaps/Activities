@@ -27,10 +27,14 @@ namespace Activities.Web.Controllers.Api
         [HttpGet]
         public async Task<dynamic> Get(string type, string duration, int year)
         {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
+
+            if (stravaAthlete == null)
+            {
+                return Unauthorized();
+            }
             
-            var activities = (await _activitiesClient.GetActivities(accessToken, athleteId)).AsEnumerable();
+            var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId)).AsEnumerable();
 
             if (type != null)
             {
@@ -50,8 +54,7 @@ namespace Activities.Web.Controllers.Api
                 activities = activities.Where(activity => activity.StartDate.Year == DateTime.Today.Year);
             }
 
-            var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(accessToken, activity.Id));
-            detailedActivities.TagIntervalLaps();
+            var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
 
             var intervals = detailedActivities
                 .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
@@ -70,9 +73,9 @@ namespace Activities.Web.Controllers.Api
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
                         Interval_Laps = intervalLaps
-                            .Select(lap => $"{lap.Name}: {lap.Distance.ToKmString()}, {lap.AverageSpeed.ToMinPerKmString()}, {(int)lap.AverageHeartrate} bpm")
+                            .Select(lap => $"{(lap.Lactate.HasValue ? $"({lap.Lactate.Value}) " : "")}{lap.Distance.ToKmString()}, {lap.AverageSpeed.ToMinPerKmString()}, {(int)lap.AverageHeartrate} bpm")
                             .ToList(),
-                        Laktat = GetLaktat(activity.Description)
+                        Laktat = GetLaktat(activity)
                     };
                 })
                 .ToList();
@@ -84,7 +87,7 @@ namespace Activities.Web.Controllers.Api
                     return new
                     {
                         Date = activity.StartDate,
-                        Laktat = GetLaktat(activity.Description)
+                        Laktat = GetLaktat(activity)
                     };
                 })
                 .Where(activity => activity.Laktat.Any())
@@ -111,7 +114,7 @@ namespace Activities.Web.Controllers.Api
                     return new
                     {
                         Date = activity.StartDate,
-                        Laktat = GetLaktat(activity.Description)
+                        Laktat = GetLaktat(activity)
                     };
                 })
                 .SelectMany(activity => activity.Laktat.Select(laktat => new
@@ -143,19 +146,27 @@ namespace Activities.Web.Controllers.Api
             };
         }
 
-        private double[] GetLaktat(string description)
+        private double[] GetLaktat(DetailedActivity activity)
         {
-            if (string.IsNullOrWhiteSpace(description))
+            var result = new List<double>();
+
+            if (activity.Lactate.HasValue)
             {
-                return new double[0];
+                result.Add(activity.Lactate.Value);
             }
 
-            var matches = Regex.Matches(description, @"(💉[ ]*([0-9,]+) )");
+            if (activity.Laps != null)
+            {
+                foreach (var lap in activity.Laps)
+                {
+                    if (lap.Lactate.HasValue)
+                    {
+                        result.Add(lap.Lactate.Value);
+                    }
+                }
+            }
 
-            return matches
-                .Where(match => double.TryParse(match.Groups[2].Value.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out _))
-                .Select(match => Convert.ToDouble(match.Groups[2].Value.Replace(",", "."), CultureInfo.InvariantCulture))
-                .ToArray();
+            return result.ToArray();
         }
 
         [HttpGet("month")]
@@ -172,8 +183,6 @@ namespace Activities.Web.Controllers.Api
                 var activityDetails = await _activitiesClient.GetActivity(accessToken, activity.Id);
                 detailedActivities.Add(activityDetails);
             }
-            
-            detailedActivities.TagIntervalLaps();
 
             return detailedActivities
                 .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
@@ -189,7 +198,7 @@ namespace Activities.Web.Controllers.Api
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
                         Distance = intervalLaps.Sum(lap => lap.Distance),
-                        Laktat = GetLaktat(activity.Description)
+                        Laktat = GetLaktat(activity)
                     };
                 })
                 .Where(activity => activity.Laktat.Any())

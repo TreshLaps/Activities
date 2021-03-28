@@ -40,7 +40,7 @@ namespace Activities.Core.Caching
                 }
                 
                 result = await action();
-                await Add(key, result);
+                await AddOrUpdate(key, TimeSpan.MaxValue, result);
             }
             finally
             {
@@ -49,8 +49,8 @@ namespace Activities.Core.Caching
 
             return result;
         }
-        
-        public async Task Add<T>(string key, T value) where T : class
+
+        public async Task AddOrUpdate(string key, TimeSpan expiration, object value)
         {
             if (key == null)
             {

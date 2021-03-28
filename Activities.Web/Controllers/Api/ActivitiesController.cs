@@ -23,9 +23,14 @@ namespace Activities.Web.Controllers.Api
         [HttpGet]
         public async Task<dynamic> Get()
         {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
-            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
+            var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
+
+            if (stravaAthlete == null)
+            {
+                return Unauthorized();
+            }
+            
+            var activities = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
 
             return activities
                 .Select(

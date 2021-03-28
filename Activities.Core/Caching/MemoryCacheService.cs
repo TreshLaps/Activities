@@ -38,10 +38,7 @@ namespace Activities.Core.Caching
                 }
                 
                 result = await action();
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(expiration);
-            
-                _memoryCache.Set(key, result, cacheEntryOptions);
+                await AddOrUpdate(key, expiration, result);
             }
             finally
             {
@@ -49,6 +46,15 @@ namespace Activities.Core.Caching
             }
 
             return result;
+        }
+
+        public Task AddOrUpdate(string key, TimeSpan expiration, object value)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(expiration);
+            
+            _memoryCache.Set(key, value, cacheEntryOptions);
+            return Task.CompletedTask;
         }
     }
 }

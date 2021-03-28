@@ -5,6 +5,8 @@ namespace Activities.Strava.Endpoints.Models
 {
     public class Lap
     {
+        public double? Lactate { get; set; }
+        
         [JsonProperty("id")]
         public object Id { get; set; }
 

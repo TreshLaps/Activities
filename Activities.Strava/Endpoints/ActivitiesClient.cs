@@ -24,12 +24,19 @@ namespace Activities.Strava.Endpoints
         /// </summary>
         /// <param name="accessToken">Strava access token</param>
         /// <param name="id">Activity Id</param>
-        public Task<DetailedActivity> GetActivity(string accessToken, long id)
+        public async Task<DetailedActivity> GetActivity(string accessToken, long id)
         {
-            return _cachingService.GetOrAdd(
+            var activity = await _cachingService.GetOrAdd(
                 $"DetailedActivity:{id}",
                 TimeSpan.MaxValue,
                 () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
+
+            if (activity.TryTagIntervalLaps() | activity.TryParseLactatMeasurements())
+            {
+                await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+            }
+                    
+            return activity;
         }
 
         /// <summary>
@@ -70,19 +77,12 @@ namespace Activities.Strava.Endpoints
                 
             } while (activities.Any());
 
-            foreach (var activity in result)
-            {
-                if (activitiesCache.Activities.Any(a => a.Id == activity.Id))
-                {
-                    continue;
-                }
-                
-                activitiesCache.Activities.Add(activity);
-            }
+            activitiesCache.Activities.RemoveAll(activity => result.Any(a => a.Id == activity.Id));
+            activitiesCache.Activities.AddRange(result);
 
             activitiesCache.Activities = activitiesCache.Activities.OrderByDescending(activity => activity.StartDate).ToList();
             activitiesCache.LastSyncDate = DateTimeOffset.UtcNow.AddMonths(-1);
-            await _permanentStorageService.Add($"ActivitiesCache:{athleteId}", activitiesCache);
+            await _permanentStorageService.AddOrUpdate($"ActivitiesCache:{athleteId}", TimeSpan.MaxValue, activitiesCache);
             return activitiesCache.Activities;
         }
     }

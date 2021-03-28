@@ -31,5 +31,15 @@ namespace Activities.Core.Caching
                     return action();
                 });
         }
+
+        public async Task AddOrUpdate(string key, TimeSpan expiration, object value)
+        {
+            await _memoryCacheService.AddOrUpdate(key, expiration, value);
+
+            if (expiration == TimeSpan.MaxValue)
+            {
+                await _permanentStorageService.AddOrUpdate(key, expiration, value);
+            }
+        }
     }
 }

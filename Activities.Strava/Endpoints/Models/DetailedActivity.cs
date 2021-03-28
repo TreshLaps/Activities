@@ -6,6 +6,11 @@ namespace Activities.Strava.Endpoints.Models
 {
     public class DetailedActivity
     {
+        public string _IntervalVersion { get; set; }
+        public string _LactateVersion { get; set; }
+
+        public double? Lactate { get; set; }
+
         [JsonProperty("resource_state")]
         public int ResourceState { get; set; }
 

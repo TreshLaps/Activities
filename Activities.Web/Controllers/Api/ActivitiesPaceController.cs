@@ -25,17 +25,22 @@ namespace Activities.Web.Controllers.Api
         [HttpGet]
         public async Task<dynamic> Get(double minSpeed, double maxSpeed)
         {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
+            var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
+
+            if (stravaAthlete == null)
+            {
+                return Unauthorized();
+            }
+            
             minSpeed = minSpeed.ToMetersPerSecond();
             maxSpeed = maxSpeed.ToMetersPerSecond();
             var laps = new List<Lap>();
             
-            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
+            var activities = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
             
             foreach (var activity in activities.Where(activity => activity.Type == "Run" && activity.StartDate > DateTime.Today.AddMonths(-6)))
             {
-                var activityDetails = await _activitiesClient.GetActivity(accessToken, activity.Id);
+                var activityDetails = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id);
                 laps.AddRange(activityDetails.Laps?.Where(lap => lap.AverageSpeed >= minSpeed && lap.AverageSpeed <= maxSpeed) ?? Enumerable.Empty<Lap>());
             }
 

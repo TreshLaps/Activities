@@ -34,7 +34,7 @@ const IntervalsPage: React.FC = () => {
 
     // Filters
     const [typeFilter, setTypeFilter] = useState('Run');
-    const [durationFilter, setDurationFilter] = useState('Year');
+    const [durationFilter, setDurationFilter] = useState('Last12Months');
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
 
     const appendArgument = function(url: string, key: string, value: any) {
@@ -106,6 +106,7 @@ const IntervalsPage: React.FC = () => {
                     <option value="NordicSki">NordicSki</option>
                 </Dropdown>
                 <Dropdown disabled={isLoading} value={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
+                    <option value="Last12Months">Last 12 months</option>
                     <option value="Year">Year report</option>
                     <option value="Custom">Custom report</option>
                 </Dropdown>

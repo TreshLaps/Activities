@@ -37,7 +37,11 @@ namespace Activities.Web.Controllers.Api
                 activities = activities.Where(activity => activity.Type == type);
             }
 
-            if (duration == "Year")
+            if (duration == "Last12Months")
+            {
+                activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1));
+            }
+            else if (duration == "Year")
             {
                 activities = activities.Where(activity => activity.StartDate.Year == year);
             }

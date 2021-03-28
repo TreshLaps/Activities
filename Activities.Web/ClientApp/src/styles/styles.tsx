@@ -56,6 +56,13 @@ export const Table = styled.table`
     margin: -20px;
     margin-top: 0;
 
+    @media(max-width: 1440px) {
+        width: calc(100% + 20px);
+        max-width: calc(100% + 20px);
+        margin: -10px;
+        margin-top: 0;
+    }
+
     th {
         text-align: right;
         padding: 10px;

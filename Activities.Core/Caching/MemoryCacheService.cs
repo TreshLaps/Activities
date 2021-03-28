@@ -56,5 +56,10 @@ namespace Activities.Core.Caching
             _memoryCache.Set(key, value, cacheEntryOptions);
             return Task.CompletedTask;
         }
+
+        public void Remove(string key)
+        {
+            _memoryCache.Remove(key);
+        }
     }
 }

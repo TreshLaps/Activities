@@ -41,5 +41,11 @@ namespace Activities.Core.Caching
                 await _permanentStorageService.AddOrUpdate(key, expiration, value);
             }
         }
+
+        public void Remove(string key)
+        {
+            _memoryCacheService.Remove(key);
+            _permanentStorageService.Remove(key);
+        }
     }
 }

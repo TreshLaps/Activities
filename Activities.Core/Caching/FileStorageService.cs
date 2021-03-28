@@ -82,6 +82,15 @@ namespace Activities.Core.Caching
             return JsonConvert.DeserializeObject<T>(json);
         }
 
+        public void Remove(string key)
+        {
+            var filePath = GetFilePath(key);
+            if (File.Exists(filePath) && !key.Contains("\\") && !key.Contains("/") && !key.Contains(".."))
+            {
+                File.Delete(filePath);
+            }
+        }
+
         private void EnsureDirectoryExists()
         {
             if (!Directory.Exists(_storagePath))

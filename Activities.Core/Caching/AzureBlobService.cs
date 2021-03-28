@@ -95,5 +95,19 @@ namespace Activities.Core.Caching
             var json = await streamReader.ReadToEndAsync();
             return JsonConvert.DeserializeObject<T>(json);
         }
+
+        public void Remove(string key)
+        {
+            if (key == null)
+            {
+                return;
+            }
+
+            var container = new BlobContainerClient(_connectionString, _containerName);
+            container.CreateIfNotExists();
+            
+            var blob = container.GetBlobClient(key);
+            blob.DeleteIfExists();
+        }
     }
 }

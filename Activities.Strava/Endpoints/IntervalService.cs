@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Endpoints
@@ -6,7 +7,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-28";
+        private const string Version = "2021-03-28_8";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -22,7 +23,12 @@ namespace Activities.Strava.Endpoints
                 return true;
             }
 
-            if (activity.Laps == null || activity.Laps.Count(lap => lap.Distance > 200 && lap.ElapsedTime > 60) < 6)
+            foreach (var lap in activity.Laps)
+            {
+                lap.IsInterval = false;
+            }
+
+            if (activity.Laps.Count(lap => lap.Distance > 200 && lap.ElapsedTime > 60) < 6)
             {
                 return true;
             }
@@ -52,6 +58,12 @@ namespace Activities.Strava.Endpoints
             intervalLaps = intervalLaps
                 .Where(lap => lap.Distance >= medianDistance / 3 && lap.Distance <= medianDistance * 3)
                 .ToList();
+
+            // Detect runs with "Auto lap" enabled.
+            if (intervalLaps.Count > Math.Max(activity.Laps.Count - 4, activity.Laps.Count / 2.5))
+            {
+                return true;
+            }
 
             foreach (var lap in intervalLaps)
             {

@@ -7,7 +7,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-28_8";
+        private const string Version = "2021-03-28_9";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -61,6 +61,12 @@ namespace Activities.Strava.Endpoints
 
             // Detect runs with "Auto lap" enabled.
             if (intervalLaps.Count > Math.Max(activity.Laps.Count - 4, activity.Laps.Count / 2.5))
+            {
+                return true;
+            }
+            
+            // We require a minimum of 4 laps for an activity to be considered intervals.
+            if (intervalLaps.Count < 4)
             {
                 return true;
             }

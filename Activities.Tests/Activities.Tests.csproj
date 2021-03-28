@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -12,6 +12,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Activities.Core\Activities.Core.csproj" />
     <ProjectReference Include="..\Activities.Strava\Activities.Strava.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Activities\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

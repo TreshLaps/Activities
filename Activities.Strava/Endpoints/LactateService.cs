@@ -10,7 +10,7 @@ namespace Activities.Strava.Endpoints
     public static class LactateService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-28_3";
+        private const string Version = "2021-03-28_4";
 
         public static bool TryParseLactatMeasurements(this DetailedActivity activity)
         {

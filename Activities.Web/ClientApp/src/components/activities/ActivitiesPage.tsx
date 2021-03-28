@@ -58,7 +58,7 @@ const ActivitiesPage: React.FC = () => {
                     {activities?.map(activity => {
                         return (
                             <tr key={activity.id}>
-                                <td>{activity.name}</td>
+                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
                                 <td>{activity.type}</td>
                                 <td>{activity.distance}</td>
                                 <td>{activity.averageSpeed}</td>

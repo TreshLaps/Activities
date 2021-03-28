@@ -25,8 +25,8 @@ const IntervalsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<string>();
     const [activities, setActivities] = useState<Activity[]>();
-    const [laktat, setLaktat] = useState<any[]>();
-    const [laktatAll, setLaktatAll] = useState<any[]>();
+    const [lactate, setLactate] = useState<any[]>();
+    const [lactateAll, setLactateAll] = useState<any[]>();
     const [hint, setHint] = useState<any | null>();
     const [totalDistances, setTotalDistances] = useState<any[]>();
     const [intervalDistances, setIntervalDistances] = useState<any[]>();
@@ -67,12 +67,12 @@ const IntervalsPage: React.FC = () => {
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setActivities(data.intervals);
-                setLaktat(getChartData<any>(data.measurements, 
+                setLactate(getChartData<any>(data.measurements, 
                     (item) => new Date(item.date).getTime(), 
                     (item) => item.laktat,
                     (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.laktat}`
                 ));
-                setLaktatAll(getChartData<any>(data.allMeasurements, 
+                setLactateAll(getChartData<any>(data.allMeasurements, 
                     (item) => new Date(item.date).getTime(), 
                     (item) => item.laktat
                 ));
@@ -152,21 +152,21 @@ const IntervalsPage: React.FC = () => {
                             }
                         </Box>
                         <Box>
-                            <SubHeader>Laktat</SubHeader>
-                            {laktat && laktat.length > 0 && 
+                            <SubHeader>Lactate</SubHeader>
+                            {lactate && lactate.length > 0 && 
                                 <Chart xAxisType={axisTypes.Date} yDomain={[0,5]}>                        
                                     <HexbinSeries 
                                         sizeHexagonsWithCount
-                                        data={laktatAll}
+                                        data={lactateAll}
                                         style={{opacity: 0.5, fill: '#ccc'}}
                                         stroke="gray"
                                     />
                                     <LineSeries 
-                                        data={laktat}
+                                        data={lactate}
                                         stroke="#2d76d8"
                                     />
                                     <MarkSeries 
-                                        data={laktat}
+                                        data={lactate}
                                         fill="#2d76d8"
                                         stroke="#2d76d8"
                                         onValueMouseOver={(value) => setHint(value)}

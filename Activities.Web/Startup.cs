@@ -1,5 +1,7 @@
 using System.Globalization;
+using Activities.Core.Authentication;
 using Activities.Core.Caching;
+using Activities.Web.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +45,10 @@ namespace Activities.Web
                     {
                         options.LoginPath = "/signin";
                         options.LogoutPath = "/signout";
+                        options.Events = new CookieAuthenticationEvents
+                        {
+                            OnValidatePrincipal = OauthUtils.OnValidatePrincipal
+                        };
                     })
                 .AddStrava(options =>
                     {

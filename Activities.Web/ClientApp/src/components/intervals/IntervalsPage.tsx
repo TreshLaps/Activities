@@ -197,7 +197,7 @@ const IntervalsPage: React.FC = () => {
                                 {activities?.map(activity => {
                                     return (
                                         <tr key={activity.id}>
-                                            <td><div style={{fontWeight: 500}}>{activity.name}</div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
+                                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
                                             <td>{activity.date}</td>
                                             <td>{activity.interval_AverageSpeed}</td>
                                             <td>{activity.interval_AverageHeartrate}</td>

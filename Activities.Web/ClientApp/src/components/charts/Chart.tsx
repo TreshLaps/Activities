@@ -1,6 +1,6 @@
 import React, {  } from 'react';
 import {AutoSizer} from 'react-virtualized'; 
-import {XYPlot, XAxis, YAxis, HorizontalGridLines} from 'react-vis';
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, RVTickFormat} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 
 export enum axisTypes {
@@ -15,20 +15,21 @@ interface ChartProps {
     xType?: string;
     yDomain?: any;
     stack?: boolean;
+    yTickFormat?: RVTickFormat | undefined;
 };
 
 const Chart: React.FC<ChartProps> = (props) => {
-    const { children, height, xAxisType, stack, yDomain, xType } = props;
+    const { children, height, xAxisType, stack, yDomain, xType, yTickFormat } = props;
 
     return (
         <div>
             <AutoSizer disableHeight={true}>
                 {(size) => 
-                    (<XYPlot height={height || 300} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain} xType={xType}>
+                    (<XYPlot height={height || 250} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain} xType={xType}>
                         <HorizontalGridLines />
-                        <YAxis />
+                        <YAxis tickFormat={yTickFormat} />
                         {xAxisType === axisTypes.Date && <XAxis tickFormat={v => (new Date(v)).toUTCString().substr(8,8)} tickLabelAngle={30} tickPadding={30} />}
-                        {(xAxisType == null || xAxisType === axisTypes.Number) && <XAxis />}
+                        {(xAxisType == null || xAxisType === axisTypes.Number) && <XAxis tickLabelAngle={30} tickPadding={30} />}
                         {children}
                     </XYPlot>)
                 }

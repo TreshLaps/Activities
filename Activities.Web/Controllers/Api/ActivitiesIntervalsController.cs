@@ -45,6 +45,10 @@ namespace Activities.Web.Controllers.Api
             {
                 activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1));
             }
+            else if (duration == "Last24Months")
+            {
+                activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-2));
+            }
             else if (duration == "Year")
             {
                 activities = activities.Where(activity => activity.StartDate.Year == year);
@@ -75,36 +79,26 @@ namespace Activities.Web.Controllers.Api
                         Interval_Laps = intervalLaps
                             .Select(lap => $"{(lap.Lactate.HasValue ? $"({lap.Lactate.Value}) " : "")}{lap.Distance.ToKmString()}, {lap.AverageSpeed.ToMinPerKmString()}, {(int)lap.AverageHeartrate} bpm")
                             .ToList(),
-                        Laktat = GetLaktat(activity)
+                        Laktat = GetLactate(activity)
                     };
                 })
                 .ToList();
             
             var measurements = detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
-                .Select(activity =>
-                {
-                    return new
-                    {
-                        Date = activity.StartDate,
-                        Laktat = GetLaktat(activity)
-                    };
-                })
-                .Where(activity => activity.Laktat.Any())
-                .GroupBy(activity => activity.Date.ToString("yyyy-MM"))
+                .GroupBy(activity => activity.StartDate.ToString("yyyy-MM"))
                 .Select(month =>
                 {
                     var measures = month
-                        .SelectMany(activity => activity.Laktat)
+                        .SelectMany(activity => GetLactate(activity))
                         .ToList();
                     
                     return new
                     {
                         Date = month.Key + "-15",
-                        Laktat = measures.Median(),
-                        Variance = (measures.Max() - measures.Min()) / 2.0
+                        Lactate = measures.Any() ? (double?)measures.Median() : null
                     };
                 })
+                .Where(item => item.Lactate.HasValue)
                 .ToList();
             
             var allMeasurements = detailedActivities
@@ -114,25 +108,46 @@ namespace Activities.Web.Controllers.Api
                     return new
                     {
                         Date = activity.StartDate,
-                        Laktat = GetLaktat(activity)
+                        Laktat = GetLactate(activity)
                     };
                 })
-                .SelectMany(activity => activity.Laktat.Select(laktat => new
+                .SelectMany(activity => activity.Laktat.Select(lactate => new
                 {
                     Date = activity.Date,
-                    Laktat = laktat
+                    Lactate = lactate
                 }))
                 .ToList();
             
             var distances = detailedActivities
-                .GroupBy(activity => activity.StartDate.ToString("yyyy-MM"))
+                .GroupBy(activity => activity.StartDate.ToString("MMM yy"))
                 .Select(month =>
                 {
+                    var intervalDistance = Math.Round(month.Where(activity => activity.Laps != null).Sum(activity => activity.Laps.Where(lap => lap.IsInterval).Sum(lap => lap.Distance)) / 1000, 2);
+                    
                     return new
                     {
-                        Date = month.Key + "-15",
-                        TotalDistance = Math.Round(month.Sum(activity => activity.Distance) / 1000, 2),
-                        IntervalDistance = Math.Round(month.Where(activity => activity.Laps != null).Sum(activity => activity.Laps.Where(lap => lap.IsInterval).Sum(lap => lap.Distance)) / 1000, 2)
+                        Date = month.Key,
+                        NonIntervalDistance = Math.Round((month.Sum(activity => activity.Distance) / 1000) - intervalDistance, 2),
+                        IntervalDistance = intervalDistance
+                    };
+                })
+                .ToList();
+            
+            var paces = detailedActivities
+                .GroupBy(activity => activity.StartDate.ToString("MMM yy"))
+                .Select(month =>
+                {
+                    var monthActivities = month
+                        .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
+                        .ToList();
+                    
+                    var averagePace = monthActivities.Any() ? monthActivities.Average(activity => activity.Laps.Where(lap => lap.IsInterval).Average(lap => lap.AverageSpeed)) : 0;
+                    
+                    return new
+                    {
+                        Date = month.Key,
+                        IntervalPace = averagePace,
+                        Label = $"{month.Key} - {averagePace.ToMinPerKmString()} ({monthActivities.Count} activities)"
                     };
                 })
                 .ToList();
@@ -142,11 +157,12 @@ namespace Activities.Web.Controllers.Api
                 Intervals = intervals,
                 Measurements = measurements,
                 AllMeasurements = allMeasurements,
-                Distances = distances
+                Distances = distances,
+                Paces = paces
             };
         }
 
-        private double[] GetLaktat(DetailedActivity activity)
+        private IReadOnlyList<double> GetLactate(DetailedActivity activity)
         {
             var result = new List<double>();
 
@@ -155,18 +171,20 @@ namespace Activities.Web.Controllers.Api
                 result.Add(activity.Lactate.Value);
             }
 
-            if (activity.Laps != null)
+            if (activity.Laps == null)
             {
-                foreach (var lap in activity.Laps)
+                return result;
+            }
+
+            foreach (var lap in activity.Laps)
+            {
+                if (lap.Lactate.HasValue)
                 {
-                    if (lap.Lactate.HasValue)
-                    {
-                        result.Add(lap.Lactate.Value);
-                    }
+                    result.Add(lap.Lactate.Value);
                 }
             }
 
-            return result.ToArray();
+            return result;
         }
 
         [HttpGet("month")]
@@ -198,7 +216,7 @@ namespace Activities.Web.Controllers.Api
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
                         Distance = intervalLaps.Sum(lap => lap.Distance),
-                        Laktat = GetLaktat(activity)
+                        Laktat = GetLactate(activity)
                     };
                 })
                 .Where(activity => activity.Laktat.Any())

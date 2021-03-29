@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-    border-radius: 5px;
+    border-radius: 3px;
     margin-bottom: 20px;
 `;
 
@@ -29,6 +29,8 @@ export const StackContainer = styled(Container)`
 `;
 
 export const SubHeader = styled.h2`
+    font-size: 17px;
+    line-height: 1;
     margin: 0;
     margin-bottom: 10px;
 `;

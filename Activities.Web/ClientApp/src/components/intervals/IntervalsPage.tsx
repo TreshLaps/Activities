@@ -15,10 +15,11 @@ interface Activity {
     interval_Laps: string[];
 };
 
-interface Laktat {
-    x: number;
-    y: number;
-    yVariance: number;
+const getMinPerKmString = (metersPerSecond: number) => {
+    const averageSpeed = 1000 / metersPerSecond / 60;
+    const averageSpeedMin = Math.floor(averageSpeed);
+    const averageSpeedSeconds = Math.round((averageSpeed - averageSpeedMin) * 60);
+    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}`;
 }
 
 const IntervalsPage: React.FC = () => {
@@ -27,9 +28,10 @@ const IntervalsPage: React.FC = () => {
     const [activities, setActivities] = useState<Activity[]>();
     const [lactate, setLactate] = useState<any[]>();
     const [lactateAll, setLactateAll] = useState<any[]>();
-    const [hint, setHint] = useState<any | null>();
+    const [hint, setHint] = useState<{value: any, owner: string} | null>();
     const [totalDistances, setTotalDistances] = useState<any[]>();
     const [intervalDistances, setIntervalDistances] = useState<any[]>();
+    const [intervalPaces, setIntervalPaces] = useState<any[]>();
     const showLoader = isLoading || activities == null;
 
     // Filters
@@ -67,25 +69,36 @@ const IntervalsPage: React.FC = () => {
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setActivities(data.intervals);
+
                 setLactate(getChartData<any>(data.measurements, 
                     (item) => new Date(item.date).getTime(), 
-                    (item) => item.laktat,
-                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.laktat}`
+                    (item) => item.lactate,
+                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactate}`
                 ));
+
                 setLactateAll(getChartData<any>(data.allMeasurements, 
                     (item) => new Date(item.date).getTime(), 
-                    (item) => item.laktat
+                    (item) => item.lactate
                 ));
+
                 setTotalDistances(getChartData<any>(data.distances, 
-                    (item) => new Date(item.date).toUTCString().substr(8,8), 
-                    (item) => item.totalDistance - item.intervalDistance,
-                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)} - Total: ${item.totalDistance} km`
+                    (item) => item.date,
+                    (item) => item.nonIntervalDistance,
+                    (item) => `${item.date} - Total: ${Math.round(item.nonIntervalDistance + item.intervalDistance)} km`
                 ).reverse());
+
                 setIntervalDistances(getChartData<any>(data.distances, 
-                    (item) => new Date(item.date).toUTCString().substr(8,8), 
+                    (item) => item.date, 
                     (item) => item.intervalDistance,
-                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)} - Intervals: ${item.intervalDistance} km (${Math.round(100 / item.totalDistance * item.intervalDistance)} %)`
+                    (item) => `${item.date} - Intervals: ${item.intervalDistance} km (${Math.round(100 / (item.nonIntervalDistance + item.intervalDistance) * item.intervalDistance)} %)`
                 ).reverse());
+
+                setIntervalPaces(getChartData<any>(data.paces, 
+                    (item) => item.date, 
+                    (item) => item.intervalPace,
+                    (item) => item.label
+                ).reverse());
+
                 setIsLoading(false);
                 setMessage(undefined);
             })
@@ -107,8 +120,8 @@ const IntervalsPage: React.FC = () => {
                 </Dropdown>
                 <Dropdown disabled={isLoading} value={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
                     <option value="Last12Months">Last 12 months</option>
+                    <option value="Last24Months">Last 24 months</option>
                     <option value="Year">Year report</option>
-                    <option value="Custom">Custom report</option>
                 </Dropdown>
                 {durationFilter === 'Year' && 
                     <Dropdown disabled={isLoading} value={yearFilter} onChange={(v) => { setYearFilter(parseInt(v.currentTarget.value, 10)); setActivities(undefined); }}>
@@ -122,17 +135,17 @@ const IntervalsPage: React.FC = () => {
             {showLoader && <Loader message={message} />}
             {!showLoader && 
                 <div>
-                    <Grid columns={2}>
+                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter == 'Last24Months' ? 2 : 1))}>
                         <Box>
                             <SubHeader>Distance</SubHeader>
                             {totalDistances && totalDistances.length > 0 && 
-                                <Chart xAxisType={axisTypes.Date} stack={true} xType="ordinal">       
+                                <Chart stack={true} xType="ordinal">       
                                     <VerticalBarSeries 
                                         barWidth={0.5}
                                         data={intervalDistances}
                                         fill="#2d76d8"
                                         stroke="#2d76d8"
-                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOver={(value) => setHint({value, owner: 'distance'})}
                                         onValueMouseOut={() => setHint(null)}
                                     />                 
                                     <VerticalBarSeries
@@ -140,20 +153,41 @@ const IntervalsPage: React.FC = () => {
                                         data={totalDistances}
                                         fill="#bdc9ce"
                                         stroke="#bdc9ce"
-                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOver={(value) => setHint({value, owner: 'distance'})}
                                         onValueMouseOut={() => setHint(null)}
                                     />
-                                    {hint?.label != null && 
-                                        <Hint value={hint}>
-                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
+                                    {hint?.value.label != null && hint?.owner === 'distance' && 
+                                        <Hint value={hint.value}>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
                                         </Hint>
                                     }
                                 </Chart>              
                             }
                         </Box>
-                        <Box>
-                            <SubHeader>Lactate</SubHeader>
-                            {lactate && lactate.length > 0 && 
+                            <Box>
+                                <SubHeader>Average interval pace</SubHeader>
+                                {intervalPaces && intervalPaces.length > 0 && 
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond)}>       
+                                        <VerticalBarSeries
+                                            getY={d => { return d.y < 3 ? 3 : d.y; }}
+                                            barWidth={0.5}
+                                            data={intervalPaces}
+                                            fill="#2d76d8"
+                                            stroke="#2d76d8"
+                                            onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
+                                            onValueMouseOut={() => setHint(null)}
+                                        />
+                                        {hint?.value.label != null && hint?.owner === 'pace' && 
+                                            <Hint value={hint.value}>
+                                                <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
+                                            </Hint>
+                                        }
+                                    </Chart>          
+                                }
+                        </Box>    
+                        {lactate && lactate.length > 0 && 
+                            <Box>
+                                <SubHeader>Lactate</SubHeader>
                                 <Chart xAxisType={axisTypes.Date} yDomain={[0,5]}>                        
                                     <HexbinSeries 
                                         sizeHexagonsWithCount
@@ -169,17 +203,17 @@ const IntervalsPage: React.FC = () => {
                                         data={lactate}
                                         fill="#2d76d8"
                                         stroke="#2d76d8"
-                                        onValueMouseOver={(value) => setHint(value)}
+                                        onValueMouseOver={(value) => setHint({value, owner: 'lactate'})}
                                         onValueMouseOut={() => setHint(null)}
                                     />
-                                    {hint?.label != null && 
-                                        <Hint value={hint}>
-                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.label}</div>
+                                    {hint?.value.label != null && hint?.owner === 'lactate' && 
+                                        <Hint value={hint.value}>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
                                         </Hint>
                                     }
-                                </Chart>              
-                            }
-                        </Box>             
+                                </Chart>      
+                            </Box>           
+                        }          
                     </Grid>
                     <Box>
                         <Table>

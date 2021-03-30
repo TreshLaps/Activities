@@ -70,11 +70,11 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
             <MenuWrapper>
                 <MenuContainer>
                     <LinkContainer>
-                        <li><NavLink to="/" activeClassName="navLink-active">Home</NavLink></li>
+                        <li><NavLink exact to="/" activeClassName="navLink-active">Home</NavLink></li>
                         {isAuthenticated &&
                             <React.Fragment>
-                                <li><NavLink to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
-                                <li><NavLink to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
+                                <li><NavLink exact to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
+                                <li><NavLink exact to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
                             </React.Fragment>
                         }
                         <li><a href={isAuthenticated ? '/signout' : '/signin'}>{isAuthenticated ? 'Sign out' : 'Sign in'}</a></li>

@@ -173,8 +173,8 @@ const IntervalsPage: React.FC = () => {
                                     <VerticalBarSeries 
                                         barWidth={0.5}
                                         data={intervalDistances}
-                                        fill="#2d76d8"
-                                        stroke="#2d76d8"
+                                        fill="#4c8eff"
+                                        stroke="#4c8eff"
                                         onValueMouseOver={(value) => setHint({value, owner: 'distance'})}
                                         onValueMouseOut={() => setHint(null)}
                                     />                 
@@ -202,8 +202,8 @@ const IntervalsPage: React.FC = () => {
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
                                             barWidth={0.5}
                                             data={intervalPaces}
-                                            fill="#2d76d8"
-                                            stroke="#2d76d8"
+                                            fill="#50a150"
+                                            stroke="#50a150"
                                             onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
                                             onValueMouseOut={() => setHint(null)}
                                         />
@@ -269,13 +269,9 @@ const IntervalsPage: React.FC = () => {
                                                 <LapsTable>
                                                     {activity.interval_Laps.map(lap => (
                                                         <tr key={lap.id}>
-                                                            <td title="Lactate" style={{width: "25px"}}>{lap.lactate || ' '}</td>
                                                             <td title="Distance">
                                                                 <LapLabel>{lap.distance}</LapLabel>
                                                                 <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
-                                                            </td>
-                                                            <td title="Time">
-                                                                <LapLabel>{lap.duration}</LapLabel>
                                                             </td>
                                                             <td title="Pace">
                                                                 <LapLabel>{lap.averageSpeed}</LapLabel>
@@ -284,6 +280,9 @@ const IntervalsPage: React.FC = () => {
                                                             <td title="HR">
                                                                 <LapLabel>{lap.heartrate}</LapLabel>
                                                                 <LapFactor style={{width: `${lap.heartrateFactor * 100}%`}} color="#ff1700" />
+                                                            </td>
+                                                            <td title="Time" style={{width: "60px"}}>
+                                                                <LapLabel>{lap.lactate && `(${lap.lactate})`} {lap.duration}</LapLabel>
                                                             </td>
                                                         </tr>
                                                     ))}

@@ -64,11 +64,12 @@ namespace Activities.Web.Controllers.Api
                     })
                 .Where(activity => activity.IntervalLaps?.Any() == true)
                 .ToList();
-            
-            var maxDistance = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.Distance);
-            var maxDuration = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.ElapsedTime);
-            var maxSpeed = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.AverageSpeed);
-            var maxHeartrate = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.AverageHeartrate);
+
+            var allLaps = intervalActivities.SelectMany(activity => activity.IntervalLaps).ToList();
+            var maxDistance = allLaps.Any() ? allLaps.Max(lap => lap.Distance) : 0;
+            var maxDuration = allLaps.Any() ? allLaps.Max(lap => lap.ElapsedTime) : 0;
+            var maxSpeed = allLaps.Any() ? allLaps.Max(lap => lap.AverageSpeed) : 0;
+            var maxHeartrate = allLaps.Any() ? allLaps.Max(lap => lap.AverageHeartrate) : 0;
 
             var intervals = intervalActivities
                 .GroupBy(activity => activity.Activity.StartDate.ToString("MMM yy"))

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import styled from 'styled-components';
 const LayoutContainer = styled.div`
     margin: 0 auto;

@@ -2,8 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, Container, WarningLabel } from '../../styles/styles';
 import Loader from '../utils/Loader';
+
+interface ActivityMonth {
+    date: string;
+    activities: Activity[];
+};
 
 interface Activity {
     id: number;
@@ -27,7 +32,7 @@ let timeoutKey : NodeJS.Timeout | null = null;
 const IntervalsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<string>();
-    const [activities, setActivities] = useState<Activity[]>();
+    const [activities, setActivities] = useState<ActivityMonth[]>();
     const [lactate, setLactate] = useState<any[]>();
     const [lactateAll, setLactateAll] = useState<any[]>();
     const [hint, setHint] = useState<{value: any, owner: string} | null>();
@@ -142,7 +147,6 @@ const IntervalsPage: React.FC = () => {
                 </Dropdown>
                 <Dropdown disabled={isLoading} defaultValue={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
                     <option value="Last12Months">Last 12 months</option>
-                    <option value="Last24Months">Last 24 months</option>
                     <option value="Year">Year report</option>
                 </Dropdown>
                 {durationFilter === 'Year' && 
@@ -156,6 +160,7 @@ const IntervalsPage: React.FC = () => {
                 <DropdownLabel>Pace (slowest/fastest)</DropdownLabel>
                 <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPace} onChange={(v) => { setMinPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
                 <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPace} onChange={(v) => { setMaxPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
+                {minPace && maxPace && minPace <= maxPace && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}
             </StackContainer>
             {showLoader && <Loader message={message} />}
             {!showLoader && 
@@ -240,27 +245,27 @@ const IntervalsPage: React.FC = () => {
                             </Box>           
                         }          
                     </Grid>
-                    <Box>
                         <Table>
-                            <thead>
-                                <tr>
-                                    <th>&nbsp;</th>
-                                    <th>Date</th>
-                                    <th>Speed</th>
-                                    <th>BPM</th>
-                                    <th>Laps</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {message && <tr><td>{message}</td></tr>}
-                                {activities?.map(activity => {
-                                    return (
+                            {activities?.map(month => (
+                            <>
+                                <thead>
+                                    <tr>
+                                        <th>{month.date}</th>
+                                        <th>Time</th>
+                                        <th>Pace</th>
+                                        <th>HR</th>
+                                        <th>Laps</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {message && <tr><td>{message}</td></tr>}
+                                    {month.activities.map(activity => (
                                         <tr key={activity.id}>
                                             <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
-                                            <td>{activity.date}</td>
-                                            <td>{activity.interval_AverageSpeed}</td>
-                                            <td>{activity.interval_AverageHeartrate}</td>
-                                            <td style={{width: "300px"}}>
+                                            <td style={{whiteSpace: "nowrap"}}>{activity.date}</td>
+                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageSpeed}</td>
+                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageHeartrate}</td>
+                                            <td style={{minWidth: "300px"}}>
                                                 <LapsTable>
                                                     {activity.interval_Laps.map(lap => (
                                                         <tr key={lap.id}>
@@ -285,11 +290,11 @@ const IntervalsPage: React.FC = () => {
                                                 </LapsTable>
                                             </td>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </Table>
-                    </Box>
+                                    ))}
+                                </tbody>
+                            </>
+                        ))}
+                    </Table>
                 </div>
             }            
         </div>        

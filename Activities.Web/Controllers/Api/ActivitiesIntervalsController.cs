@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
 using Activities.Strava.Endpoints;
@@ -45,10 +43,6 @@ namespace Activities.Web.Controllers.Api
             {
                 activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1));
             }
-            else if (duration == "Last24Months")
-            {
-                activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-2));
-            }
             else if (duration == "Year")
             {
                 activities = activities.Where(activity => activity.StartDate.Year == year);
@@ -59,35 +53,53 @@ namespace Activities.Web.Controllers.Api
             }
 
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
-
-            var intervals = detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
-                .Select(activity =>
-                {
-                    var intervalLaps = activity.Laps
-                        .Where(lap => IsIntervalWithinPace(lap, minPace, maxPace))
-                        .ToList();
-
-                    return new
+            var intervalActivities = detailedActivities
+                .Select(
+                    activity => new
                     {
-                        activity.Id,
-                        Date = activity.StartDate.ToString("dd.MM.yyyy"),
-                        activity.Name,
-                        activity.Description,
-                        Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
-                        Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
-                        Interval_Laps = GetLapsResult(intervalLaps),
-                        Laktat = GetLactate(activity)
-                    };
+                        Activity = activity,
+                        IntervalLaps = activity.Laps?
+                            .Where(lap => IsIntervalWithinPace(lap, minPace, maxPace))
+                            .ToList()
+                    })
+                .Where(activity => activity.IntervalLaps?.Any() == true)
+                .ToList();
+            
+            var maxDistance = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.Distance);
+            var maxDuration = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.ElapsedTime);
+            var maxSpeed = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.AverageSpeed);
+            var maxHeartrate = intervalActivities.SelectMany(activity => activity.IntervalLaps).Max(lap => lap.AverageHeartrate);
+
+            var intervals = intervalActivities
+                .GroupBy(activity => activity.Activity.StartDate.ToString("MMM yy"))
+                .Select(month => new
+                {
+                    Date = month.Key,
+                    Activities = month
+                        .Select(activity =>
+                        {
+                            return new
+                            {
+                                activity.Activity.Id,
+                                Date = activity.Activity.StartDate.ToString("ddd dd. MMM yyyy"),
+                                activity.Activity.Name,
+                                activity.Activity.Description,
+                                Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
+                                Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
+                                Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
+                                Laktat = GetLactate(activity.Activity)
+                            };
+                        })
+                        .ToList()
                 })
                 .ToList();
             
-            var measurements = detailedActivities
-                .GroupBy(activity => activity.StartDate.ToString("yyyy-MM"))
+            var measurements = intervalActivities
+                .GroupBy(activity => activity.Activity.StartDate.ToString("yyyy-MM"))
                 .Select(month =>
                 {
                     var measures = month
-                        .SelectMany(activity => GetLactate(activity))
+                        .SelectMany(activity => GetLactate(activity.Activity))
                         .ToList();
                     
                     return new
@@ -99,17 +111,13 @@ namespace Activities.Web.Controllers.Api
                 .Where(item => item.Lactate.HasValue)
                 .ToList();
             
-            var allMeasurements = detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
-                .Select(activity =>
+            var allMeasurements = intervalActivities
+                .Select(activity => new
                 {
-                    return new
-                    {
-                        Date = activity.StartDate,
-                        Laktat = GetLactate(activity)
-                    };
+                    Date = activity.Activity.StartDate,
+                    Lactate = GetLactate(activity.Activity)
                 })
-                .SelectMany(activity => activity.Laktat.Select(lactate => new
+                .SelectMany(activity => activity.Lactate.Select(lactate => new
                 {
                     Date = activity.Date,
                     Lactate = lactate
@@ -131,21 +139,17 @@ namespace Activities.Web.Controllers.Api
                 })
                 .ToList();
             
-            var paces = detailedActivities
-                .GroupBy(activity => activity.StartDate.ToString("MMM yy"))
+            var paces = intervalActivities
+                .GroupBy(activity => activity.Activity.StartDate.ToString("MMM yy"))
                 .Select(month =>
                 {
-                    var monthActivities = month
-                        .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
-                        .ToList();
-                    
-                    var averagePace = monthActivities.Any() ? monthActivities.Average(activity => activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Average(lap => lap.AverageSpeed)) : 0;
+                    var averagePace = month.Average(activity => activity.Activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Average(lap => lap.AverageSpeed));
                     
                     return new
                     {
                         Date = month.Key,
                         IntervalPace = averagePace,
-                        Label = $"{month.Key} - {averagePace.ToMinPerKmString()} ({monthActivities.Count} activities)"
+                        Label = $"{month.Key} - {averagePace.ToMinPerKmString()} ({month.Count()} activities)"
                     };
                 })
                 .ToList();
@@ -160,20 +164,20 @@ namespace Activities.Web.Controllers.Api
             };
         }
 
-        private List<LapResult> GetLapsResult(List<Lap> laps)
+        private List<LapResult> GetLapsResult(List<Lap> laps, double? maxDistance = null, double? maxSpeed = null, double? maxHeartrate = null, double? maxDuration = null)
         {
             if (laps == null)
             {
                 return new List<LapResult>();
             }
 
-            var maxDistance = Math.Round(laps.Max(lap => lap.Distance) / 1000, 1);
-            var maxDuration = laps.Max(lap => lap.ElapsedTime);
-            var maxSpeed = laps.Max(lap => lap.AverageSpeed);
-            var maxHeartrate = laps.Max(lap => lap.AverageHeartrate);
+            var maxLapDistance = maxDistance ?? laps.Max(lap => lap.Distance);
+            var maxLapDuration = maxDuration ?? laps.Max(lap => lap.ElapsedTime);
+            var maxLapSpeed = maxSpeed ?? laps.Max(lap => lap.AverageSpeed);
+            var maxLapHeartrate = maxHeartrate ?? laps.Max(lap => lap.AverageHeartrate);
             
             return laps
-                .Select(lap => new LapResult(lap, maxDistance, maxSpeed, maxHeartrate, maxDuration))
+                .Select(lap => new LapResult(lap, maxLapDistance, maxLapSpeed, maxLapHeartrate, maxLapDuration))
                 .ToList();
         }
 
@@ -271,7 +275,7 @@ namespace Activities.Web.Controllers.Api
             Duration = TimeSpan.FromSeconds(lap.ElapsedTime).ToString(@"mm\:ss");
             Lactate = lap.Lactate?.ToString("0.0");
 
-            DistanceFactor = 1.0 / maxDistance * Math.Round(lap.Distance / 1000, 1);
+            DistanceFactor = 1.0 / Math.Round(maxDistance / 1000, 1) * Math.Round(lap.Distance / 1000, 1);
             AverageSpeedFactor = 1.0 / maxSpeed * lap.AverageSpeed;
             HeartrateFactor = Math.Max(1.0 / (maxHeartrate - 100) * (lap.AverageHeartrate - 100), 0.0);
             DurationFactor = 1.0 / maxDuration * lap.ElapsedTime;

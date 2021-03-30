@@ -51,26 +51,27 @@ export const Grid = styled.div<{columns: number}>`
 `;
 
 export const Table = styled.table`
-    width: calc(100% + 40px);
-    max-width: calc(100% + 40px);
+    width: 100%;
+    width: 100%;
     border-spacing: 0;
     border-collapse: separate;
-    margin: -20px;
-    margin-top: 0;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    background: #fff;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 
     @media(max-width: 1440px) {
         width: calc(100% + 20px);
         max-width: calc(100% + 20px);
-        margin: -10px;
-        margin-top: 0;
     }
 
     > thead > tr > th {
         text-align: right;
-        padding: 10px;
-        padding-top: 0;
-        padding-bottom: 20px;
-        font-size: 17px;
+        padding: 15px;
+        font-size: 15px;
+        line-height: 1;
+        background: #bdc9ce;
 
         &:first-child {
             text-align: left;
@@ -182,4 +183,17 @@ export const DropdownLabel = styled.label`
     flex-direction: column;
     justify-content: center;
     margin-right: 0;
+`;
+
+export const WarningLabel = styled.span`
+    padding: 10px 0;
+    font-family: 'Roboto',sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: red;
+    font-weight: bold;
+    margin-right: 20px;
 `;

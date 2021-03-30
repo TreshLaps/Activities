@@ -122,3 +122,28 @@ export const Dropdown = styled.select`
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
     font-weight: 500;
 `;
+
+export const Input = styled.input`    
+    border-radius: 3px;
+    border: 0;
+    padding: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    background: #fff;
+    color: #000;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+`;
+
+export const DropdownLabel = styled.label`
+    padding: 10px 0;
+    padding-right: 10px;
+    font-family: 'Roboto',sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 0;
+`;

@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Activities.Core.Caching;
 using Activities.Strava.Endpoints;
+using Activities.Strava.Endpoints.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Activities.Web.Controllers.Api
 {
@@ -11,11 +13,13 @@ namespace Activities.Web.Controllers.Api
     {
         private readonly ActivitiesClient _activitiesClient;
         private readonly ICachingService _cachingService;
+        private readonly IPermanentStorageService _permanentStorageService;
 
-        public DebugController(ActivitiesClient activitiesClient, ICachingService cachingService)
+        public DebugController(ActivitiesClient activitiesClient, ICachingService cachingService, IPermanentStorageService permanentStorageService)
         {
             _activitiesClient = activitiesClient;
             _cachingService = cachingService;
+            _permanentStorageService = permanentStorageService;
         }
 
         [HttpGet("ClearData")]
@@ -37,6 +41,13 @@ namespace Activities.Web.Controllers.Api
             }
             
             return Ok();
+        }
+        
+        [HttpGet("Save/{activityId}")]
+        public async Task<IActionResult> Save(long activityId)
+        {
+            var activity = await _permanentStorageService.Get<DetailedActivity>($"DetailedActivity:{activityId}");
+            return Content(JsonConvert.SerializeObject(activity), "application/json");
         }
     }
 }

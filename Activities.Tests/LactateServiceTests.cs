@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Activities.Strava.Endpoints;
+﻿using Activities.Strava.Endpoints;
 using NUnit.Framework;
 
 namespace Activities.Tests
@@ -7,58 +6,47 @@ namespace Activities.Tests
     [TestFixture]
     public class LactateServiceTests
     {
-        [Test]
-        public void Should_match_text_format_1()
-        {
-            var description = @"
-                Introtext...
-
+        [TestCase(@"...
                 2,4 (4)
                 2.5 (6)
-                Outrotekst..";
-            
-            var expectedResult = new List<(double Value, int? Lap)>()
-            {
-                (2.4, 4),
-                (2.5, 6)
-            };
-
-            var result = LactateService.GetLactateFromDescription(description);
-            
-            Assert.AreEqual(expectedResult.Count, result.Count);
-
-            for (var i = 0; i < expectedResult.Count; i++)
-            {
-                Assert.AreEqual(expectedResult[i].Value, result[i].Value);
-                Assert.AreEqual(expectedResult[i].Lap, result[i].Lap);
-            }
-        }
-        
-        [Test]
-        public void Should_match_text_format_2()
-        {
-            var description = @"
-                2x6m, 60sp
-                6x 5m, 60sp
+                ...",
+            0, 
+            2.4, 
+            4)]
+        [TestCase(@"...
+                2,4 (4)
+                2.5 (6)
+                ...", 
+            1, 
+            2.5, 
+            6)]
+        [TestCase(@"...
+                La: 3.3 (3) (171, 3:17)
+                ...", 
+            0, 
+            3.3, 
+            3)]
+        [TestCase(@"...
                 💉 2,4 etter 4.
                 💉 2,5.
-                Vind rætt imot vestover. God stemning, men halvstive bein.";
-            
-            var expectedResult = new List<(double Value, int? Lap)>()
-            {
-                (2.4, 4),
-                (2.5, null)
-            };
-
+                ...", 
+            0, 
+            2.4, 
+            4)]
+        [TestCase(@"...
+                💉 2,4 etter 4.
+                💉 2,5.
+                ...", 
+            1, 
+            2.5, 
+            null)]
+        public void Should_match_text_format(string description, int expectedValueIndex, double expectedLactate, int? expectedLap)
+        {
             var result = LactateService.GetLactateFromDescription(description);
             
-            Assert.AreEqual(expectedResult.Count, result.Count);
-
-            for (var i = 0; i < expectedResult.Count; i++)
-            {
-                Assert.AreEqual(expectedResult[i].Value, result[i].Value);
-                Assert.AreEqual(expectedResult[i].Lap, result[i].Lap);
-            }
+            Assert.Less(expectedValueIndex, result.Count);
+            Assert.AreEqual(expectedLactate, result[expectedValueIndex].Value);
+            Assert.AreEqual(expectedLap, result[expectedValueIndex].Lap);
         }
     }
 }

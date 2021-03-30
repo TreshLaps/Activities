@@ -8,7 +8,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-28_19";
+        private const string Version = "2021-03-30_13";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -18,6 +18,7 @@ namespace Activities.Strava.Endpoints
             }
 
             activity._IntervalVersion = Version;
+            activity._LactateVersion = null;
                 
             if (activity.Laps == null)
             {
@@ -29,121 +30,135 @@ namespace Activities.Strava.Endpoints
                 lap.IsInterval = false;
             }
                 
-            if (activity.Laps.Count < 7)
+            if (activity.Laps.Count < 5)
             {
                 return true;
             }
 
-            var minMaxLaps = activity.Laps
-                .OrderBy(lap => lap.Distance)
-                .Skip(2)
-                .SkipLast(2)
-                .ToList();
-
-            if (Math.Abs(minMaxLaps.First().Distance - minMaxLaps.Last().Distance) < 100)
+            for (var i = 1; i < activity.Laps.Count - 1; i++)
             {
-                return true;
-            }
-
-            //if (activity.Laps.Count(lap => lap.Distance > 200 || lap.ElapsedTime > 60) < 6)
-            //{
-            //    return true;
-            //}
-
-            //var laps = activity.Laps
-            //    .Where(lap => lap.Distance > 200 || lap.ElapsedTime > 60)
-            //    .ToList();
-
-            var speedGroup = activity.Laps
-                .Where(lap => lap.ElapsedTime - lap.MovingTime < 10)
-                .GroupBy(lap => Math.Floor(lap.AverageSpeed * 3.6))
-                .OrderByDescending(s => s.Key)
-                .ToList();
-            
-            var fastestGroup = speedGroup.FirstOrDefault(s => s.Count() > 1);
-
-            if (fastestGroup == null)
-            {
-                return true;
-            }
-                
-            var avgSpeedInKmHour = fastestGroup.Average(lap => lap.AverageSpeed * 3.6);
-            var speedDifference = avgSpeedInKmHour;
-            var intervalLaps = new List<Lap>();
-
-            for (var i = 0; i < speedGroup.Count; i++)
-            {
-                var group = speedGroup[i];
-
-                if (group.Key >= speedDifference - 1)
+                if (!IgnoreLap(activity.Laps[i]) && IsPauseLap(i - 1, activity.Laps) && IsPauseLap(i + 1, activity.Laps))
                 {
-                    speedDifference = group.Key;
-                    intervalLaps.AddRange(group);
+                    var similarLaps = GetSimilarLaps(i, activity.Laps, 0.1);
+
+                    if (similarLaps.Count >= 3)
+                    {
+                        foreach (var similarLap in similarLaps)
+                        {
+                            similarLap.Lap.IsInterval = true;
+                        }
+                    }
                 }
             }
 
-            foreach (var lap in intervalLaps)
+            // Remove interval laps that has no similar interval laps based on distance.
+            foreach (var lap in activity.Laps.Where(lap => lap.IsInterval))
             {
-                lap.IsInterval = true;
+                if (lap.Distance < 500 && activity.Laps.Count(lap2 => lap2.IsInterval && Math.Abs(lap.Distance - lap2.Distance) < 200) <= 1)
+                {
+                    lap.IsInterval = false;
+                }
             }
 
-            var revertedLaps = new List<int>();
-            
+            if (!activity.Laps.Any(lap => lap.IsInterval))
+            {
+                return true;
+            }
+
+            var slowestIntervalPace = activity.Laps.Where(lap => lap.IsInterval).Min(lap => lap.AverageSpeed);
+
             for (var i = 1; i < activity.Laps.Count - 1; i++)
             {
                 var lap = activity.Laps[i];
-
-                if (lap.IsInterval && activity.Laps[i - 1].IsInterval && activity.Laps[i + 1].IsInterval)
+                
+                if (lap.IsInterval || lap.AverageSpeed < slowestIntervalPace || IgnoreLap(lap))
                 {
-                    revertedLaps.Add(i);
+                    continue;
+                }
+                
+                if (lap.Distance < 500 && activity.Laps.Count(lap2 => lap2.IsInterval && Math.Abs(lap.Distance - lap2.Distance) < 200) <= 1)
+                {
+                    continue;
+                }
+
+                if (IsPauseLap(i - 1, activity.Laps) && IsPauseLap(i + 1, activity.Laps))
+                {
+                    lap.IsInterval = true;
                 }
             }
-
-            if (revertedLaps.Count >= 1)
-            {
-                foreach (var lap in activity.Laps)
-                {
-                    lap.IsInterval = false;
-                }
-            }
-
-            if (activity.Laps.Count(lap => lap.IsInterval) < 4)
-            {
-                foreach (var lap in activity.Laps)
-                {
-                    lap.IsInterval = false;
-                }
-            }
-
-            //var speedDifferenceInKmHour = 0.5;
-
-            //var intervalLaps = laps
-            //    .Where(lap => lap.AverageSpeed >= medianSpeed - speedDifference)
-            //    .ToList();
-
-            //var medianDistance = intervalLaps
-            //    .OrderBy(lap => lap.Distance)
-            //    .Skip(intervalLaps.Count / 2)
-            //    .First()
-            //    .Distance;
-
-            //intervalLaps = intervalLaps
-            //    .Where(lap => lap.Distance >= medianDistance / 3 && lap.Distance <= medianDistance * 3)
-            //    .ToList();
-
-            //// Detect runs with "Auto lap" enabled.
-            //if (intervalLaps.Count > Math.Max(activity.Laps.Count - 4, activity.Laps.Count / 2.5))
-            //{
-            //    return true;
-            //}
-
-            //// We require a minimum of 4 laps for an activity to be considered intervals.
-            //if (intervalLaps.Count < 4)
-            //{
-            //    return true;
-            //}
 
             return true;
         }
+
+        public static List<(Lap Lap, int LapIndex)> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)
+        {
+            var result = new List<(Lap Lap, int LapIndex)>();
+
+            // Don't calculate similarities for pause laps.
+            if (IsPauseLap(lapIndex, laps))
+            {
+                return result;
+            }
+
+            for (var i = 0; i < laps.Count; i++)
+            {
+                if (IsPauseLap(i, laps) || i == lapIndex)
+                {
+                    continue;
+                }
+
+                if (GetSpeedDifference(laps[lapIndex], laps[i]) < threshold)
+                {
+                    result.Add((laps[i], i));
+                }
+            }
+            
+            result.Insert(0, (laps[lapIndex], lapIndex));
+            return result;
+        }
+
+        public static double GetSpeedDifference(Lap lap, Lap otherLap) => Math.Abs(Math.Log(lap.AverageSpeed) - Math.Log(otherLap.AverageSpeed));
+
+        private static bool IsPauseLap(Lap lap, Lap currentLap)
+        {
+            if (IsProbablyPauseLap(lap))
+            {
+                return true;
+            }
+            
+            return lap.AverageSpeed < currentLap.AverageSpeed && (currentLap.AverageSpeed - lap.AverageSpeed) * 3.6 > 3;
+        }
+
+        private static bool IsPauseLap(int lapIndex, List<Lap> laps)
+        {
+            if (IsProbablyNotPauseLap(laps[lapIndex]))
+            {
+                return false;
+            }
+            
+            var hasPausedNeighbors = false;
+
+            if (lapIndex > 0)
+            {
+                hasPausedNeighbors = IsPauseLap(laps[lapIndex - 1], laps[lapIndex]);
+            }
+
+            if (lapIndex < laps.Count - 1)
+            {
+                hasPausedNeighbors = hasPausedNeighbors || IsPauseLap(laps[lapIndex + 1], laps[lapIndex]);
+            }
+
+            // Don't calculate similarities for pause laps.
+            if (IsProbablyPauseLap(laps[lapIndex]) || !hasPausedNeighbors)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        
+        private static bool IsProbablyNotPauseLap(Lap lap) => lap.MovingTime > 5 * 60 || lap.Distance > 1000;
+        private static bool IsProbablyPauseLap(Lap lap) => lap.MovingTime < 15 || lap.Distance < 80;
+        private static bool IgnoreLap(Lap lap) => lap.MovingTime < 15 || lap.MovingTime > 30 * 60 || lap.Distance < 80 || lap.Distance > 5000 || lap.AverageSpeed * 3.6 < 12;
     }
 }

@@ -25,7 +25,7 @@ namespace Activities.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<dynamic> Get(string type, string duration, int year)
+        public async Task<dynamic> Get(string type, string duration, int year, double? minPace, double? maxPace)
         {
             var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
 
@@ -61,11 +61,11 @@ namespace Activities.Web.Controllers.Api
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
 
             var intervals = detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
+                .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
                 .Select(activity =>
                 {
                     var intervalLaps = activity.Laps
-                        .Where(lap => lap.IsInterval)
+                        .Where(lap => IsIntervalWithinPace(lap, minPace, maxPace))
                         .ToList();
 
                     return new
@@ -102,7 +102,7 @@ namespace Activities.Web.Controllers.Api
                 .ToList();
             
             var allMeasurements = detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
+                .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
                 .Select(activity =>
                 {
                     return new
@@ -122,7 +122,7 @@ namespace Activities.Web.Controllers.Api
                 .GroupBy(activity => activity.StartDate.ToString("MMM yy"))
                 .Select(month =>
                 {
-                    var intervalDistance = Math.Round(month.Where(activity => activity.Laps != null).Sum(activity => activity.Laps.Where(lap => lap.IsInterval).Sum(lap => lap.Distance)) / 1000, 2);
+                    var intervalDistance = Math.Round(month.Where(activity => activity.Laps != null).Sum(activity => activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Sum(lap => lap.Distance)) / 1000, 2);
                     
                     return new
                     {
@@ -138,10 +138,10 @@ namespace Activities.Web.Controllers.Api
                 .Select(month =>
                 {
                     var monthActivities = month
-                        .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
+                        .Where(activity => activity.Laps?.Any(lap => IsIntervalWithinPace(lap, minPace, maxPace)) == true)
                         .ToList();
                     
-                    var averagePace = monthActivities.Any() ? monthActivities.Average(activity => activity.Laps.Where(lap => lap.IsInterval).Average(lap => lap.AverageSpeed)) : 0;
+                    var averagePace = monthActivities.Any() ? monthActivities.Average(activity => activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Average(lap => lap.AverageSpeed)) : 0;
                     
                     return new
                     {
@@ -160,6 +160,11 @@ namespace Activities.Web.Controllers.Api
                 Distances = distances,
                 Paces = paces
             };
+        }
+
+        private bool IsIntervalWithinPace(Lap lap, double? minPace, double? maxPace)
+        {
+            return lap.IsInterval && (minPace == null || lap.AverageSpeed >= minPace.Value.ToMetersPerSecond()) && (maxPace == null || lap.AverageSpeed <= maxPace.Value.ToMetersPerSecond());
         }
 
         private IReadOnlyList<double> GetLactate(DetailedActivity activity)

@@ -10,7 +10,7 @@ namespace Activities.Strava.Endpoints
     public static class LactateService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-28_4";
+        private const string Version = "2021-03-30";
 
         public static bool TryParseLactatMeasurements(this DetailedActivity activity)
         {
@@ -55,9 +55,9 @@ namespace Activities.Strava.Endpoints
             
             var regexes = new []
             {
-                @"^[\W]*([0-9][,\.][0-9])[\W]*\(([0-9]+)\)",
-                @"^[\W]*💉[\W]*([0-9][,\.][0-9])[\W]*etter[\W]*([0-9]+)",
-                @"^[\W]*💉[\W]*([0-9][,\.][0-9])"
+                @"[\W]*([0-9][,\.][0-9])[\W]*\(([0-9]+)\)",
+                @"[\W]*💉[\W]*([0-9][,\.][0-9])[\W]*etter[\W]*([0-9]+)",
+                @"[\W]*💉[\W]*([0-9][,\.][0-9])"
             };
 
             foreach (var regex in regexes)

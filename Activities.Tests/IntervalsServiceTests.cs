@@ -12,16 +12,28 @@ namespace Activities.Tests
     [TestFixture]
     public class IntervalsServiceTests
     {
-        [TestCase(@"DetailedActivity.4128570707.json", new [] {2, 4, 6, 8, 10, 12})]
-        [TestCase(@"DetailedActivity.4198493186.json", new [] {2, 4, 6, 8, 10, 12, 13})]
-        [TestCase("DetailedActivity.5017996322.json", new [] {2, 4, 6, 8, 10, 12, 14, 16})]
-        [TestCase("DetailedActivity.1275055990.json", new int[0])]
-        [TestCase("DetailedActivity.1164398338.json", new int[0])]
-        [TestCase("DetailedActivity.1165907510.json", new int[0])]
-        [TestCase("DetailedActivity.2264841884.json", new [] {4, 6, 8, 10, 12})]
-        public async Task Detect_interval_laps(string filePath, int[] expectedIntervalLaps)
+        [TestCase(4128570707, new [] {2, 4, 6, 8, 10, 12})]
+        [TestCase(4198493186, new [] {2, 4, 6, 8, 10, 12, 13})]
+        [TestCase(5017996322, new [] {2, 4, 6, 8, 10, 12, 14, 16})]
+        [TestCase(1275055990, new int[0])]
+        [TestCase(1164398338, new int[0])]
+        [TestCase(1165907510, new int[0])]
+        [TestCase(2264841884, new [] {4, 6, 8, 10, 12})]
+        [TestCase(2015579716, new [] {2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 , 32})]
+        [TestCase(4997120231, new [] {2, 4, 6, 8, 10, 12, 14, 16, 18, 20})]
+        [TestCase(3958433322, new []{2, 4, 6, 8, 10, 12})]
+        [TestCase(3657567570, new []{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26})]
+        [TestCase(3197658818, new []{2, 4, 6, 8, 10, 12})]
+        [TestCase(4668663223, new []{2, 4, 6, 8, 10, 12})]
+        [TestCase(4619867954, new []{2, 4, 6, 8, 10, 12, 14, 16})]
+        [TestCase(2593351765, new []{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28})]
+        [TestCase(3476674921, new [] {2, 4, 6, 8, 10, 12, 14, 16, 18, 20})]
+        [TestCase(3445099341, new [] {2, 4, 6, 8})]
+        [TestCase(4205824685, new [] {2, 4, 6})]
+        [TestCase(2615379182, new int[0])]
+        public async Task Detect_interval_laps(long stravaId, int[] expectedIntervalLaps)
         {
-            var json = await File.ReadAllTextAsync(Path.Combine("Activities", filePath));
+            var json = await File.ReadAllTextAsync(Path.Combine("Activities", $"DetailedActivity.{stravaId}.json"));
             var activity = JsonConvert.DeserializeObject<DetailedActivity>(json);
             activity._IntervalVersion = null;
             
@@ -33,7 +45,12 @@ namespace Activities.Tests
                     for (var lapIndex = 0; lapIndex < activity.Laps.Count; lapIndex++)
                     {
                         var lap = activity.Laps[lapIndex];
-                        Assert.AreEqual(expectedIntervalLaps.Contains(lapIndex + 1), lap.IsInterval, $"Lap: {lapIndex + 1} ({lap.AverageSpeed.ToMinPerKmString()}, {lap.Distance.ToKmString()}, {lap.ElapsedTime.ToTimeString()})");
+                        var expectedResult = expectedIntervalLaps.Contains(lapIndex + 1);
+                        
+                        Assert.AreEqual(
+                            expectedResult, 
+                            lap.IsInterval, 
+                            $"{(expectedResult ? "Lap not found" : "Didn't expect lap")}: {lapIndex + 1} ({lap.AverageSpeed.ToMinPerKmString()}, {lap.Distance.ToKmString()}, {lap.ElapsedTime.ToTimeString()}) - https://www.strava.com/activities/{stravaId}");
                     }
                 });
         }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, Grid, Dropdown } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, Grid, Dropdown, DropdownLabel, Input } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -22,6 +22,8 @@ const getMinPerKmString = (metersPerSecond: number) => {
     return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}`;
 }
 
+let timeoutKey : NodeJS.Timeout | null = null;
+
 const IntervalsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [message, setMessage] = useState<string>();
@@ -38,6 +40,8 @@ const IntervalsPage: React.FC = () => {
     const [typeFilter, setTypeFilter] = useState('Run');
     const [durationFilter, setDurationFilter] = useState('Last12Months');
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+    const [minPace, setMinPace] = useState<number | undefined>();
+    const [maxPace, setMaxPace] = useState<number | undefined>();
 
     const appendArgument = function(url: string, key: string, value: any) {
 
@@ -55,7 +59,25 @@ const IntervalsPage: React.FC = () => {
             url = appendArgument(url, 'year', yearFilter);
         }
 
+        if (minPace != null && minPace > 0) {
+            url = appendArgument(url, 'minPace', minPace);
+        }
+
+        if (maxPace != null && maxPace > 0) {
+            url = appendArgument(url, 'maxPace', maxPace);
+        }
+
         return url;
+    };
+
+    const refetchAsync = function() {
+        if (timeoutKey != null) {
+            clearTimeout(timeoutKey)
+        }
+
+        timeoutKey = setTimeout(() => {
+            setActivities(undefined);
+        }, 500);        
     };
 
     useEffect(() => {
@@ -112,25 +134,28 @@ const IntervalsPage: React.FC = () => {
     return (
         <div>
             <StackContainer>
-                <Dropdown disabled={isLoading} value={typeFilter} onChange={(v) => { setTypeFilter(v.currentTarget.value); setActivities(undefined); }}>
+                <Dropdown disabled={isLoading} defaultValue={typeFilter} onChange={(v) => { setTypeFilter(v.currentTarget.value); setActivities(undefined); }}>
                     <option value="All">All activities</option>
                     <option value="Run">Run</option>
                     <option value="Ride">Ride</option>
                     <option value="NordicSki">NordicSki</option>
                 </Dropdown>
-                <Dropdown disabled={isLoading} value={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
+                <Dropdown disabled={isLoading} defaultValue={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
                     <option value="Last12Months">Last 12 months</option>
                     <option value="Last24Months">Last 24 months</option>
                     <option value="Year">Year report</option>
                 </Dropdown>
                 {durationFilter === 'Year' && 
-                    <Dropdown disabled={isLoading} value={yearFilter} onChange={(v) => { setYearFilter(parseInt(v.currentTarget.value, 10)); setActivities(undefined); }}>
+                    <Dropdown disabled={isLoading} defaultValue={yearFilter} onChange={(v) => { setYearFilter(parseInt(v.currentTarget.value, 10)); setActivities(undefined); }}>
                         {new Array(10).fill(0).map((item, index) => {
                             const year = new Date().getFullYear() - index;
                             return (<option key={year} value={year}>{year}</option>);
                         })}
                     </Dropdown>
                 }
+                <DropdownLabel>Pace (slowest/fastest)</DropdownLabel>
+                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPace} onChange={(v) => { setMinPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
+                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPace} onChange={(v) => { setMaxPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
             </StackContainer>
             {showLoader && <Loader message={message} />}
             {!showLoader && 

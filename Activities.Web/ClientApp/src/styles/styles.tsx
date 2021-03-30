@@ -122,7 +122,7 @@ export const LapsTable = styled.table`
         line-height: 1;
         text-align: right;
         position: relative;
-        border-right: 5px solid transparent;
+        border-right: 10px solid transparent;
 
         &:last-child {
             border-right: 0;

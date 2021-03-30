@@ -167,7 +167,7 @@ namespace Activities.Web.Controllers.Api
                 return new List<LapResult>();
             }
 
-            var maxDistance = laps.Max(lap => lap.Distance);
+            var maxDistance = Math.Round(laps.Max(lap => lap.Distance) / 1000, 1);
             var maxDuration = laps.Max(lap => lap.ElapsedTime);
             var maxSpeed = laps.Max(lap => lap.AverageSpeed);
             var maxHeartrate = laps.Max(lap => lap.AverageHeartrate);
@@ -271,9 +271,9 @@ namespace Activities.Web.Controllers.Api
             Duration = TimeSpan.FromSeconds(lap.ElapsedTime).ToString(@"mm\:ss");
             Lactate = lap.Lactate?.ToString("0.0");
 
-            DistanceFactor = 1.0 / maxDistance * lap.Distance;
+            DistanceFactor = 1.0 / maxDistance * Math.Round(lap.Distance / 1000, 1);
             AverageSpeedFactor = 1.0 / maxSpeed * lap.AverageSpeed;
-            HeartrateFactor = 1.0 / maxHeartrate * lap.AverageHeartrate;
+            HeartrateFactor = Math.Max(1.0 / (maxHeartrate - 100) * (lap.AverageHeartrate - 100), 0.0);
             DurationFactor = 1.0 / maxDuration * lap.ElapsedTime;
         }
 

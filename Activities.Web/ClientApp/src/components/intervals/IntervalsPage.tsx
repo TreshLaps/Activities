@@ -271,13 +271,14 @@ const IntervalsPage: React.FC = () => {
                                                             </td>
                                                             <td title="Time">
                                                                 <LapLabel>{lap.duration}</LapLabel>
-                                                                <LapFactor style={{width: `${lap.durationFactor * 100}%`}} color="#00c6c4" />
                                                             </td>
                                                             <td title="Pace">
                                                                 <LapLabel>{lap.averageSpeed}</LapLabel>
+                                                                <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
                                                             </td>
                                                             <td title="HR">
                                                                 <LapLabel>{lap.heartrate}</LapLabel>
+                                                                <LapFactor style={{width: `${lap.heartrateFactor * 100}%`}} color="#ff1700" />
                                                             </td>
                                                         </tr>
                                                     ))}

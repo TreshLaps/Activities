@@ -177,6 +177,7 @@ const IntervalsPage: React.FC = () => {
                                         stroke="#4c8eff"
                                         onValueMouseOver={(value) => setHint({value, owner: 'distance'})}
                                         onValueMouseOut={() => setHint(null)}
+                                        onValueClick={(value) => { window.location.hash = value.x.toString(); }}
                                     />                 
                                     <VerticalBarSeries
                                         barWidth={0.5}
@@ -185,6 +186,7 @@ const IntervalsPage: React.FC = () => {
                                         stroke="#bdc9ce"
                                         onValueMouseOver={(value) => setHint({value, owner: 'distance'})}
                                         onValueMouseOut={() => setHint(null)}
+                                        onValueClick={(value) => { window.location.hash = value.x.toString(); }}
                                     />
                                     {hint?.value.label != null && hint?.owner === 'distance' && 
                                         <Hint value={hint.value}>
@@ -206,6 +208,7 @@ const IntervalsPage: React.FC = () => {
                                             stroke="#50a150"
                                             onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
                                             onValueMouseOut={() => setHint(null)}
+                                            onValueClick={(value) => { window.location.hash = value.x.toString(); }}
                                         />
                                         {hint?.value.label != null && hint?.owner === 'pace' && 
                                             <Hint value={hint.value}>
@@ -250,7 +253,7 @@ const IntervalsPage: React.FC = () => {
                             <>
                                 <thead>
                                     <tr>
-                                        <th>{month.date}</th>
+                                        <th id={month.date}>{month.date}</th>
                                         <th>Time</th>
                                         <th>Pace</th>
                                         <th>HR</th>

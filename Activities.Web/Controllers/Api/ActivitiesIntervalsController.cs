@@ -23,7 +23,7 @@ namespace Activities.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<dynamic> Get(string type, string duration, int year, double? minPace, double? maxPace)
+        public async Task<dynamic> Get(string type = "Run", string duration = "Last12Months", int year = 0, double? minPace = null, double? maxPace = null)
         {
             var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
 

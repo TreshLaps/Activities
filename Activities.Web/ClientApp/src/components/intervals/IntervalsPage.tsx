@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
@@ -25,7 +26,32 @@ const getMinPerKmString = (metersPerSecond: number) => {
     const averageSpeedMin = Math.floor(averageSpeed);
     const averageSpeedSeconds = Math.round((averageSpeed - averageSpeedMin) * 60);
     return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}`;
-}
+} 
+
+const addOrUpdateQueryString = (url: string, name: string, value: string) => {
+    var separator = url.indexOf("?") === -1 ? "?" : "&";
+    var parameter = name + "=" + value;
+
+    if (url.indexOf(name + "=") === -1) {
+        var hashMatchPattern = /^(.+?)#(.+?)$/i;
+        var hashMatch = url.match(hashMatchPattern);
+
+        if (hashMatch != null) {
+            // url contains a hash like: /url/to/content#some-hash
+            return hashMatch[1] + separator + parameter + "#" + hashMatch[2];
+        }
+        else {
+            return url + separator + parameter;
+        }
+    }
+    else {
+        url = url.replace(new RegExp(name + '=[\\d,]+'), parameter);
+    }
+
+    return url;
+};
+  
+const removeQueryString = (url: string, name: string) => url.replace(new RegExp('[\\?|\\&]+' + name + '=[\\w\\d,]+'), '');
 
 let timeoutKey : NodeJS.Timeout | null = null;
 
@@ -41,35 +67,43 @@ const IntervalsPage: React.FC = () => {
     const [intervalPaces, setIntervalPaces] = useState<any[]>();
     const showLoader = isLoading || activities == null;
 
-    // Filters
-    const [typeFilter, setTypeFilter] = useState('Run');
-    const [durationFilter, setDurationFilter] = useState('Last12Months');
-    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
-    const [minPace, setMinPace] = useState<number | undefined>();
-    const [maxPace, setMaxPace] = useState<number | undefined>();
-
-    const appendArgument = function(url: string, key: string, value: any) {
-
-        return `${url}${url.indexOf('?') !== -1 ? '&' : '?'}${key}=${value}`;
-    };
+    // Filters    
+    const { type, duration, year, minPace, maxPace } = queryString.parse(window.location.search);
+    const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : 'Run');
+    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : 'Last12Months');
+    const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : new Date().getFullYear());
+    const [minPaceFilter, setMinPaceFilter] = useState<number | undefined>(typeof minPace === 'string' ? parseFloat(minPace) : undefined);
+    const [maxPaceFilter, setMaxPaceFilter] = useState<number | undefined>(typeof maxPace === 'string' ? parseFloat(maxPace) : undefined);
 
     const appendUrlArguments = function(url: string) {
-        if (typeFilter !== 'All') {
-            url = appendArgument(url, 'type', typeFilter);
+        if (typeFilter !== 'Run') {
+            url = addOrUpdateQueryString(url, 'type', typeFilter);
+        } else {
+            url = removeQueryString(url, 'type');
         }
 
-        url = appendArgument(url, 'duration', durationFilter);
+        if (durationFilter !== 'Last12Months') {
+            url = addOrUpdateQueryString(url, 'duration', durationFilter);
+        } else {
+            url = removeQueryString(url, 'duration');
+        }
 
         if (durationFilter === 'Year') {
-            url = appendArgument(url, 'year', yearFilter);
+            url = addOrUpdateQueryString(url, 'year', yearFilter.toString());
+        } else {
+            url = removeQueryString(url, 'year');
         }
 
-        if (minPace != null && minPace > 0) {
-            url = appendArgument(url, 'minPace', minPace);
+        if (minPaceFilter != null && minPaceFilter > 0) {
+            url = addOrUpdateQueryString(url, 'minPace', minPaceFilter.toString());
+        } else {
+            url = removeQueryString(url, 'minPace');
         }
 
-        if (maxPace != null && maxPace > 0) {
-            url = appendArgument(url, 'maxPace', maxPace);
+        if (maxPaceFilter != null && maxPaceFilter > 0) {
+            url = addOrUpdateQueryString(url, 'maxPace', maxPaceFilter.toString());
+        } else {
+            url = removeQueryString(url, 'maxPace');
         }
 
         return url;
@@ -92,6 +126,10 @@ const IntervalsPage: React.FC = () => {
 
         setIsLoading(true);
         setMessage("Loading activities ...");
+
+        const url = appendUrlArguments(window.location.href);
+        window.history.replaceState({}, '', url);
+
         fetch(appendUrlArguments('/api/ActivitiesIntervals/'))
             .then(response => response.json() as Promise<any>)
             .then(data => {
@@ -158,9 +196,9 @@ const IntervalsPage: React.FC = () => {
                     </Dropdown>
                 }
                 <DropdownLabel>Pace (slowest/fastest)</DropdownLabel>
-                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPace} onChange={(v) => { setMinPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
-                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPace} onChange={(v) => { setMaxPace(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
-                {minPace && maxPace && minPace <= maxPace && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}
+                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPaceFilter} onChange={(v) => { setMinPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
+                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPaceFilter} onChange={(v) => { setMaxPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
+                {minPaceFilter && maxPaceFilter && minPaceFilter <= maxPaceFilter && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}
             </StackContainer>
             {showLoader && <Loader message={message} />}
             {!showLoader && 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, Grid, Dropdown, DropdownLabel, Input } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -12,7 +12,7 @@ interface Activity {
     description: string;
     interval_AverageSpeed: string;
     interval_AverageHeartrate: number;
-    interval_Laps: string[];
+    interval_Laps: any[];
 };
 
 const getMinPerKmString = (metersPerSecond: number) => {
@@ -260,10 +260,28 @@ const IntervalsPage: React.FC = () => {
                                             <td>{activity.date}</td>
                                             <td>{activity.interval_AverageSpeed}</td>
                                             <td>{activity.interval_AverageHeartrate}</td>
-                                            <td>
-                                                <div style={{fontSize: "13px"}}>
-                                                    {activity.interval_Laps.map(lap => (<div key={lap}>{lap}</div>))}
-                                                </div>
+                                            <td style={{width: "300px"}}>
+                                                <LapsTable>
+                                                    {activity.interval_Laps.map(lap => (
+                                                        <tr key={lap.id}>
+                                                            <td title="Lactate" style={{width: "25px"}}>{lap.lactate || ' '}</td>
+                                                            <td title="Distance">
+                                                                <LapLabel>{lap.distance}</LapLabel>
+                                                                <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
+                                                            </td>
+                                                            <td title="Time">
+                                                                <LapLabel>{lap.duration}</LapLabel>
+                                                                <LapFactor style={{width: `${lap.durationFactor * 100}%`}} color="#00c6c4" />
+                                                            </td>
+                                                            <td title="Pace">
+                                                                <LapLabel>{lap.averageSpeed}</LapLabel>
+                                                            </td>
+                                                            <td title="HR">
+                                                                <LapLabel>{lap.heartrate}</LapLabel>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </LapsTable>
                                             </td>
                                         </tr>
                                     );

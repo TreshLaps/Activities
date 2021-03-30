@@ -65,7 +65,7 @@ export const Table = styled.table`
         margin-top: 0;
     }
 
-    th {
+    > thead > tr > th {
         text-align: right;
         padding: 10px;
         padding-top: 0;
@@ -82,32 +82,68 @@ export const Table = styled.table`
         }
     }
 
-    tbody tr {
-        td { 
+    > tbody > tr {
+        > td { 
             border-top: thin solid #efefef;
         }
 
         &:nth-child(odd) {
             background: #fafafa;
         }
+
+        > td {
+            white-space: pre-wrap;
+            max-width: 300px;
+            text-align: right;
+            vertical-align: text-top;
+            padding: 10px;
+    
+            &:first-child {
+                text-align: left;
+                padding-left: 20px;
+            }
+    
+            &:last-child {
+                padding-right: 20px;
+            }
+        }
     }
+`;
+
+export const LapsTable = styled.table`
+    border-spacing: 0;
+    border-collapse: separate;
+    width: 100%;
+    table-layout: fixed;
 
     td {
-        white-space: pre-wrap;
-        max-width: 300px;
+        white-space: nowrap;
+        font-size: 11px;
+        line-height: 1;
         text-align: right;
-        vertical-align: text-top;
-        padding: 10px;
-
-        &:first-child {
-            text-align: left;
-            padding-left: 20px;
-        }
+        position: relative;
+        border-right: 5px solid transparent;
 
         &:last-child {
-            padding-right: 20px;
+            border-right: 0;
         }
     }
+`;
+
+export const LapFactor = styled.div<{color: string}>`
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 1px;
+    opacity: 0.3;
+    background: ${props => props.color};
+`;
+
+export const LapLabel = styled.span`
+    z-index: 1;
+    position: relative;
+    display: block;
+    padding: 2px;
 `;
 
 export const Dropdown = styled.select`    

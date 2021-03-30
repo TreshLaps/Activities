@@ -8,7 +8,7 @@ namespace Activities.Strava.Endpoints.Models
         public double? Lactate { get; set; }
         
         [JsonProperty("id")]
-        public object Id { get; set; }
+        public long Id { get; set; }
 
         [JsonProperty("resource_state")]
         public int ResourceState { get; set; }

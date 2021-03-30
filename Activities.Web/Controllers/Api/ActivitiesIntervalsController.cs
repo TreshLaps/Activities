@@ -76,9 +76,7 @@ namespace Activities.Web.Controllers.Api
                         activity.Description,
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
-                        Interval_Laps = intervalLaps
-                            .Select(lap => $"{(lap.Lactate.HasValue ? $"({lap.Lactate.Value}) " : "")}{lap.Distance.ToKmString()}, {lap.AverageSpeed.ToMinPerKmString()}, {(int)lap.AverageHeartrate} bpm")
-                            .ToList(),
+                        Interval_Laps = GetLapsResult(intervalLaps),
                         Laktat = GetLactate(activity)
                     };
                 })
@@ -162,6 +160,23 @@ namespace Activities.Web.Controllers.Api
             };
         }
 
+        private List<LapResult> GetLapsResult(List<Lap> laps)
+        {
+            if (laps == null)
+            {
+                return new List<LapResult>();
+            }
+
+            var maxDistance = laps.Max(lap => lap.Distance);
+            var maxDuration = laps.Max(lap => lap.ElapsedTime);
+            var maxSpeed = laps.Max(lap => lap.AverageSpeed);
+            var maxHeartrate = laps.Max(lap => lap.AverageHeartrate);
+            
+            return laps
+                .Select(lap => new LapResult(lap, maxDistance, maxSpeed, maxHeartrate, maxDuration))
+                .ToList();
+        }
+
         private bool IsIntervalWithinPace(Lap lap, double? minPace, double? maxPace)
         {
             return lap.IsInterval && (minPace == null || lap.AverageSpeed >= minPace.Value.ToMetersPerSecond()) && (maxPace == null || lap.AverageSpeed <= maxPace.Value.ToMetersPerSecond());
@@ -243,5 +258,35 @@ namespace Activities.Web.Controllers.Api
                 .Select(month => $"{month.Month}: {month.AverageSpeed}, {month.AverageHeartrate}, {month.Distance}, Laktat: {month.Laktat:0.0}, {month.MedianLaktat:0.0} ({month.MinLaktat:0.0}, {month.MaxLaktat:0.0}) {month.Measures} samples")
                 .ToList();
         }
+    }
+
+    public class LapResult
+    {
+        public LapResult(Lap lap, double maxDistance, double maxSpeed, double maxHeartrate, double maxDuration)
+        {
+            Id = lap.Id;
+            Distance = lap.Distance.ToKmString();
+            AverageSpeed = lap.AverageSpeed.ToMinPerKmString();
+            Heartrate = $"{lap.AverageHeartrate:0} bpm";
+            Duration = TimeSpan.FromSeconds(lap.ElapsedTime).ToString(@"mm\:ss");
+            Lactate = lap.Lactate?.ToString("0.0");
+
+            DistanceFactor = 1.0 / maxDistance * lap.Distance;
+            AverageSpeedFactor = 1.0 / maxSpeed * lap.AverageSpeed;
+            HeartrateFactor = 1.0 / maxHeartrate * lap.AverageHeartrate;
+            DurationFactor = 1.0 / maxDuration * lap.ElapsedTime;
+        }
+
+        public long Id { get; init; }
+        public string Distance { get; init; }
+        public string AverageSpeed { get; init; }
+        public string Heartrate { get; init; }
+        public string Duration { get; init; }
+        public string Lactate { get; init; }
+        
+        public double DistanceFactor { get; init; }
+        public double AverageSpeedFactor { get; init; }
+        public double HeartrateFactor { get; init; }
+        public double DurationFactor { get; init; }
     }
 }

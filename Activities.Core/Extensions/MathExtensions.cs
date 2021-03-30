@@ -30,7 +30,7 @@ namespace Activities.Core.Extensions
 
         public static string ToKmString(this double distanceInMeters)
         {
-            return $"{distanceInMeters / 1000:0.00} km";
+            return $"{distanceInMeters / 1000:0.0} km";
         }
 
         public static string ToTimeString(this int seconds)

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styled from 'styled-components';
-
 const LayoutContainer = styled.div`
     margin: 0 auto;
     max-width: 1400px;
@@ -28,14 +27,25 @@ const MenuContainer = styled.div`
 const LinkContainer = styled.ul`
     list-style: none;
     margin: 0;
-    padding: 20px;
+    padding: 0px 10px;
     display: flex;
     flex: 1 1 auto;
-
+    height: 64px;
+    line-height: 64px;
+    
     li {
-        padding: 0;
-        padding-right: 20px;
-        color: #fff;
+        a {
+            transition: background-color .3s;
+            font-size: 1rem;
+            color: #fff;
+            display: block;
+            padding: 0 16px;
+            text-decoration: none;
+        }   
+        a:hover, .navLink-active {
+            background-color: rgba(0,0,0,0.1);
+        }
+       
     }
 `;
 
@@ -60,11 +70,11 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
             <MenuWrapper>
                 <MenuContainer>
                     <LinkContainer>
-                        <li><Link to="/">Home</Link></li>
+                        <li><NavLink to="/" activeClassName="navLink-active">Home</NavLink></li>
                         {isAuthenticated &&
                             <React.Fragment>
-                                <li><Link to="/activities">Activities</Link></li>
-                                <li><Link to="/intervals">Intervals</Link></li>
+                                <li><NavLink to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
+                                <li><NavLink to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
                             </React.Fragment>
                         }
                         <li><a href={isAuthenticated ? '/signout' : '/signin'}>{isAuthenticated ? 'Sign out' : 'Sign in'}</a></li>

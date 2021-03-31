@@ -18,7 +18,7 @@ namespace Activities.Tests
         {
             var metersPerSecond = pace.ToMetersPerSecond();
             var paceString = metersPerSecond.ToMinPerKmString().Replace(":", ".");
-            Assert.AreEqual(pace.ToString("0.00", CultureInfo.InvariantCulture) + " /km", paceString);
+            Assert.AreEqual(pace.ToString("0.00", CultureInfo.InvariantCulture) + "/km", paceString);
         }
     }
 }

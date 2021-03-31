@@ -13,7 +13,7 @@ namespace Activities.Core.Extensions
             var averageSpeed = 1000 / metersPerSecond / 60;
             var averageSpeedMin = Math.Floor(averageSpeed);
             var averageSpeedSeconds = Math.Round(averageSpeed % 1 * 60);
-            return $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds} /km";
+            return $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds}/km";
         }
 
         public static double ToMetersPerSecond(this double minPerKm)

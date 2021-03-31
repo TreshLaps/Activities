@@ -8,7 +8,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-31_2";
+        private const string Version = "2021-03-31_3";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -59,6 +59,28 @@ namespace Activities.Strava.Endpoints
                 }
             }
 
+            var intervalsWithNoPauses = activity.Laps.Where(
+                    (lap, index) =>
+                    {
+                        if (!lap.IsInterval)
+                        {
+                            return false;
+                        }
+
+                        var prevIsPauseOrNull = index > 0 && !activity.Laps[index - 1].IsInterval;
+                        var nextIsPauseOrNull = index + 1 < activity.Laps.Count && !activity.Laps[index + 1].IsInterval;
+                        return !(prevIsPauseOrNull || nextIsPauseOrNull);
+                    })
+                .Count();
+
+            if (intervalsWithNoPauses > 2)
+            {
+                foreach (var lap in activity.Laps)
+                {
+                    lap.IsInterval = false;
+                }
+            }
+
             return true;
         }
 
@@ -69,7 +91,9 @@ namespace Activities.Strava.Endpoints
 
             for (var i = 0; i < laps.Count; i++)
             {
-                if (IsProbablyNotIntervalLap(laps[i]))
+                var isNotFirstLapOrSimilar = i != 0 || IsProbablyNotIntervalLap(laps[i]) && IsPauseLapComparedTo(i, laps, laps[i + 1]);
+                
+                if (!IsIntervalLap(i, laps, perfectMatch: false) && isNotFirstLapOrSimilar)
                 {
                     continue;
                 }
@@ -86,7 +110,7 @@ namespace Activities.Strava.Endpoints
             return result;
         }
 
-        private static bool IsIntervalLap(int lapIndex, List<Lap> laps)
+        private static bool IsIntervalLap(int lapIndex, List<Lap> laps, bool perfectMatch = true)
         {
             var lap = laps[lapIndex];
             
@@ -95,7 +119,18 @@ namespace Activities.Strava.Endpoints
                 return false;
             }
 
-            if (!IsPauseLapComparedTo(lapIndex - 1, laps, lap) || !IsPauseLapComparedTo(lapIndex + 1, laps, lap))
+            var prevLapIsPause = lapIndex == 0 || IsPauseLapComparedTo(lapIndex - 1, laps, lap);
+            var nextLapIsPause = lapIndex + 1 == laps.Count || IsPauseLapComparedTo(lapIndex + 1, laps, lap);
+
+            var isPauseLapOnBothSides = prevLapIsPause && nextLapIsPause;
+            var isPauseLapOnEitherSides = (lapIndex != 0 && prevLapIsPause) || (lapIndex + 1 != laps.Count && nextLapIsPause);
+
+            if (perfectMatch && !isPauseLapOnBothSides)
+            {
+                return false;
+            }
+
+            if (!perfectMatch && !isPauseLapOnEitherSides)
             {
                 return false;
             }
@@ -107,15 +142,29 @@ namespace Activities.Strava.Endpoints
         {
             var lap = laps[lapIndex];
 
+            if (lap.ElapsedTime < 10)
+            {
+                return false;
+            }
+
             var isSlowerThanIntervalLap = lap.AverageSpeed < intervalLap.AverageSpeed;
             var isLessThanDoubleDistanceOfIntervalLap = lap.Distance < intervalLap.Distance * 2;
-            var IsGreatDistanceDifference = Math.Abs(lap.Distance - intervalLap.Distance) > Math.Max(lap.Distance, intervalLap.Distance) * 0.5;
+            var isGreatDistanceDifference = Math.Abs(lap.Distance - intervalLap.Distance) > Math.Max(lap.Distance, intervalLap.Distance) * 0.5;
             var isShortLap = lap.Distance < 500;
             var isStationary = lap.MovingTime < lap.ElapsedTime / 2;
 
             var isShortAndStationary = isShortLap && isStationary;
             var isShortAndSlower = isShortLap && isSlowerThanIntervalLap;
-            var isLongAndSlowerAndDifferent = !isShortLap && isSlowerThanIntervalLap && isLessThanDoubleDistanceOfIntervalLap && IsGreatDistanceDifference;
+            var isLongAndSlowerAndDifferent = !isShortLap && isSlowerThanIntervalLap && isLessThanDoubleDistanceOfIntervalLap && isGreatDistanceDifference;
+
+            var isIdenticalInDistance = Math.Abs(lap.Distance - intervalLap.Distance) < 10;
+            var isIdenticalInDuration = Math.Abs(lap.ElapsedTime - intervalLap.ElapsedTime) < 10;
+            var isIdentical = lap.Distance > 100 && isIdenticalInDistance && isIdenticalInDuration;
+
+            if (isIdentical)
+            {
+                return false;
+            }
             
             return isShortAndStationary || isShortAndSlower || isLongAndSlowerAndDifferent;
         }

@@ -33,6 +33,7 @@ namespace Activities.Tests
         [TestCase(2131763171, new [] {10, 12, 14, 16})]
         [TestCase(2233746904, new [] {12, 14, 16})]
         [TestCase(4977393213, new [] {1, 2, 4, 5, 7})]
+        [TestCase(4491176735, new [] {1, 3, 5, 7, 9})]
         [TestCase(1275055990, new int[0])]
         [TestCase(1164398338, new int[0])]
         [TestCase(1165907510, new int[0])]
@@ -41,6 +42,11 @@ namespace Activities.Tests
         [TestCase(3949692949, new int[0])]
         [TestCase(2950561146, new int[0])]
         [TestCase(2725685243, new int[0])]
+        [TestCase(4436915217, new int[0])]
+        [TestCase(226716622, new int[0])]
+        [TestCase(3463728022, new int[0])]
+        [TestCase(3902376336, new int[0])]
+        [TestCase(3936521519, new int[0])]
         public async Task Detect_interval_laps(long stravaId, int[] expectedIntervalLaps)
         {
             var json = await File.ReadAllTextAsync(Path.Combine("Activities", $"DetailedActivity.{stravaId}.json"));

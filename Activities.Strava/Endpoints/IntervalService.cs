@@ -8,7 +8,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-31_3";
+        private const string Version = "2021-03-31_4";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -59,7 +59,7 @@ namespace Activities.Strava.Endpoints
                 }
             }
 
-            if (HasToManyIntervalLapsWithoutPauses(activity.Laps))
+            if (HasTooManyIntervalLapsWithoutPauses(activity.Laps) || IsAutoLap(activity.Laps))
             {
                 foreach (var lap in activity.Laps)
                 {
@@ -70,7 +70,7 @@ namespace Activities.Strava.Endpoints
             return true;
         }
 
-        private static bool HasToManyIntervalLapsWithoutPauses(List<Lap> laps)
+        private static bool HasTooManyIntervalLapsWithoutPauses(List<Lap> laps)
         {
             var intervalsWithNoPauses = laps
                 .Where(
@@ -88,6 +88,19 @@ namespace Activities.Strava.Endpoints
                 .Count();
 
             return intervalsWithNoPauses > 2;
+        }
+
+        private static bool IsAutoLap(List<Lap> laps)
+        {
+            if (laps.Count < 3)
+            {
+                return false;
+            }
+            
+            var lapsOrderedByDistance = laps.OrderBy(lap => lap.Distance).Skip(1).SkipLast(1).ToList();
+            var averageDistance = lapsOrderedByDistance.Average(lap => lap.Distance);
+
+            return lapsOrderedByDistance.Sum(lap => Math.Abs(lap.Distance - averageDistance)) < 100;
         }
 
         public static List<(Lap Lap, int LapIndex)> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)

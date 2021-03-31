@@ -59,21 +59,7 @@ namespace Activities.Strava.Endpoints
                 }
             }
 
-            var intervalsWithNoPauses = activity.Laps.Where(
-                    (lap, index) =>
-                    {
-                        if (!lap.IsInterval)
-                        {
-                            return false;
-                        }
-
-                        var prevIsPauseOrNull = index > 0 && !activity.Laps[index - 1].IsInterval;
-                        var nextIsPauseOrNull = index + 1 < activity.Laps.Count && !activity.Laps[index + 1].IsInterval;
-                        return !(prevIsPauseOrNull || nextIsPauseOrNull);
-                    })
-                .Count();
-
-            if (intervalsWithNoPauses > 2)
+            if (HasToManyIntervalLapsWithoutPauses(activity.Laps))
             {
                 foreach (var lap in activity.Laps)
                 {
@@ -82,6 +68,26 @@ namespace Activities.Strava.Endpoints
             }
 
             return true;
+        }
+
+        private static bool HasToManyIntervalLapsWithoutPauses(List<Lap> laps)
+        {
+            var intervalsWithNoPauses = laps
+                .Where(
+                    (lap, index) =>
+                    {
+                        if (!lap.IsInterval)
+                        {
+                            return false;
+                        }
+
+                        var prevIsPauseOrNull = index > 0 && !laps[index - 1].IsInterval;
+                        var nextIsPauseOrNull = index + 1 < laps.Count && !laps[index + 1].IsInterval;
+                        return !(prevIsPauseOrNull || nextIsPauseOrNull);
+                    })
+                .Count();
+
+            return intervalsWithNoPauses > 2;
         }
 
         public static List<(Lap Lap, int LapIndex)> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)

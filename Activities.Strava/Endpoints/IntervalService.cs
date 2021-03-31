@@ -8,7 +8,7 @@ namespace Activities.Strava.Endpoints
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-31_4";
+        private const string Version = "2021-03-31_5";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -59,7 +59,7 @@ namespace Activities.Strava.Endpoints
                 }
             }
 
-            if (HasTooManyIntervalLapsWithoutPauses(activity.Laps) || IsAutoLap(activity.Laps))
+            if (IsAutoLapOrSimilar(activity.Laps))
             {
                 foreach (var lap in activity.Laps)
                 {
@@ -70,27 +70,7 @@ namespace Activities.Strava.Endpoints
             return true;
         }
 
-        private static bool HasTooManyIntervalLapsWithoutPauses(List<Lap> laps)
-        {
-            var intervalsWithNoPauses = laps
-                .Where(
-                    (lap, index) =>
-                    {
-                        if (!lap.IsInterval)
-                        {
-                            return false;
-                        }
-
-                        var prevIsPauseOrNull = index > 0 && !laps[index - 1].IsInterval;
-                        var nextIsPauseOrNull = index + 1 < laps.Count && !laps[index + 1].IsInterval;
-                        return !(prevIsPauseOrNull || nextIsPauseOrNull);
-                    })
-                .Count();
-
-            return intervalsWithNoPauses > 2;
-        }
-
-        private static bool IsAutoLap(List<Lap> laps)
+        private static bool IsAutoLapOrSimilar(List<Lap> laps)
         {
             if (laps.Count < 3)
             {
@@ -100,7 +80,7 @@ namespace Activities.Strava.Endpoints
             var lapsOrderedByDistance = laps.OrderBy(lap => lap.Distance).Skip(1).SkipLast(1).ToList();
             var averageDistance = lapsOrderedByDistance.Average(lap => lap.Distance);
 
-            return lapsOrderedByDistance.Sum(lap => Math.Abs(lap.Distance - averageDistance)) < 100;
+            return lapsOrderedByDistance.Sum(lap => Math.Abs(lap.Distance - averageDistance)) < 20 * laps.Count;
         }
 
         public static List<(Lap Lap, int LapIndex)> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)

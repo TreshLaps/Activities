@@ -34,7 +34,7 @@ namespace Activities.Web.Pages.Authentication
                         activity.Name,
                         StartDate = activity.StartDate.ToString("dd.MM.yyyy"),
                         Distance = activity.Distance.ToKmString(),
-                        AverageSpeed = activity.AverageSpeed.ToMinPerKmString()
+                        AverageSpeed = activity.AverageSpeed.ToPaceString()
                     })
                 .ToList();
         }

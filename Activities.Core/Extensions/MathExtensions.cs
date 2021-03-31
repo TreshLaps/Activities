@@ -8,7 +8,7 @@ namespace Activities.Core.Extensions
 {
     public static class MathExtensions
     {
-        public static string ToMinPerKmString(this double metersPerSecond)
+        public static string ToPaceString(this double metersPerSecond, bool showSuffix = false)
         {
             if (double.IsNaN(metersPerSecond) || metersPerSecond == 0.0)
             {
@@ -18,7 +18,9 @@ namespace Activities.Core.Extensions
             var averageSpeed = 1000 / metersPerSecond / 60;
             var averageSpeedMin = Math.Floor(averageSpeed);
             var averageSpeedSeconds = Math.Round(averageSpeed % 1 * 60);
-            return $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds} /km";
+
+            var paceString = $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds}";
+            return showSuffix ? $"{paceString} /km" : paceString;
         }
 
         public static double ToMetersPerSecond(this double minPerKm)

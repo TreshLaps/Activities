@@ -100,7 +100,7 @@ namespace Activities.Web.Pages.Intervals
                                 Date = activity.Activity.StartDate.ToString("ddd dd. MMM yyyy"),
                                 activity.Activity.Name,
                                 activity.Activity.Description,
-                                Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
+                                Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),
                                 Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                 Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
                                 Laktat = GetLactate(activity.Activity)
@@ -199,9 +199,9 @@ namespace Activities.Web.Pages.Intervals
                     var averageMediumPace = mediumPaces.Any() ? mediumPaces.Average() : 0;
                     var averageLongPace = longPaces.Any() ? longPaces.Average() : 0;
 
-                    var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToMinPerKmString()} (< 2 min)" : null;
-                    var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToMinPerKmString()}" : null;
-                    var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToMinPerKmString()} (> 10 min)" : null;
+                    var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString()} (< 2 min)" : null;
+                    var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString()}" : null;
+                    var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString()} (> 10 min)" : null;
                     
                     return new
                     {

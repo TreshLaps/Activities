@@ -75,6 +75,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                             <React.Fragment>
                                 <li><NavLink exact to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
                                 <li><NavLink exact to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
+                                <li><NavLink exact to="/races" activeClassName="navLink-active">Races</NavLink></li>
                             </React.Fragment>
                         }
                         <li><a href={isAuthenticated ? '/signout' : '/signin'}>{isAuthenticated ? 'Sign out' : 'Sign in'}</a></li>

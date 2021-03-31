@@ -40,6 +40,20 @@ namespace Activities.Tests
             1, 
             2.5, 
             null)]
+        [TestCase(@"...
+                11,7 (12)
+                2.5 (6)
+                ...",
+            0,
+            11.7,
+            12)]
+        [TestCase(@"...
+                💉 99,9 etter 99.
+                💉 2,5.
+                ...",
+            0,
+            99.9,
+            99)]
         public void Should_match_text_format(string description, int expectedValueIndex, double expectedLactate, int? expectedLap)
         {
             var result = LactateService.GetLactateFromDescription(description);

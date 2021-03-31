@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Activities.Strava.Endpoints.Models;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Endpoints
 {
     public static class LactateService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-30";
+        private const string Version = "2021-03-31";
 
         public static bool TryParseLactatMeasurements(this DetailedActivity activity)
         {
@@ -40,24 +40,24 @@ namespace Activities.Strava.Endpoints
                     intervalLaps[measurement.Lap.Value - 1].Lactate = measurement.Value;
                 }
             }
-            
+
             return true;
         }
 
         public static List<(double Value, int? Lap)> GetLactateFromDescription(string description)
         {
             var result = new List<(double Value, int? Lap)>();
-            
+
             if (string.IsNullOrWhiteSpace(description))
             {
                 return result;
             }
-            
-            var regexes = new []
+
+            var regexes = new[]
             {
-                @"[\W]*([0-9][,\.][0-9])[\W]*\(([0-9]+)\)",
-                @"[\W]*💉[\W]*([0-9][,\.][0-9])[\W]*etter[\W]*([0-9]+)",
-                @"[\W]*💉[\W]*([0-9][,\.][0-9])"
+                @"[\W]*([0-9]+[,\.][0-9])[\W]*\(([0-9]+)\)",
+                @"[\W]*💉[\W]*([0-9]+[,\.][0-9])[\W]*etter[\W]*([0-9]+)",
+                @"[\W]*💉[\W]*([0-9]+[,\.][0-9])"
             };
 
             foreach (var regex in regexes)

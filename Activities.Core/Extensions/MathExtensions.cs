@@ -45,10 +45,28 @@ namespace Activities.Core.Extensions
 
         public static double Median(this IEnumerable<double> source)
         {
-            return source
-                .OrderBy(s => s)
-                .Skip(source.Count() / 2)
-                .First();
+            var items = source.ToList();
+
+            if (items.Count % 2 == 0)
+            {
+                var index = items.Count / 2;
+                
+                return (items[index - 1] + items[index]) / 2.0;
+            }
+
+            return items[(int) Math.Floor(items.Count / 2.0)];
+        }
+
+        public static DateTime GetStartOfWeek(this DateTime date)
+        {
+            var dayOfWeek = (int)date.DayOfWeek - 1;
+
+            if (dayOfWeek < 0)
+            {
+                dayOfWeek = 6;
+            }
+            
+            return date.Date.AddDays(0 - dayOfWeek);
         }
     }
 }

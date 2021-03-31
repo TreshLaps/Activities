@@ -23,7 +23,7 @@ namespace Activities.Web.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<dynamic> Get(string type = "Run", string duration = "Last12Months", int year = 0, double? minPace = null, double? maxPace = null)
+        public async Task<dynamic> Get(string type = "Run", string duration = "LastMonths", int year = 0, double? minPace = null, double? maxPace = null)
         {
             var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
 
@@ -39,7 +39,11 @@ namespace Activities.Web.Controllers.Api
                 activities = activities.Where(activity => activity.Type == type);
             }
 
-            if (duration == "Last12Months")
+            if (duration == "LastMonths")
+            {
+                activities = activities.Where(activity => activity.StartDate >= DateTime.Today.GetStartOfWeek().AddDays(-7 * 20));
+            }
+            else if (duration == "LastYear")
             {
                 activities = activities.Where(activity => activity.StartDate >= new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1));
             }
@@ -72,7 +76,7 @@ namespace Activities.Web.Controllers.Api
             var maxHeartrate = allLaps.Any() ? allLaps.Max(lap => lap.AverageHeartrate) : 0;
 
             var intervals = intervalActivities
-                .GroupBy(activity => activity.Activity.StartDate.ToString("MMM yy"))
+                .GroupBy(activity => GetGroupKey(activity.Activity, duration))
                 .Select(month => new
                 {
                     Date = month.Key,
@@ -96,17 +100,24 @@ namespace Activities.Web.Controllers.Api
                 .ToList();
             
             var measurements = intervalActivities
-                .GroupBy(activity => activity.Activity.StartDate.ToString("yyyy-MM"))
+                .GroupBy(activity => GetGroupKey(activity.Activity, duration))
                 .Select(month =>
                 {
                     var measures = month
-                        .SelectMany(activity => GetLactate(activity.Activity))
+                        .Select(activity => GetLactate(activity.Activity))
+                        .Where(activity => activity.Any())
+                        .Select(activity => activity.Average())
                         .ToList();
+
+                    var averageFileTime = (long)month.Average(activity => activity.Activity.StartDate.ToFileTime());
+                    var averageDate = DateTime.FromFileTime(averageFileTime);
                     
                     return new
                     {
-                        Date = month.Key + "-15",
-                        Lactate = measures.Any() ? (double?)measures.Median() : null
+                        Date = averageDate.ToString("yyyy-MM-dd"),
+                        Lactate = measures.Any() ? (double?)measures.Median() : null,
+                        LactateMin = measures.Any() ? (double?)measures.Min() : null,
+                        LactateMax = measures.Any() ? (double?)measures.Max() : null
                     };
                 })
                 .Where(item => item.Lactate.HasValue)
@@ -126,7 +137,7 @@ namespace Activities.Web.Controllers.Api
                 .ToList();
             
             var distances = detailedActivities
-                .GroupBy(activity => activity.StartDate.ToString("MMM yy"))
+                .GroupBy(activity => GetGroupKey(activity, duration))
                 .Select(month =>
                 {
                     var intervalDistance = Math.Round(month.Where(activity => activity.Laps != null).Sum(activity => activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Sum(lap => lap.Distance)) / 1000, 2);
@@ -141,7 +152,7 @@ namespace Activities.Web.Controllers.Api
                 .ToList();
             
             var paces = intervalActivities
-                .GroupBy(activity => activity.Activity.StartDate.ToString("MMM yy"))
+                .GroupBy(activity => GetGroupKey(activity.Activity, duration))
                 .Select(month =>
                 {
                     var averagePace = month.Average(activity => activity.Activity.Laps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Average(lap => lap.AverageSpeed));
@@ -163,6 +174,28 @@ namespace Activities.Web.Controllers.Api
                 Distances = distances,
                 Paces = paces
             };
+        }
+
+        private string GetGroupKey(DetailedActivity activity, string duration)
+        {
+            if (duration == "LastMonths")
+            {
+                var startOfWeek = activity.StartDate.GetStartOfWeek();
+                var endOfWeek = startOfWeek.AddDays(6);
+
+                if (startOfWeek.Month == endOfWeek.Month)
+                {
+                    return $"{startOfWeek:dd.} - {startOfWeek.AddDays(6):dd. MMM yyyy}";
+                }
+                
+                return $"{startOfWeek:dd. MMM} - {startOfWeek.AddDays(6):dd. MMM yyyy}";
+            }
+            else if (duration == "LastYear" || duration == "Year")
+            {
+                return activity.StartDate.ToString("MMM yyyy");
+            }
+
+            return "";
         }
 
         private List<LapResult> GetLapsResult(List<Lap> laps, double? maxDistance = null, double? maxSpeed = null, double? maxHeartrate = null, double? maxDuration = null)
@@ -210,58 +243,6 @@ namespace Activities.Web.Controllers.Api
             }
 
             return result;
-        }
-
-        [HttpGet("month")]
-        public async Task<dynamic> GetMonth(double minPace)
-        {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-            var athleteId = Convert.ToInt64(HttpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value);
-            var detailedActivities = new List<DetailedActivity>();
-            
-            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
-            
-            foreach (var activity in activities.Where(activity => activity.Type == "Run" && activity.StartDate > DateTime.Today.AddMonths(-24)))
-            {
-                var activityDetails = await _activitiesClient.GetActivity(accessToken, activity.Id);
-                detailedActivities.Add(activityDetails);
-            }
-
-            return detailedActivities
-                .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
-                .Select(activity =>
-                {
-                    var intervalLaps = activity.Laps
-                        .Where(lap => lap.IsInterval)
-                        .ToList();
-
-                    return new
-                    {
-                        Date = activity.StartDate,
-                        Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed),
-                        Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
-                        Distance = intervalLaps.Sum(lap => lap.Distance),
-                        Laktat = GetLactate(activity)
-                    };
-                })
-                .Where(activity => activity.Laktat.Any())
-                .Where(activity => activity.Interval_AverageSpeed >= minPace.ToMetersPerSecond())
-                .GroupBy(activity => activity.Date.ToString("MMM yyyy"))
-                .Select(
-                    month => new
-                    {
-                        Month = month.Key,
-                        AverageSpeed = month.Average(activity => activity.Interval_AverageSpeed).ToMinPerKmString(),
-                        AverageHeartrate = (int)month.Average(activity => activity.Interval_AverageHeartrate),
-                        Distance = month.Sum(activity => activity.Distance).ToKmString(),
-                        Laktat = month.SelectMany(activity => activity.Laktat).Average(),
-                        MedianLaktat = month.SelectMany(activity => activity.Laktat).Median(),
-                        MinLaktat = month.SelectMany(activity => activity.Laktat).Min(),
-                        MaxLaktat = month.SelectMany(activity => activity.Laktat).Max(),
-                        Measures = month.SelectMany(activity => activity.Laktat).Count()
-                    })
-                .Select(month => $"{month.Month}: {month.AverageSpeed}, {month.AverageHeartrate}, {month.Distance}, Laktat: {month.Laktat:0.0}, {month.MedianLaktat:0.0} ({month.MinLaktat:0.0}, {month.MaxLaktat:0.0}) {month.Measures} samples")
-                .ToList();
         }
     }
 

@@ -5,7 +5,8 @@ import '../../../node_modules/react-vis/dist/style.css';
 
 export enum axisTypes {
     Number,
-    Date
+    Date,
+    None
 };
 
 interface ChartProps {
@@ -29,7 +30,8 @@ const Chart: React.FC<ChartProps> = (props) => {
                         <HorizontalGridLines />
                         <YAxis tickFormat={yTickFormat} />
                         {xAxisType === axisTypes.Date && <XAxis tickFormat={v => (new Date(v)).toUTCString().substr(8,8)} tickLabelAngle={30} tickPadding={30} />}
-                        {(xAxisType == null || xAxisType === axisTypes.Number) && <XAxis tickLabelAngle={30} tickPadding={30} />}
+                        {(xAxisType === axisTypes.Number) && <XAxis tickLabelAngle={30} tickPadding={30} />}
+                        {(xAxisType == undefined || xAxisType === axisTypes.None) && <XAxis hideTicks />}
                         {children}
                     </XYPlot>)
                 }

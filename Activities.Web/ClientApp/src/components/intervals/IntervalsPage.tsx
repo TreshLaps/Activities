@@ -60,6 +60,8 @@ const IntervalsPage: React.FC = () => {
     const [message, setMessage] = useState<string>();
     const [activities, setActivities] = useState<ActivityMonth[]>();
     const [lactate, setLactate] = useState<any[]>();
+    const [lactateMin, setLactateMin] = useState<any[]>();
+    const [lactateMax, setLactateMax] = useState<any[]>();
     const [lactateAll, setLactateAll] = useState<any[]>();
     const [hint, setHint] = useState<{value: any, owner: string} | null>();
     const [totalDistances, setTotalDistances] = useState<any[]>();
@@ -70,7 +72,7 @@ const IntervalsPage: React.FC = () => {
     // Filters    
     const { type, duration, year, minPace, maxPace } = queryString.parse(window.location.search);
     const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : 'Run');
-    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : 'Last12Months');
+    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : 'LastMonths');
     const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : new Date().getFullYear());
     const [minPaceFilter, setMinPaceFilter] = useState<number | undefined>(typeof minPace === 'string' ? parseFloat(minPace) : undefined);
     const [maxPaceFilter, setMaxPaceFilter] = useState<number | undefined>(typeof maxPace === 'string' ? parseFloat(maxPace) : undefined);
@@ -82,7 +84,7 @@ const IntervalsPage: React.FC = () => {
             url = removeQueryString(url, 'type');
         }
 
-        if (durationFilter !== 'Last12Months') {
+        if (durationFilter !== 'LastMonths') {
             url = addOrUpdateQueryString(url, 'duration', durationFilter);
         } else {
             url = removeQueryString(url, 'duration');
@@ -141,6 +143,18 @@ const IntervalsPage: React.FC = () => {
                     (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactate}`
                 ));
 
+                setLactateMin(getChartData<any>(data.measurements, 
+                    (item) => new Date(item.date).getTime(), 
+                    (item) => item.lactateMin,
+                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactateMin}`
+                ));
+
+                setLactateMax(getChartData<any>(data.measurements, 
+                    (item) => new Date(item.date).getTime(), 
+                    (item) => item.lactateMax,
+                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactateMax}`
+                ));
+
                 setLactateAll(getChartData<any>(data.allMeasurements, 
                     (item) => new Date(item.date).getTime(), 
                     (item) => item.lactate
@@ -184,7 +198,8 @@ const IntervalsPage: React.FC = () => {
                     <option value="NordicSki">NordicSki</option>
                 </Dropdown>
                 <Dropdown disabled={isLoading} defaultValue={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
-                    <option value="Last12Months">Last 12 months</option>
+                    <option value="LastMonths">Last 20 weeks</option>
+                    <option value="LastYear">Last 12 months</option>
                     <option value="Year">Year report</option>
                 </Dropdown>
                 {durationFilter === 'Year' && 
@@ -273,7 +288,8 @@ const IntervalsPage: React.FC = () => {
                                     <MarkSeries 
                                         data={lactate}
                                         fill="#2d76d8"
-                                        stroke="#2d76d8"
+                                        stroke="transparent"
+                                        sizeBaseValue={50}
                                         onValueMouseOver={(value) => setHint({value, owner: 'lactate'})}
                                         onValueMouseOut={() => setHint(null)}
                                     />
@@ -292,7 +308,7 @@ const IntervalsPage: React.FC = () => {
                                 <thead>
                                     <tr>
                                         <th id={month.date}>{month.date}</th>
-                                        <th>Time</th>
+                                        <th>Date</th>
                                         <th>Pace</th>
                                         <th>HR</th>
                                         <th>Laps</th>

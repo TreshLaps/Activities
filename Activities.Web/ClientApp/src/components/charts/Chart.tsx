@@ -21,17 +21,18 @@ interface ChartProps {
 
 const Chart: React.FC<ChartProps> = (props) => {
     const { children, height, xAxisType, stack, yDomain, xType, yTickFormat } = props;
+    const hideXAxis = xAxisType === undefined || xAxisType === axisTypes.None;
 
     return (
-        <div>
+        <div style={{margin: "-10px", marginTop: "0px"}}>
             <AutoSizer disableHeight={true}>
                 {(size) => 
-                    (<XYPlot height={height || 250} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain} xType={xType}>
+                    (<XYPlot height={height || 200} width={size.width} stackBy={stack ? 'y' : undefined} yDomain={yDomain} xType={xType} margin={{left: 40, right: 10, top: 10, bottom: (hideXAxis ? 10 : 40)}}>
                         <HorizontalGridLines />
                         <YAxis tickFormat={yTickFormat} />
                         {xAxisType === axisTypes.Date && <XAxis tickFormat={v => (new Date(v)).toUTCString().substr(8,8)} tickLabelAngle={30} tickPadding={30} />}
                         {(xAxisType === axisTypes.Number) && <XAxis tickLabelAngle={30} tickPadding={30} />}
-                        {(xAxisType == undefined || xAxisType === axisTypes.None) && <XAxis hideTicks />}
+                        {hideXAxis && <XAxis hideTicks />}
                         {children}
                     </XYPlot>)
                 }

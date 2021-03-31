@@ -10,6 +10,11 @@ namespace Activities.Core.Extensions
     {
         public static string ToMinPerKmString(this double metersPerSecond)
         {
+            if (double.IsNaN(metersPerSecond) || metersPerSecond == 0.0)
+            {
+                return string.Empty;
+            }
+            
             var averageSpeed = 1000 / metersPerSecond / 60;
             var averageSpeedMin = Math.Floor(averageSpeed);
             var averageSpeedSeconds = Math.Round(averageSpeed % 1 * 60);

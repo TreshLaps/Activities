@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, Container, WarningLabel } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface ActivityMonth {
@@ -45,7 +45,7 @@ const addOrUpdateQueryString = (url: string, name: string, value: string) => {
         }
     }
     else {
-        url = url.replace(new RegExp(name + '=[\\d,]+'), parameter);
+        url = url.replace(new RegExp(name + '=[\\w\\d,]+'), parameter);
     }
 
     return url;
@@ -60,13 +60,13 @@ const IntervalsPage: React.FC = () => {
     const [message, setMessage] = useState<string>();
     const [activities, setActivities] = useState<ActivityMonth[]>();
     const [lactate, setLactate] = useState<any[]>();
-    const [lactateMin, setLactateMin] = useState<any[]>();
-    const [lactateMax, setLactateMax] = useState<any[]>();
     const [lactateAll, setLactateAll] = useState<any[]>();
     const [hint, setHint] = useState<{value: any, owner: string} | null>();
     const [totalDistances, setTotalDistances] = useState<any[]>();
     const [intervalDistances, setIntervalDistances] = useState<any[]>();
-    const [intervalPaces, setIntervalPaces] = useState<any[]>();
+    const [shortPaces, setShortPaces] = useState<any[]>();
+    const [mediumPaces, setMediumPaces] = useState<any[]>();
+    const [longPaces, setLongPaces] = useState<any[]>();
     const showLoader = isLoading || activities == null;
 
     // Filters    
@@ -143,18 +143,6 @@ const IntervalsPage: React.FC = () => {
                     (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactate}`
                 ));
 
-                setLactateMin(getChartData<any>(data.measurements, 
-                    (item) => new Date(item.date).getTime(), 
-                    (item) => item.lactateMin,
-                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactateMin}`
-                ));
-
-                setLactateMax(getChartData<any>(data.measurements, 
-                    (item) => new Date(item.date).getTime(), 
-                    (item) => item.lactateMax,
-                    (item) => `${(new Date(item.date)).toUTCString().substr(8,8)}: ${item.lactateMax}`
-                ));
-
                 setLactateAll(getChartData<any>(data.allMeasurements, 
                     (item) => new Date(item.date).getTime(), 
                     (item) => item.lactate
@@ -163,18 +151,30 @@ const IntervalsPage: React.FC = () => {
                 setTotalDistances(getChartData<any>(data.distances, 
                     (item) => item.date,
                     (item) => item.nonIntervalDistance,
-                    (item) => `${item.date} - Total: ${Math.round(item.nonIntervalDistance + item.intervalDistance)} km`
+                    (item) => `${item.date}\r\n- Total: ${Math.round(item.nonIntervalDistance + item.intervalDistance)} km`
                 ).reverse());
 
                 setIntervalDistances(getChartData<any>(data.distances, 
                     (item) => item.date, 
                     (item) => item.intervalDistance,
-                    (item) => `${item.date} - Intervals: ${item.intervalDistance} km (${Math.round(100 / (item.nonIntervalDistance + item.intervalDistance) * item.intervalDistance)} %)`
+                    (item) => `${item.date}\r\n- Intervals: ${item.intervalDistance} km (${Math.round(100 / (item.nonIntervalDistance + item.intervalDistance) * item.intervalDistance)} %)`
                 ).reverse());
 
-                setIntervalPaces(getChartData<any>(data.paces, 
+                setShortPaces(getChartData<any>(data.paces, 
                     (item) => item.date, 
-                    (item) => item.intervalPace,
+                    (item) => item.averageShortPace,
+                    (item) => item.label
+                ).reverse());
+
+                setMediumPaces(getChartData<any>(data.paces, 
+                    (item) => item.date, 
+                    (item) => item.averageMediumPace,
+                    (item) => item.label
+                ).reverse());
+
+                setLongPaces(getChartData<any>(data.paces, 
+                    (item) => item.date, 
+                    (item) => item.averageLongPace,
                     (item) => item.label
                 ).reverse());
 
@@ -186,7 +186,7 @@ const IntervalsPage: React.FC = () => {
                 setIsLoading(false);
                 setMessage("Failed to load activities.");
             });
-    });
+    }, [activities, isLoading]);
 
     return (
         <div>
@@ -210,10 +210,10 @@ const IntervalsPage: React.FC = () => {
                         })}
                     </Dropdown>
                 }
-                <DropdownLabel>Pace (slowest/fastest)</DropdownLabel>
+                <DropdownLabel>Pace</DropdownLabel>
                 <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPaceFilter} onChange={(v) => { setMinPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
                 <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPaceFilter} onChange={(v) => { setMaxPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
-                {minPaceFilter && maxPaceFilter && minPaceFilter <= maxPaceFilter && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}
+                {minPaceFilter && maxPaceFilter && minPaceFilter <= maxPaceFilter && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}                
             </StackContainer>
             {showLoader && <Loader message={message} />}
             {!showLoader && 
@@ -243,29 +243,49 @@ const IntervalsPage: React.FC = () => {
                                     />
                                     {hint?.value.label != null && hint?.owner === 'distance' && 
                                         <Hint value={hint.value}>
-                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px", whiteSpace: "pre-line"}}>{hint.value.label}</div>
                                         </Hint>
                                     }
                                 </Chart>              
                             }
                         </Box>
                             <Box>
-                                <SubHeader>Average interval pace</SubHeader>
-                                {intervalPaces && intervalPaces.length > 0 && 
-                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond)}>       
+                                <SubHeader>Pace</SubHeader>
+                                {shortPaces && shortPaces.length > 0 && 
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond)}>
                                         <VerticalBarSeries
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
-                                            barWidth={0.5}
-                                            data={intervalPaces}
-                                            fill="#50a150"
-                                            stroke="#50a150"
+                                            barWidth={0.6}                                            
+                                            data={shortPaces}
+                                            fill="#d4ce73"
+                                            stroke={0}
+                                            onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
+                                            onValueMouseOut={() => setHint(null)}
+                                            onValueClick={(value) => { window.location.hash = value.x.toString(); }}
+                                        />
+                                        <VerticalBarSeries
+                                            getY={d => { return d.y < 3 ? 3 : d.y; }}
+                                            barWidth={0.9}
+                                            data={mediumPaces}
+                                            fill="#448944"
+                                            stroke={0}
+                                            onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
+                                            onValueMouseOut={() => setHint(null)}
+                                            onValueClick={(value) => { window.location.hash = value.x.toString(); }}
+                                        />
+                                        <VerticalBarSeries
+                                            getY={d => { return d.y < 3 ? 3 : d.y; }}
+                                            barWidth={0.55}
+                                            data={longPaces}
+                                            fill="#afcbfb"
+                                            stroke={0}
                                             onValueMouseOver={(value) => setHint({value, owner: 'pace'})}
                                             onValueMouseOut={() => setHint(null)}
                                             onValueClick={(value) => { window.location.hash = value.x.toString(); }}
                                         />
                                         {hint?.value.label != null && hint?.owner === 'pace' && 
                                             <Hint value={hint.value}>
-                                                <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
+                                                <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px", whiteSpace: "pre-line"}}>{hint.value.label}</div>
                                             </Hint>
                                         }
                                     </Chart>          
@@ -295,7 +315,7 @@ const IntervalsPage: React.FC = () => {
                                     />
                                     {hint?.value.label != null && hint?.owner === 'lactate' && 
                                         <Hint value={hint.value}>
-                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px"}}>{hint.value.label}</div>
+                                            <div style={{background: 'black', padding: "3px 5px", color: "white", borderRadius: "5px", fontSize: "12px", whiteSpace: "pre-line"}}>{hint.value.label}</div>
                                         </Hint>
                                     }
                                 </Chart>      
@@ -304,7 +324,7 @@ const IntervalsPage: React.FC = () => {
                     </Grid>
                         <Table>
                             {activities?.map(month => (
-                            <>
+                            <React.Fragment key={month.date}>
                                 <thead>
                                     <tr>
                                         <th id={month.date}>{month.date}</th>
@@ -324,31 +344,33 @@ const IntervalsPage: React.FC = () => {
                                             <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageHeartrate}</td>
                                             <td style={{minWidth: "300px"}}>
                                                 <LapsTable>
-                                                    {activity.interval_Laps.map(lap => (
-                                                        <tr key={lap.id}>
-                                                            <td title="Distance">
-                                                                <LapLabel>{lap.distance}</LapLabel>
-                                                                <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
-                                                            </td>
-                                                            <td title="Pace">
-                                                                <LapLabel>{lap.averageSpeed}</LapLabel>
-                                                                <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
-                                                            </td>
-                                                            <td title="HR">
-                                                                <LapLabel>{lap.heartrate}</LapLabel>
-                                                                <LapFactor style={{width: `${lap.heartrateFactor * 100}%`}} color="#ff1700" />
-                                                            </td>
-                                                            <td title="Time" style={{width: "60px"}}>
-                                                                <LapLabel>{lap.lactate && `(${lap.lactate})`} {lap.duration}</LapLabel>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    <tbody>
+                                                        {activity.interval_Laps.map(lap => (
+                                                            <tr key={lap.id}>
+                                                                <td title="Distance">
+                                                                    <LapLabel>{lap.distance}</LapLabel>
+                                                                    <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
+                                                                </td>
+                                                                <td title="Pace">
+                                                                    <LapLabel>{lap.averageSpeed}</LapLabel>
+                                                                    <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
+                                                                </td>
+                                                                <td title="HR">
+                                                                    <LapLabel>{lap.heartrate}</LapLabel>
+                                                                    <LapFactor style={{width: `${lap.heartrateFactor * 100}%`}} color="#ff1700" />
+                                                                </td>
+                                                                <td title="Time" style={{width: "60px"}}>
+                                                                    <LapLabel>{lap.lactate && `(${lap.lactate})`} {lap.duration}</LapLabel>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
                                                 </LapsTable>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
-                            </>
+                            </React.Fragment>
                         ))}
                     </Table>
                 </div>

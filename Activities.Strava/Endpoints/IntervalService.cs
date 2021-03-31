@@ -151,7 +151,7 @@ namespace Activities.Strava.Endpoints
             var isGreatDistanceDifference = Math.Abs(lap.Distance - intervalLap.Distance) > Math.Max(lap.Distance, intervalLap.Distance) * 0.5;
             var isShortLap = lap.Distance < 500;
             var isStationary = lap.MovingTime < lap.ElapsedTime / 2;
-
+            
             var isShortAndStationary = isShortLap && isStationary;
             var isShortAndSlower = isShortLap && isSlowerThanIntervalLap;
             var isLongAndSlowerAndDifferent = !isShortLap && isSlowerThanIntervalLap && isLessThanDoubleDistanceOfIntervalLap && isGreatDistanceDifference;
@@ -169,6 +169,6 @@ namespace Activities.Strava.Endpoints
         }
 
         private static double GetSpeedDifference(Lap lap, Lap otherLap) => Math.Abs(Math.Log(lap.AverageSpeed) - Math.Log(otherLap.AverageSpeed));
-        private static bool IsProbablyNotIntervalLap(Lap lap) => lap.MovingTime < 10 || lap.MovingTime > 60 * 60 || lap.Distance > 11000 || lap.AverageSpeed * 3.6 < 12;
+        private static bool IsProbablyNotIntervalLap(Lap lap) => lap.MovingTime < 10 || (lap.Distance < 500 && Math.Abs(lap.MovingTime - lap.ElapsedTime) > 30) || lap.MovingTime > 60 * 60 || lap.Distance > 11000 || lap.AverageSpeed * 3.6 < 12;
     }
 }

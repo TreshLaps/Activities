@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Box } from '../../styles/styles';
+import { Table } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface Activity {

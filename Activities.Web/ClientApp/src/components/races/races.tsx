@@ -6,6 +6,7 @@ interface Activity {
     id: number;
     name: string;
     startDate: string;
+    movingTime: string;
     distance: number;
     averageSpeed: number;
 };
@@ -49,6 +50,7 @@ const RacesPage: React.FC = () => {
                         <th>Name</th>
                         <th>Distance</th>
                         <th>Speed</th>
+                        <th>Time</th>
                         <th>Date</th>
                     </tr>
                 </thead>
@@ -59,6 +61,7 @@ const RacesPage: React.FC = () => {
                                     <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
                                     <td>{activity.distance}</td>
                                     <td>{activity.averageSpeed}</td>
+                                    <td>{activity.movingTime}</td>
                                     <td>{activity.startDate}</td>
                                 </tr>
                             );

@@ -30,17 +30,17 @@ namespace Activities.Web.Controllers.Api
                 return Unauthorized();
             }
             
-            var activities = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
+            var races = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
 
-            return activities
+            return races
                 .Select(
 
                     activity => new
                     {
                         activity.Id,
-                        activity.Type,
                         activity.Name,
                         activity.WorkoutType,
+                        MovingTime = activity.MovingTime.ToTimeStringSeconds(),
                         StartDate = activity.StartDate.ToString("dd.MM.yyyy"),
                         Distance = activity.Distance.ToKmString(),
                         AverageSpeed = activity.AverageSpeed.ToMinPerKmString()

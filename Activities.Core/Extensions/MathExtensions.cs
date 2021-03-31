@@ -42,6 +42,10 @@ namespace Activities.Core.Extensions
 
             return TimeSpan.FromSeconds(seconds).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Day, precision: 2);
         }
+        public static string ToTimeStringSeconds(this int seconds)
+        {
+            return TimeSpan.FromSeconds(seconds).Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day, precision: 2);
+        }
 
         public static double Median(this IEnumerable<double> source)
         {

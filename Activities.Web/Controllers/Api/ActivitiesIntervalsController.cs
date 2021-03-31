@@ -88,7 +88,7 @@ namespace Activities.Web.Controllers.Api
                                 Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToMinPerKmString(),
                                 Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                 Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
-                                Laktat = GetLactate(activity.Activity)
+                                Lactate = GetLactate(activity.Activity)
                             };
                         })
                         .ToList()
@@ -241,10 +241,10 @@ namespace Activities.Web.Controllers.Api
                         Interval_AverageSpeed = intervalLaps.Average(lap => lap.AverageSpeed),
                         Interval_AverageHeartrate = (int)intervalLaps.Average(lap => lap.AverageHeartrate),
                         Distance = intervalLaps.Sum(lap => lap.Distance),
-                        Laktat = GetLactate(activity)
+                        Lactate = GetLactate(activity)
                     };
                 })
-                .Where(activity => activity.Laktat.Any())
+                .Where(activity => activity.Lactate.Any())
                 .Where(activity => activity.Interval_AverageSpeed >= minPace.ToMetersPerSecond())
                 .GroupBy(activity => activity.Date.ToString("MMM yyyy"))
                 .Select(
@@ -254,13 +254,13 @@ namespace Activities.Web.Controllers.Api
                         AverageSpeed = month.Average(activity => activity.Interval_AverageSpeed).ToMinPerKmString(),
                         AverageHeartrate = (int)month.Average(activity => activity.Interval_AverageHeartrate),
                         Distance = month.Sum(activity => activity.Distance).ToKmString(),
-                        Laktat = month.SelectMany(activity => activity.Laktat).Average(),
-                        MedianLaktat = month.SelectMany(activity => activity.Laktat).Median(),
-                        MinLaktat = month.SelectMany(activity => activity.Laktat).Min(),
-                        MaxLaktat = month.SelectMany(activity => activity.Laktat).Max(),
-                        Measures = month.SelectMany(activity => activity.Laktat).Count()
+                        Lactate = month.SelectMany(activity => activity.Lactate).Average(),
+                        MedianLactate = month.SelectMany(activity => activity.Lactate).Median(),
+                        MinLactate = month.SelectMany(activity => activity.Lactate).Min(),
+                        MaxLactate = month.SelectMany(activity => activity.Lactate).Max(),
+                        Measures = month.SelectMany(activity => activity.Lactate).Count()
                     })
-                .Select(month => $"{month.Month}: {month.AverageSpeed}, {month.AverageHeartrate}, {month.Distance}, Laktat: {month.Laktat:0.0}, {month.MedianLaktat:0.0} ({month.MinLaktat:0.0}, {month.MaxLaktat:0.0}) {month.Measures} samples")
+                .Select(month => $"{month.Month}: {month.AverageSpeed}, {month.AverageHeartrate}, {month.Distance}, Lactate: {month.Lactate:0.0}, {month.MedianLactate:0.0} ({month.MinLactate:0.0}, {month.MaxLactate:0.0}) {month.Measures} samples")
                 .ToList();
         }
     }

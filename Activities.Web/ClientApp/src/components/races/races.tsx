@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Table } from '../../styles/styles';
+import { getDateString, getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
 import Loader from '../utils/Loader';
 
 interface Activity {
     id: number;
     name: string;
+    movingTime: number;
     startDate: string;
-    movingTime: string;
     distance: number;
     averageSpeed: number;
 };
@@ -54,20 +55,18 @@ const RacesPage: React.FC = () => {
                 </tr>
             </thead>
             <tbody>
-                {activities?.map(activity => {
-                        return (
-                            <tr key={activity.id}>
-                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
-                                <td>{activity.distance}</td>
-                                <td>{activity.averageSpeed}</td>
-                                <td>{activity.movingTime}</td>
-                                <td>{activity.startDate}</td>
-                            </tr>
-                        );
-                })}
+                {activities?.map(activity => (
+                    <tr key={activity.id}>
+                        <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                        <td>{getKmString(activity.distance)}</td>
+                        <td>{getMinPerKmString(activity.averageSpeed)}</td>
+                        <td>{getTimeString(activity.movingTime)}</td>
+                        <td>{getDateString(activity.startDate)}</td>
+                    </tr>
+                ))}
             </tbody>
         </Table> 
     );
 }
-    
+
 export default RacesPage;

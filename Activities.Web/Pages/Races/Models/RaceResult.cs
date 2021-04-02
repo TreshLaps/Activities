@@ -1,12 +1,14 @@
+using System;
+
 namespace Activities.Web.Pages.Races.Models
 {
     public class RaceResult
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public string MovingTime { get; set; }
-        public string StartDate { get; set; }
-        public string Distance { get; set; }
-        public string AverageSpeed { get; set; }
+        public int MovingTime { get; set; }
+        public DateTime StartDate { get; set; }
+        public double Distance { get; set; }
+        public double AverageSpeed { get; set; }
     }
 }

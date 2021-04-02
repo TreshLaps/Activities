@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Activities.Core.Extensions;
 using Activities.Strava.Endpoints;
 using Activities.Web.Pages.Races.Models;
 
@@ -27,10 +26,10 @@ namespace Activities.Web.Pages.Races.Services
                     {
                         Id = activity.Id, 
                         Name = activity.Name, 
-                        MovingTime = activity.MovingTime.ToTimeStringSeconds(),
-                        StartDate = activity.StartDate.ToString("dd.MM.yyyy"),
-                        Distance = activity.Distance.ToKmString(),
-                        AverageSpeed = activity.AverageSpeed.ToMinPerKmString()
+                        MovingTime = activity.MovingTime,
+                        StartDate = activity.StartDate,
+                        Distance = activity.Distance,
+                        AverageSpeed = activity.AverageSpeed
                     })
                 .ToList();
         }

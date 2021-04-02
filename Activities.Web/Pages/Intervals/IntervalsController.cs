@@ -279,28 +279,31 @@ namespace Activities.Web.Pages.Intervals
         public LapResult(Lap lap, double maxDistance, double maxSpeed, double maxHeartrate, double maxDuration)
         {
             Id = lap.Id;
-            Distance = lap.Distance.ToKmString();
-            AverageSpeed = lap.AverageSpeed.ToMinPerKmString();
-            Heartrate = $"{lap.AverageHeartrate:0} bpm";
-            Duration = TimeSpan.FromSeconds(lap.ElapsedTime).ToString(@"mm\:ss");
-            Lactate = lap.Lactate?.ToString("0.0");
+            IsInterval = lap.IsInterval;
+            Distance = lap.Distance;
+            AverageSpeed = lap.AverageSpeed;
+            AverageHeartrate = (int)lap.AverageHeartrate;
+            ElapsedTime = lap.ElapsedTime;
+            Lactate = lap.Lactate;
 
             DistanceFactor = 1.0 / Math.Round(maxDistance / 1000, 1) * Math.Round(lap.Distance / 1000, 1);
             AverageSpeedFactor = 1.0 / maxSpeed * lap.AverageSpeed;
-            HeartrateFactor = Math.Max(1.0 / (maxHeartrate - 100) * (lap.AverageHeartrate - 100), 0.0);
+            AverageHeartrateFactor = Math.Max(1.0 / (maxHeartrate - 100) * (lap.AverageHeartrate - 100), 0.0);
             DurationFactor = 1.0 / maxDuration * lap.ElapsedTime;
         }
 
+
         public long Id { get; init; }
-        public string Distance { get; init; }
-        public string AverageSpeed { get; init; }
-        public string Heartrate { get; init; }
-        public string Duration { get; init; }
-        public string Lactate { get; init; }
+        public bool IsInterval { get; init; }
+        public double Distance { get; init; }
+        public double AverageSpeed { get; init; }
+        public int AverageHeartrate { get; init; }
+        public int ElapsedTime { get; init; }
+        public double? Lactate { get; init; }
         
         public double DistanceFactor { get; init; }
         public double AverageSpeedFactor { get; init; }
-        public double HeartrateFactor { get; init; }
+        public double AverageHeartrateFactor { get; init; }
         public double DurationFactor { get; init; }
     }
 }

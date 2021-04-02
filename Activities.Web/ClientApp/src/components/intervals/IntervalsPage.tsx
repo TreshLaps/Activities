@@ -5,6 +5,7 @@ import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
 import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel } from '../../styles/styles';
 import Loader from '../utils/Loader';
+import { getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
 
 interface ActivityMonth {
     date: string;
@@ -20,13 +21,6 @@ interface Activity {
     interval_AverageHeartrate: number;
     interval_Laps: any[];
 };
-
-const getMinPerKmString = (metersPerSecond: number) => {
-    const averageSpeed = 1000 / metersPerSecond / 60;
-    const averageSpeedMin = Math.floor(averageSpeed);
-    const averageSpeedSeconds = Math.round((averageSpeed - averageSpeedMin) * 60);
-    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}`;
-} 
 
 const addOrUpdateQueryString = (url: string, name: string, value: string) => {
     var separator = url.indexOf("?") === -1 ? "?" : "&";
@@ -344,23 +338,31 @@ const IntervalsPage: React.FC = () => {
                                             <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageHeartrate}</td>
                                             <td style={{minWidth: "300px"}}>
                                                 <LapsTable>
+                                                    <thead>
+                                                        <tr>
+                                                            <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
+                                                            <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
+                                                            <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
+                                                            <th style={{width: "60px"}}>&nbsp;</th>
+                                                        </tr>
+                                                    </thead>
                                                     <tbody>
                                                         {activity.interval_Laps.map(lap => (
                                                             <tr key={lap.id}>
                                                                 <td title="Distance">
-                                                                    <LapLabel>{lap.distance}</LapLabel>
+                                                                    <LapLabel>{getKmString(lap.distance)}</LapLabel>
                                                                     <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
                                                                 </td>
                                                                 <td title="Pace">
-                                                                    <LapLabel>{lap.averageSpeed}</LapLabel>
+                                                                    <LapLabel>{getMinPerKmString(lap.averageSpeed)}</LapLabel>
                                                                     <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
                                                                 </td>
-                                                                <td title="HR">
-                                                                    <LapLabel>{lap.heartrate}</LapLabel>
-                                                                    <LapFactor style={{width: `${lap.heartrateFactor * 100}%`}} color="#ff1700" />
+                                                                <td title="Heartrate">
+                                                                    <LapLabel>{lap.averageHeartrate} bpm</LapLabel>
+                                                                    <LapFactor style={{width: `${lap.averageHeartrateFactor * 100}%`}} color="#ff1700" />
                                                                 </td>
                                                                 <td title="Time" style={{width: "60px"}}>
-                                                                    <LapLabel>{lap.lactate && `(${lap.lactate})`} {lap.duration}</LapLabel>
+                                                                    <LapLabel>{lap.lactate && `(${lap.lactate})`} {getTimeString(lap.elapsedTime)}</LapLabel>
                                                                 </td>
                                                             </tr>
                                                         ))}

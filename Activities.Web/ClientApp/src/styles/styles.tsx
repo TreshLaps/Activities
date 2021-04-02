@@ -117,6 +117,16 @@ export const LapsTable = styled.table`
     width: 100%;
     table-layout: fixed;
 
+    th {
+        white-space: nowrap;
+        font-size: 11px;
+        line-height: 1;
+        text-align: right;
+        font-weight: 600;
+        padding-right: 12px;
+        padding-bottom: 3px;
+    }
+
     td {
         white-space: nowrap;
         font-size: 11px;

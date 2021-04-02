@@ -1,4 +1,4 @@
-﻿using Activities.Strava.Endpoints;
+﻿using Activities.Strava.Activities;
 using NUnit.Framework;
 
 namespace Activities.Tests

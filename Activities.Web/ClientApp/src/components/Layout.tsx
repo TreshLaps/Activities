@@ -57,7 +57,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
             return;
         }
 
-        fetch(`/api/IsAuthenticated/`)
+        fetch(`/api/Authentication/IsAuthenticated/`)
             .then(response => response.json() as Promise<boolean>)
             .then(data => {
                 setIsAuthenticated(data);

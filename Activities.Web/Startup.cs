@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 using Activities.Core.Authentication;
 using Activities.Core.Caching;
 using Activities.Strava.Endpoints;
-using Activities.Web.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -80,13 +78,20 @@ namespace Activities.Web
             services.AddTransient<IPermanentStorageService, FileStorageService>();
             services.AddTransient<AzureBlobService, AzureBlobService>(_ => new AzureBlobService(Configuration.GetConnectionString("AzureBlob")));
             
+            ScanAssembly<Startup>(services);
+            ScanAssembly<ActivitiesClient>(services);
+            ScanAssembly<ICachingService>(services);
+        }
+
+        private static void ScanAssembly<T>(IServiceCollection services)
+        {
             services.Scan(scan => scan
-                .FromAssemblyOf<Strava.Endpoints.ActivitiesClient>()
-                .FromAssemblyOf<Core.Caching.ICachingService>()
-                .AddClasses()
+                .FromAssemblyOf<T>()
+                .AddClasses((x) => x.Where(type => type.Name.EndsWith("Service") || type.Name.EndsWith("Client")))
                 .UsingRegistrationStrategy(RegistrationStrategy.Skip)
                 .AsSelf()
-                .WithTransientLifetime());
+                .WithTransientLifetime()
+            );
         }
 
         private async Task OnCreatingTicket(OAuthCreatingTicketContext context)

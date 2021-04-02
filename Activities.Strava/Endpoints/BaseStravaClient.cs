@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints
 {
-    public class BaseStravaClient
+    public abstract class BaseStravaClient
     {
         protected readonly IHttpClientFactory _httpClientFactory;
 
-        public BaseStravaClient(IHttpClientFactory httpClientFactory)
+        protected BaseStravaClient(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }

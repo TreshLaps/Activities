@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Activities.Strava.Endpoints.Models;
 
-namespace Activities.Strava.Endpoints
+namespace Activities.Strava.Activities
 {
     public static class IntervalService
     {

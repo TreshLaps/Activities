@@ -2,39 +2,17 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Activities.Core.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using AspNet.Security.OAuth.Strava;
+using Activities.Strava.Authentication.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Activities.Web.Controllers
+namespace Activities.Strava.Authentication
 {
-    public class AuthenticationController : Controller
+    public static class HttpContextExtensions
     {
-        [HttpGet("~/signin")]
-        public IActionResult SignIn()
-        {
-            return Challenge(new AuthenticationProperties { RedirectUri = "/", AllowRefresh = true }, StravaAuthenticationDefaults.AuthenticationScheme);
-        }
-
-        [HttpGet("~/signout")]
-        [HttpPost("~/signout")]
-        public IActionResult SignOutCurrentUser()
-        {
-            return SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
-        }
-        
-        [HttpGet("~/api/IsAuthenticated")]
-        public async Task<bool> IsAuthenticated()
-        {
-            return (await TryGetStravaAthlete(HttpContext)) != null;
-        }
-
-        public static async Task<StravaAthleteToken> TryGetStravaAthlete(HttpContext httpContext)
+        public static async Task<StravaAthleteToken> TryGetStravaAthlete(this HttpContext httpContext)
         {
             if (httpContext.User.Identity?.IsAuthenticated == false)
             {

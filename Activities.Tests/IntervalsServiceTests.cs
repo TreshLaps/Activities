@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
-using Activities.Strava.Endpoints;
+using Activities.Strava.Activities;
 using Activities.Strava.Endpoints.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;

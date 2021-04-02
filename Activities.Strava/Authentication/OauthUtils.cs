@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Activities.Strava.Authentication.Models;
 using AspNet.Security.OAuth.Strava;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -73,29 +74,5 @@ namespace Activities.Core.Authentication
                 semaphoreSlim.Release();
             }
         }
-    }
-
-    public class StravaAthleteToken
-    {
-        public long AthleteId { get; init; }
-        public string AccessToken { get; init; }
-    }
-    
-    public class RefresToken
-    {
-        [JsonProperty("token_type")]
-        public string TokenType { get; set; }
-
-        [JsonProperty("access_token")]
-        public string AccessToken { get; set; }
-
-        [JsonProperty("expires_at")]
-        public int ExpiresAt { get; set; }
-
-        [JsonProperty("expires_in")]
-        public int ExpiresIn { get; set; }
-
-        [JsonProperty("refresh_token")]
-        public string RefreshToken { get; set; }
     }
 }

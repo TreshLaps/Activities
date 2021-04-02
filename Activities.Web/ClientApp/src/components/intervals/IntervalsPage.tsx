@@ -45,13 +45,13 @@ const addOrUpdateQueryString = (url: string, name: string, value: string) => {
         }
     }
     else {
-        url = url.replace(new RegExp(name + '=[\\w\\d,]+'), parameter);
+        url = url.replace(new RegExp(name + '=[^&]+'), parameter);
     }
 
     return url;
 };
   
-const removeQueryString = (url: string, name: string) => url.replace(new RegExp('[\\?|\\&]+' + name + '=[\\w\\d,]+'), '');
+const removeQueryString = (url: string, name: string) => url.replace(new RegExp('[\\?|\\&]+' + name + '=[^&]+'), '');
 
 let timeoutKey : NodeJS.Timeout | null = null;
 
@@ -132,7 +132,7 @@ const IntervalsPage: React.FC = () => {
         const url = appendUrlArguments(window.location.href);
         window.history.replaceState({}, '', url);
 
-        fetch(appendUrlArguments('/api/ActivitiesIntervals/'))
+        fetch(appendUrlArguments('/api/Intervals/'))
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setActivities(data.intervals);

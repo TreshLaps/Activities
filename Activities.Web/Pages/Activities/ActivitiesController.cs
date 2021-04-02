@@ -1,21 +1,20 @@
-using System;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
+using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Activities.Web.Controllers.Api
+namespace Activities.Web.Pages.Authentication
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RacesController : ControllerBase
+    [StravaAuthenticationFilter]
+    public class ActivitiesController : ControllerBase
     {
         private readonly ActivitiesClient _activitiesClient;
 
-        public RacesController(ActivitiesClient activitiesClient)
+        public ActivitiesController(ActivitiesClient activitiesClient)
         {
             _activitiesClient = activitiesClient;
         }
@@ -23,29 +22,20 @@ namespace Activities.Web.Controllers.Api
         [HttpGet]
         public async Task<dynamic> Get()
         {
-            var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
+            var activities = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
 
-            if (stravaAthlete == null)
-            {
-                return Unauthorized();
-            }
-            
-            var races = await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
-
-            return races
+            return activities
                 .Select(
-
                     activity => new
                     {
                         activity.Id,
+                        activity.Type,
                         activity.Name,
-                        activity.WorkoutType,
-                        MovingTime = activity.MovingTime.ToTimeStringSeconds(),
                         StartDate = activity.StartDate.ToString("dd.MM.yyyy"),
                         Distance = activity.Distance.ToKmString(),
                         AverageSpeed = activity.AverageSpeed.ToMinPerKmString()
                     })
-                .Where(x => x.WorkoutType == 1)
                 .ToList();
         }
     }

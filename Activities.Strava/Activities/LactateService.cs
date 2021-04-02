@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Activities.Strava.Endpoints.Models;
 
-namespace Activities.Strava.Endpoints
+namespace Activities.Strava.Activities
 {
     public static class LactateService
     {

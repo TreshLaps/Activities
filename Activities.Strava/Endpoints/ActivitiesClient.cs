@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Activities.Core.Caching;
+using Activities.Strava.Activities;
 using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Endpoints

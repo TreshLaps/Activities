@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
+using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
 using Activities.Strava.Endpoints.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Activities.Web.Controllers.Api
+namespace Activities.Web.Pages.Intervals
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ActivitiesIntervalsController : ControllerBase
+    [StravaAuthenticationFilter]
+    public class IntervalsController : ControllerBase
     {
         private readonly ActivitiesClient _activitiesClient;
 
-        public ActivitiesIntervalsController(ActivitiesClient activitiesClient)
+        public IntervalsController(ActivitiesClient activitiesClient)
         {
             _activitiesClient = activitiesClient;
         }
@@ -25,13 +25,7 @@ namespace Activities.Web.Controllers.Api
         [HttpGet]
         public async Task<dynamic> Get(string type = "Run", string duration = "LastMonths", int year = 0, double? minPace = null, double? maxPace = null, bool outliersFilter = false)
         {
-            var stravaAthlete = await AuthenticationController.TryGetStravaAthlete(HttpContext);
-
-            if (stravaAthlete == null)
-            {
-                return Unauthorized();
-            }
-            
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId)).AsEnumerable();
 
             if (type != null)

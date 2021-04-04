@@ -1,9 +1,9 @@
 
 // frontend implementation of some Activities.Core.Extensions.MathExtensions functions.
 
-const round = (value: number, decimals: number) => value.toFixed(decimals);
+export const round = (value: number, decimals: number) => value.toFixed(decimals);
 
-export const getMinPerKmString = (metersPerSecond: number) => {
+export const getMinPerKmString = (metersPerSecond: number, hideSuffix?: boolean | undefined) => {
 
     if (isNaN(metersPerSecond) || metersPerSecond == 0) {
         return '';
@@ -12,7 +12,7 @@ export const getMinPerKmString = (metersPerSecond: number) => {
     const averageSpeed = 1000 / metersPerSecond / 60;
     const averageSpeedMin = Math.floor(averageSpeed);
     const averageSpeedSeconds = Math.round(averageSpeed % 1 * 60);
-    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds} /km`;
+    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}${(hideSuffix === true ? '' : ' /km')}`;
 };
 
 export const getKmString = (distanceInMeters: number) => `${round(distanceInMeters / 1000, 1)} km`

@@ -246,7 +246,7 @@ const IntervalsPage: React.FC = () => {
                             <Box>
                                 <SubHeader>Pace</SubHeader>
                                 {shortPaces && shortPaces.length > 0 && 
-                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond)}>
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond, true)}>
                                         <VerticalBarSeries
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
                                             barWidth={0.6}                                            
@@ -343,7 +343,7 @@ const IntervalsPage: React.FC = () => {
                                                             <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
                                                             <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
                                                             <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
-                                                            <th style={{width: "60px"}}>&nbsp;</th>
+                                                            <th style={{width: "60px"}}>{getTimeString(activity.interval_Laps.map(lap => lap.elapsedTime).reduce((sum, value) => sum + value))}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>

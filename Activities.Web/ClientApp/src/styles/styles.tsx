@@ -125,6 +125,10 @@ export const LapsTable = styled.table`
         font-weight: 600;
         padding-right: 12px;
         padding-bottom: 3px;
+
+        &:last-child {
+            padding-right: 2px;
+        }
     }
 
     td {

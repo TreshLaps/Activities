@@ -50,10 +50,15 @@ export const Grid = styled.div<{columns: number}>`
     }    
 `;
 
+export const TableContainer = styled.div`
+    overflow-x: auto;
+`;
+
 export const EmptyThead = styled.thead``;
 
+export const NoWrapTd = styled.td``;
+
 export const Table = styled.table`
-    width: 100%;
     width: 100%;
     border-spacing: 0;
     border-collapse: separate;
@@ -62,11 +67,6 @@ export const Table = styled.table`
     background: #fff;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-
-    @media(max-width: 1440px) {
-        width: calc(100% + 20px);
-        max-width: calc(100% + 20px);
-    }
 
     > thead > tr > th {
         text-align: right;
@@ -83,6 +83,20 @@ export const Table = styled.table`
         &:last-child {
             padding-right: 20px;
         }
+
+        @media(max-width: 768px) {
+            padding: 5px;
+            font-size: 13px;
+            line-height: 1;
+
+            &:first-child {
+                padding-left: 10px;
+            }
+    
+            &:last-child {
+                padding-right: 10px;
+            }
+        }
     }
 
     > ${EmptyThead} > tr > th {
@@ -90,6 +104,11 @@ export const Table = styled.table`
         padding-top: 10px;
         padding-bottom: 10px;
         font-weight: normal;
+
+        @media(max-width: 768px) {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
     }
 
     > tbody > tr {
@@ -116,6 +135,24 @@ export const Table = styled.table`
             &:last-child {
                 padding-right: 20px;
             }
+
+            @media(max-width: 768px) {
+                padding: 5px;
+                font-size: 13px;
+                line-height: 1.3;
+    
+                &:first-child {
+                    padding-left: 10px;
+                }
+        
+                &:last-child {
+                    padding-right: 10px;
+                }
+            }
+        }
+
+        > ${NoWrapTd} {
+            white-space: nowrap;
         }
     }
 `;

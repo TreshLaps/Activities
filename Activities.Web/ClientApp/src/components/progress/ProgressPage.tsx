@@ -4,7 +4,7 @@ import styled from "styled-components";
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, TableContainer } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { getKmString, getMinPerKmString, getTimeString, round } from '../utils/Formatters';
 
@@ -37,7 +37,12 @@ const ProgressTable = styled(Table)`
     > tbody > tr {
         > td {
             padding: 5px 10px;
+            white-space: nowrap;
         }
+    }
+
+    @media(min-width: 1024px) {
+        table-layout: fixed;
     }
 `;
 
@@ -87,7 +92,7 @@ const ProgressPage: React.FC = () => {
     }, [progress, isLoading]);
 
     const progressTable = (name: string, items: any[]) => (
-        <ProgressTable style={{tableLayout: "fixed"}}>
+        <ProgressTable>
             <thead>
                 <tr>
                     <th colSpan={6} style={{padding: "10px"}}>&nbsp;</th>
@@ -195,10 +200,10 @@ const ProgressPage: React.FC = () => {
             </StackContainer>
             {showLoader && <Loader message={message} />}
             {!showLoader && progress && 
-                <div>
+                <TableContainer>
                     {progressTable('Week', progress.week)}
                     {progressTable('Month', progress.month)}
-                </div>
+                </TableContainer>
             }            
         </div>        
     );

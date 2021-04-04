@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table } from '../../styles/styles';
+import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
 import { getDateString, getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
 import Loader from '../utils/Loader';
 
@@ -44,28 +44,30 @@ const RacesPage: React.FC = () => {
     }
 
     return (
-        <Table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Distance</th>
-                    <th>Speed</th>
-                    <th>Time</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {activities?.map(activity => (
-                    <tr key={activity.id}>
-                        <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
-                        <td>{getKmString(activity.distance)}</td>
-                        <td>{getMinPerKmString(activity.averageSpeed)}</td>
-                        <td>{getTimeString(activity.movingTime)}</td>
-                        <td>{getDateString(activity.startDate)}</td>
+        <TableContainer>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Distance</th>
+                        <th>Speed</th>
+                        <th>Time</th>
+                        <th>Date</th>
                     </tr>
-                ))}
-            </tbody>
-        </Table> 
+                </thead>
+                <tbody>
+                    {activities?.map(activity => (
+                        <tr key={activity.id}>
+                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                            <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>
+                            <NoWrapTd>{getMinPerKmString(activity.averageSpeed)}</NoWrapTd>
+                            <NoWrapTd>{getTimeString(activity.movingTime)}</NoWrapTd>
+                            <NoWrapTd>{getDateString(activity.startDate)}</NoWrapTd>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+        </TableContainer>
     );
 }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table } from '../../styles/styles';
+import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -43,30 +43,32 @@ const ActivitiesPage: React.FC = () => {
     }
 
     return (
-        <Table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Distance</th>
-                    <th>Speed</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {activities?.map(activity => {
-                    return (
-                        <tr key={activity.id}>
-                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
-                            <td>{activity.type}</td>
-                            <td>{activity.distance}</td>
-                            <td>{activity.averageSpeed}</td>
-                            <td>{activity.startDate}</td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </Table>
+        <TableContainer>
+            <Table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Distance</th>
+                        <th>Speed</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {activities?.map(activity => {
+                        return (
+                            <tr key={activity.id}>
+                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                                <NoWrapTd>{activity.type}</NoWrapTd>
+                                <NoWrapTd>{activity.distance}</NoWrapTd>
+                                <NoWrapTd>{activity.averageSpeed}</NoWrapTd>
+                                <NoWrapTd>{activity.startDate}</NoWrapTd>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </Table>
+        </TableContainer>
     );
 }
     

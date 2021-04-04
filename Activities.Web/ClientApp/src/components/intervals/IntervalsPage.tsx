@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead, TableContainer, NoWrapTd } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
 
@@ -316,74 +316,76 @@ const IntervalsPage: React.FC = () => {
                             </Box>           
                         }          
                     </Grid>
+                    <TableContainer>
                         <Table>
                             {activities?.map(month => (
-                            <React.Fragment key={month.date}>
-                                {month.activities.length > 0 && 
-                                    <thead>
-                                        <tr>
-                                            <th id={month.date}>{month.date}</th>
-                                            <th>Date</th>
-                                            <th>Pace</th>
-                                            <th>HR</th>
-                                            <th>Laps</th>
-                                        </tr>
-                                    </thead>
-                                }
-                                {month.activities.length === 0 && 
-                                    <EmptyThead>
-                                        <tr>
-                                            <th id={month.date} colSpan={5}>{month.date} (0 activities)</th>
-                                        </tr>
-                                    </EmptyThead>
-                                }
-                                <tbody>
-                                    {message && <tr><td>{message}</td></tr>}
-                                    {month.activities.map(activity => (
-                                        <tr key={activity.id}>
-                                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
-                                            <td style={{whiteSpace: "nowrap"}}>{activity.date}</td>
-                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageSpeed}</td>
-                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageHeartrate}</td>
-                                            <td style={{minWidth: "300px"}}>
-                                                <LapsTable>
-                                                    <thead>
-                                                        <tr>
-                                                            <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
-                                                            <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
-                                                            <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
-                                                            <th style={{width: "60px"}}>{getTimeString(activity.interval_Laps.map(lap => lap.elapsedTime).reduce((sum, value) => sum + value))}</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {activity.interval_Laps.map(lap => (
-                                                            <tr key={lap.id}>
-                                                                <td title="Distance">
-                                                                    <LapLabel>{getKmString(lap.distance)}</LapLabel>
-                                                                    <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
-                                                                </td>
-                                                                <td title="Pace">
-                                                                    <LapLabel>{getMinPerKmString(lap.averageSpeed)}</LapLabel>
-                                                                    <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
-                                                                </td>
-                                                                <td title="Heartrate">
-                                                                    <LapLabel>{lap.averageHeartrate} bpm</LapLabel>
-                                                                    <LapFactor style={{width: `${lap.averageHeartrateFactor * 100}%`}} color="#ff1700" />
-                                                                </td>
-                                                                <td title="Time" style={{width: "60px"}}>
-                                                                    <LapLabel>{lap.lactate && `(${lap.lactate})`} {getTimeString(lap.elapsedTime)}</LapLabel>
-                                                                </td>
+                                <React.Fragment key={month.date}>
+                                    {month.activities.length > 0 && 
+                                        <thead>
+                                            <tr>
+                                                <th id={month.date}>{month.date}</th>
+                                                <th>Date</th>
+                                                <th>Pace</th>
+                                                <th>HR</th>
+                                                <th>Laps</th>
+                                            </tr>
+                                        </thead>
+                                    }
+                                    {month.activities.length === 0 && 
+                                        <EmptyThead>
+                                            <tr>
+                                                <th id={month.date} colSpan={5}>{month.date} (0 activities)</th>
+                                            </tr>
+                                        </EmptyThead>
+                                    }
+                                    <tbody>
+                                        {message && <tr><td>{message}</td></tr>}
+                                        {month.activities.map(activity => (
+                                            <tr key={activity.id}>
+                                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
+                                                <NoWrapTd>{activity.date}</NoWrapTd>
+                                                <NoWrapTd>{activity.interval_AverageSpeed}</NoWrapTd>
+                                                <NoWrapTd>{activity.interval_AverageHeartrate}</NoWrapTd>
+                                                <td style={{minWidth: "300px"}}>
+                                                    <LapsTable>
+                                                        <thead>
+                                                            <tr>
+                                                                <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
+                                                                <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
+                                                                <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
+                                                                <th style={{width: "60px"}}>{getTimeString(activity.interval_Laps.map(lap => lap.elapsedTime).reduce((sum, value) => sum + value))}</th>
                                                             </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </LapsTable>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </React.Fragment>
-                        ))}
-                    </Table>
+                                                        </thead>
+                                                        <tbody>
+                                                            {activity.interval_Laps.map(lap => (
+                                                                <tr key={lap.id}>
+                                                                    <NoWrapTd title="Distance">
+                                                                        <LapLabel>{getKmString(lap.distance)}</LapLabel>
+                                                                        <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
+                                                                    </NoWrapTd>
+                                                                    <NoWrapTd title="Pace">
+                                                                        <LapLabel>{getMinPerKmString(lap.averageSpeed)}</LapLabel>
+                                                                        <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
+                                                                    </NoWrapTd>
+                                                                    <NoWrapTd title="Heartrate">
+                                                                        <LapLabel>{lap.averageHeartrate} bpm</LapLabel>
+                                                                        <LapFactor style={{width: `${lap.averageHeartrateFactor * 100}%`}} color="#ff1700" />
+                                                                    </NoWrapTd>
+                                                                    <NoWrapTd title="Time" style={{width: "60px"}}>
+                                                                        <LapLabel>{lap.lactate && `(${lap.lactate})`} {getTimeString(lap.elapsedTime)}</LapLabel>
+                                                                    </NoWrapTd>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </LapsTable>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </React.Fragment>
+                            ))}
+                        </Table>
+                    </TableContainer>
                 </div>
             }            
         </div>        

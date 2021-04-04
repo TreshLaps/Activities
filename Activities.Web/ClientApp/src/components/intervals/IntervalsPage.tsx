@@ -246,7 +246,7 @@ const IntervalsPage: React.FC = () => {
                             <Box>
                                 <SubHeader>Pace</SubHeader>
                                 {shortPaces && shortPaces.length > 0 && 
-                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond, true)}>
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond)}>
                                         <VerticalBarSeries
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
                                             barWidth={0.6}                                            

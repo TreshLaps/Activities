@@ -325,8 +325,6 @@ const IntervalsPage: React.FC = () => {
                                             <tr>
                                                 <th id={month.date}>{month.date}</th>
                                                 <th>Date</th>
-                                                <th>Pace</th>
-                                                <th>HR</th>
                                                 <th>Laps</th>
                                             </tr>
                                         </thead>
@@ -344,8 +342,6 @@ const IntervalsPage: React.FC = () => {
                                             <tr key={activity.id}>
                                                 <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
                                                 <NoWrapTd>{activity.date}</NoWrapTd>
-                                                <NoWrapTd>{activity.interval_AverageSpeed}</NoWrapTd>
-                                                <NoWrapTd>{activity.interval_AverageHeartrate}</NoWrapTd>
                                                 <td style={{minWidth: "300px"}}>
                                                     <LapsTable>
                                                         <thead>
@@ -359,7 +355,7 @@ const IntervalsPage: React.FC = () => {
                                                         <tbody>
                                                             {activity.interval_Laps.map(lap => (
                                                                 <tr key={lap.id}>
-                                                                    <NoWrapTd title="Distance">
+                                                                    <NoWrapTd title={`${getKmString(lap.distance, 3)}`}>
                                                                         <LapLabel>{getKmString(lap.distance)}</LapLabel>
                                                                         <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
                                                                     </NoWrapTd>

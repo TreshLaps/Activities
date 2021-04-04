@@ -3,7 +3,7 @@
 
 export const round = (value: number, decimals: number) => value.toFixed(decimals);
 
-export const getMinPerKmString = (metersPerSecond: number, hideSuffix?: boolean | undefined) => {
+export const getPaceString = (metersPerSecond: number, hideSuffix: boolean = false) => {
 
     if (isNaN(metersPerSecond) || metersPerSecond == 0) {
         return '';
@@ -12,7 +12,7 @@ export const getMinPerKmString = (metersPerSecond: number, hideSuffix?: boolean 
     const averageSpeed = 1000 / metersPerSecond / 60;
     const averageSpeedMin = Math.floor(averageSpeed);
     const averageSpeedSeconds = Math.round(averageSpeed % 1 * 60);
-    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}${(hideSuffix === true ? '' : ' /km')}`;
+    return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}${(hideSuffix ? '' : ' /km')}`;
 };
 
 export const getKmString = (distanceInMeters: number) => `${round(distanceInMeters / 1000, 1)} km`

@@ -15,7 +15,7 @@ export const getPaceString = (metersPerSecond: number, showSuffix: boolean = fal
     return `${averageSpeedMin}:${(averageSpeedSeconds < 10 ? "0" : "")}${averageSpeedSeconds}${(showSuffix ? ' /km' : '')}`;
 };
 
-export const getKmString = (distanceInMeters: number) => `${round(distanceInMeters / 1000, 1)} km`
+export const getKmString = (distanceInMeters: number, decimals : number = 1) => `${round(distanceInMeters / 1000, decimals)} km`
 
 export const getTimeString = (seconds: number) => {
     const totalSeconds = seconds % 60;

@@ -323,8 +323,6 @@ const IntervalsPage: React.FC = () => {
                                     <tr>
                                         <th id={month.date}>{month.date}</th>
                                         <th>Date</th>
-                                        <th>Pace</th>
-                                        <th>HR</th>
                                         <th>Laps</th>
                                     </tr>
                                 </thead>
@@ -334,8 +332,6 @@ const IntervalsPage: React.FC = () => {
                                         <tr key={activity.id}>
                                             <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
                                             <td style={{whiteSpace: "nowrap"}}>{activity.date}</td>
-                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageSpeed}</td>
-                                            <td style={{whiteSpace: "nowrap"}}>{activity.interval_AverageHeartrate}</td>
                                             <td style={{minWidth: "300px"}}>
                                                 <LapsTable>
                                                     <thead>
@@ -349,7 +345,7 @@ const IntervalsPage: React.FC = () => {
                                                     <tbody>
                                                         {activity.interval_Laps.map(lap => (
                                                             <tr key={lap.id}>
-                                                                <td title="Distance">
+                                                                <td title={`${getKmString(lap.distance, 3)}`}>
                                                                     <LapLabel>{getKmString(lap.distance)}</LapLabel>
                                                                     <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
                                                                 </td>

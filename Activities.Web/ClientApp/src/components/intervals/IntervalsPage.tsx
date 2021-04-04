@@ -5,7 +5,7 @@ import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
 import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel } from '../../styles/styles';
 import Loader from '../utils/Loader';
-import { getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
+import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 
 interface ActivityMonth {
     date: string;
@@ -246,7 +246,7 @@ const IntervalsPage: React.FC = () => {
                             <Box>
                                 <SubHeader>Pace</SubHeader>
                                 {shortPaces && shortPaces.length > 0 && 
-                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond, true)}>
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond, true)}>
                                         <VerticalBarSeries
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
                                             barWidth={0.6}                                            
@@ -341,7 +341,7 @@ const IntervalsPage: React.FC = () => {
                                                     <thead>
                                                         <tr>
                                                             <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
-                                                            <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
+                                                            <th title="Average pace">{getPaceString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
                                                             <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
                                                             <th style={{width: "60px"}}>{getTimeString(activity.interval_Laps.map(lap => lap.elapsedTime).reduce((sum, value) => sum + value))}</th>
                                                         </tr>
@@ -354,7 +354,7 @@ const IntervalsPage: React.FC = () => {
                                                                     <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
                                                                 </td>
                                                                 <td title="Pace">
-                                                                    <LapLabel>{getMinPerKmString(lap.averageSpeed)}</LapLabel>
+                                                                    <LapLabel>{getPaceString(lap.averageSpeed)}</LapLabel>
                                                                     <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
                                                                 </td>
                                                                 <td title="Heartrate">

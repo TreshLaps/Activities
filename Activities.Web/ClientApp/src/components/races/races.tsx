@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table } from '../../styles/styles';
-import { getDateString, getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
+import { getDateString, getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -59,7 +59,7 @@ const RacesPage: React.FC = () => {
                     <tr key={activity.id}>
                         <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
                         <td>{getKmString(activity.distance)}</td>
-                        <td>{getMinPerKmString(activity.averageSpeed)}</td>
+                        <td>{getPaceString(activity.averageSpeed)}</td>
                         <td>{getTimeString(activity.movingTime)}</td>
                         <td>{getDateString(activity.startDate)}</td>
                     </tr>

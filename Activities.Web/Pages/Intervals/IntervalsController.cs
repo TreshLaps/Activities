@@ -28,6 +28,7 @@ namespace Activities.Web.Pages.Intervals
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId)).AsEnumerable();
             GroupKey groupKey;
+            DateTime startDate;
             DateTime endDate;
 
             if (type != null && type != "All")
@@ -37,24 +38,28 @@ namespace Activities.Web.Pages.Intervals
 
             if (duration == "LastMonths")
             {
+                startDate = DateTime.Today;
                 endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 20);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
                 groupKey = GroupKey.Week;
             }
             else if (duration == "LastYear")
             {
+                startDate = DateTime.Today;
                 endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
                 groupKey = GroupKey.Month;
             }
             else if (duration == "Year")
             {
+                startDate =new DateTime(year + 1, 01, 01).AddDays(-1);
                 endDate = new DateTime(year, 01, 01);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
                 groupKey = GroupKey.Month;
             }
             else
             {
+                startDate = DateTime.Today;
                 endDate = new DateTime(DateTime.Today.Year, 01, 01);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
                 groupKey = GroupKey.Month;
@@ -80,7 +85,7 @@ namespace Activities.Web.Pages.Intervals
             var maxHeartrate = allLaps.Any() ? allLaps.Max(lap => lap.AverageHeartrate) : 0;
 
             var intervalGroups = intervalActivities
-                .GroupByDate(groupKey, activity => activity.Activity.StartDate, endDate);
+                .GroupByDate(groupKey, activity => activity.Activity.StartDate, startDate, endDate);
 
             var intervals = intervalGroups
                 .Select(month => new
@@ -148,7 +153,7 @@ namespace Activities.Web.Pages.Intervals
                 .ToList();
             
             var distances = detailedActivities
-                .GroupByDate(groupKey, activity => activity.StartDate, endDate)
+                .GroupByDate(groupKey, activity => activity.StartDate, startDate, endDate)
                 .Select(month =>
                 {
                     var intervalsForMonth = intervalGroups[month.Key];

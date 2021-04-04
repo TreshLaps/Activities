@@ -17,14 +17,13 @@ namespace Activities.Core.Extensions
             return date.ToString("MMM yyyy");
         }
 
-        public static Dictionary<string, List<T>> GroupByDate<T>(this IEnumerable<T> items, GroupKey groupKey, Func<T, DateTime> datePropertyFunc, DateTime endDate)
+        public static Dictionary<string, List<T>> GroupByDate<T>(this IEnumerable<T> items, GroupKey groupKey, Func<T, DateTime> datePropertyFunc, DateTime startDate, DateTime endDate)
         {
             var groups = new Dictionary<string, List<T>>();
-            var endGroupKey = endDate.GetGroupKey(groupKey);
             var groupedItems = items
                 .GroupBy(item => datePropertyFunc(item).GetGroupKey(groupKey))
                 .ToDictionary(item => item.Key, item => item.ToList());
-            var currentDate = DateTime.Today;
+            var currentDate = startDate;
 
             if (groupKey == GroupKey.Week)
             {

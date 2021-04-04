@@ -43,15 +43,18 @@ namespace Activities.Web.Pages.ProgressTest
         private async Task<List<ResultItem>> GetList(IEnumerable<SummaryActivity> activities, GroupKey groupBy)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
+            DateTime startDate;
             DateTime endDate;
             
             if (groupBy == GroupKey.Week)
             {
+                startDate = DateTime.Today;
                 endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 9);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
             else
             {
+                startDate = DateTime.Today;
                 endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddMonths(-6);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
@@ -59,7 +62,7 @@ namespace Activities.Web.Pages.ProgressTest
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
 
             var result = detailedActivities
-                .GroupByDate(groupBy, activity => activity.StartDate, endDate)
+                .GroupByDate(groupBy, activity => activity.StartDate, startDate, endDate)
                 .Select(group =>
                 {
                     if (group.Value?.Any() != true)
@@ -125,7 +128,7 @@ namespace Activities.Web.Pages.ProgressTest
                         ActivityCount = group.Value.Count,
                         Distance = new ResultItemValue(group.Value.Sum(activity => activity.Distance)),
                         Pace = new ResultItemValue(group.Value.Average(activity => activity.AverageSpeed)),
-                        ElapsedTime = new ResultItemValue(group.Value.Sum(activity => activity.ElapsedTime)),
+                        ElapsedTime = new ResultItemValue(group.Value.Sum(activity => activity.MovingTime)),
                         Heartrate = group.Value.Any(activity => activity.AverageHeartrate > 0) ? new ResultItemValue(group.Value.Where(activity => activity.AverageHeartrate > 0).Average(activity => activity.AverageHeartrate)) : null,
                         IntervalDistance = intervalDistance,
                         IntervalPace = intervalPace,
@@ -135,13 +138,13 @@ namespace Activities.Web.Pages.ProgressTest
                     };
                 })
                 .ToList();
-
+            
             AppendFactor(result, item => item.Distance);
-            AppendFactor(result, item => item.Pace, -3);
+            AppendFactor(result, item => item.Pace, -2.5);
             AppendFactor(result, item => item.ElapsedTime);
             AppendFactor(result, item => item.Heartrate, -100);
             AppendFactor(result, item => item.IntervalDistance);
-            AppendFactor(result, item => item.IntervalPace, -3);
+            AppendFactor(result, item => item.IntervalPace, -2.5);
             AppendFactor(result, item => item.IntervalElapsedTime);
             AppendFactor(result, item => item.IntervalHeartrate, -100);
             AppendFactor(result, item => item.Lactate);
@@ -165,7 +168,10 @@ namespace Activities.Web.Pages.ProgressTest
 
             foreach (var property in properties)
             {
-                property.Factor = Math.Round(1.0 / (maxValue + valueOffset) * (property.Value + valueOffset), 2);
+                if (valueOffset > property.Value * -1)
+                {
+                    property.Factor = Math.Round(1.0 / (maxValue + valueOffset) * (property.Value + valueOffset), 2);
+                }
             }
         }
     }

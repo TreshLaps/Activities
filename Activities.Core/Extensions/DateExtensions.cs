@@ -19,6 +19,11 @@ namespace Activities.Core.Extensions
 
         public static Dictionary<string, List<T>> GroupByDate<T>(this IEnumerable<T> items, GroupKey groupKey, Func<T, DateTime> datePropertyFunc, DateTime startDate, DateTime endDate)
         {
+            if (startDate < endDate)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startDate), "startDate has to be higher than endDate");
+            }
+            
             var groups = new Dictionary<string, List<T>>();
             var groupedItems = items
                 .GroupBy(item => datePropertyFunc(item).GetGroupKey(groupKey))

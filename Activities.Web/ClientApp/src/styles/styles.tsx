@@ -50,6 +50,8 @@ export const Grid = styled.div<{columns: number}>`
     }    
 `;
 
+export const EmptyThead = styled.thead``;
+
 export const Table = styled.table`
     width: 100%;
     width: 100%;
@@ -81,6 +83,13 @@ export const Table = styled.table`
         &:last-child {
             padding-right: 20px;
         }
+    }
+
+    > ${EmptyThead} > tr > th {
+        background: #ddd;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-weight: normal;
     }
 
     > tbody > tr {

@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
 
@@ -319,15 +319,24 @@ const IntervalsPage: React.FC = () => {
                         <Table>
                             {activities?.map(month => (
                             <React.Fragment key={month.date}>
-                                <thead>
-                                    <tr>
-                                        <th id={month.date}>{month.date}</th>
-                                        <th>Date</th>
-                                        <th>Pace</th>
-                                        <th>HR</th>
-                                        <th>Laps</th>
-                                    </tr>
-                                </thead>
+                                {month.activities.length > 0 && 
+                                    <thead>
+                                        <tr>
+                                            <th id={month.date}>{month.date}</th>
+                                            <th>Date</th>
+                                            <th>Pace</th>
+                                            <th>HR</th>
+                                            <th>Laps</th>
+                                        </tr>
+                                    </thead>
+                                }
+                                {month.activities.length === 0 && 
+                                    <EmptyThead>
+                                        <tr>
+                                            <th id={month.date} colSpan={5}>{month.date} (0 activities)</th>
+                                        </tr>
+                                    </EmptyThead>
+                                }
                                 <tbody>
                                     {message && <tr><td>{message}</td></tr>}
                                     {month.activities.map(activity => (

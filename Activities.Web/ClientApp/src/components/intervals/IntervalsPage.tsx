@@ -5,7 +5,7 @@ import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
 import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead, TableContainer, NoWrapTd } from '../../styles/styles';
 import Loader from '../utils/Loader';
-import { getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
+import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 
 interface ActivityMonth {
     date: string;
@@ -212,7 +212,7 @@ const IntervalsPage: React.FC = () => {
             {showLoader && <Loader message={message} />}
             {!showLoader && 
                 <div>
-                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter == 'Last24Months' ? 2 : 1))}>
+                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter === 'Last24Months' ? 2 : 1))}>
                         <Box>
                             <SubHeader>Distance</SubHeader>
                             {totalDistances && totalDistances.length > 0 && 
@@ -246,7 +246,7 @@ const IntervalsPage: React.FC = () => {
                             <Box>
                                 <SubHeader>Pace</SubHeader>
                                 {shortPaces && shortPaces.length > 0 && 
-                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getMinPerKmString(distancePerSecond, true)}>
+                                    <Chart xType="ordinal" yDomain={[3,6]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond)}>
                                         <VerticalBarSeries
                                             getY={d => { return d.y < 3 ? 3 : d.y; }}
                                             barWidth={0.6}                                            
@@ -324,9 +324,7 @@ const IntervalsPage: React.FC = () => {
                                         <thead>
                                             <tr>
                                                 <th id={month.date}>{month.date}</th>
-                                                <th>Date</th>
-                                                <th>Pace</th>
-                                                <th>HR</th>
+                                                <th></th>
                                                 <th>Laps</th>
                                             </tr>
                                         </thead>
@@ -342,16 +340,19 @@ const IntervalsPage: React.FC = () => {
                                         {message && <tr><td>{message}</td></tr>}
                                         {month.activities.map(activity => (
                                             <tr key={activity.id}>
-                                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
-                                                <NoWrapTd>{activity.date}</NoWrapTd>
-                                                <NoWrapTd>{activity.interval_AverageSpeed}</NoWrapTd>
-                                                <NoWrapTd>{activity.interval_AverageHeartrate}</NoWrapTd>
+                                                <NoWrapTd style={{ width: 150 }}>{activity.date}</NoWrapTd>
+                                                <td style={{ textAlign: 'left' }}>
+                                                    <div style={{ fontWeight: 500 }}>
+                                                        <a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a>
+                                                    </div>
+                                                    <div style={{fontSize: "13px"}}>{activity.description}</div>
+                                                </td>
                                                 <td style={{minWidth: "300px"}}>
                                                     <LapsTable>
                                                         <thead>
                                                             <tr>
                                                                 <th title="Total distance">{getKmString(activity.interval_Laps.map(lap => lap.distance).reduce((sum, value) => sum + value))}</th>
-                                                                <th title="Average pace">{getMinPerKmString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
+                                                                <th title="Average pace">{getPaceString(activity.interval_Laps.map(lap => lap.averageSpeed).reduce((sum, value) => sum + value) / activity.interval_Laps.length)}</th>
                                                                 <th title="Average heartrate">{Math.round(activity.interval_Laps.map(lap => lap.averageHeartrate).reduce((sum, value) => sum + value) / activity.interval_Laps.length)} bpm</th>
                                                                 <th style={{width: "60px"}}>{getTimeString(activity.interval_Laps.map(lap => lap.elapsedTime).reduce((sum, value) => sum + value))}</th>
                                                             </tr>
@@ -359,12 +360,12 @@ const IntervalsPage: React.FC = () => {
                                                         <tbody>
                                                             {activity.interval_Laps.map(lap => (
                                                                 <tr key={lap.id}>
-                                                                    <NoWrapTd title="Distance">
+                                                                    <NoWrapTd title={`${getKmString(lap.distance, 3)}`}>
                                                                         <LapLabel>{getKmString(lap.distance)}</LapLabel>
                                                                         <LapFactor style={{width: `${lap.distanceFactor * 100}%`}} color="#005dff" />
                                                                     </NoWrapTd>
                                                                     <NoWrapTd title="Pace">
-                                                                        <LapLabel>{getMinPerKmString(lap.averageSpeed)}</LapLabel>
+                                                                        <LapLabel>{getPaceString(lap.averageSpeed)}</LapLabel>
                                                                         <LapFactor style={{width: `${lap.averageSpeedFactor * 100}%`}} color="#00a000" />
                                                                     </NoWrapTd>
                                                                     <NoWrapTd title="Heartrate">

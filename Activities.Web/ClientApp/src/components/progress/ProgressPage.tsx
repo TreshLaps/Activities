@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import styled from "styled-components";
-import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
-import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, TableContainer } from '../../styles/styles';
+import { StackContainer, Table, Dropdown, LapFactor, LapLabel, TableContainer } from '../../styles/styles';
 import Loader from '../utils/Loader';
-import { getKmString, getMinPerKmString, getTimeString, round } from '../utils/Formatters';
+import { getKmString, getPaceString, getTimeString, round } from '../utils/Formatters';
 
 const addOrUpdateQueryString = (url: string, name: string, value: string) => {
     var separator = url.indexOf("?") === -1 ? "?" : "&";
@@ -133,7 +131,7 @@ const ProgressPage: React.FC = () => {
                         {!item.elapsedTime && <td>-</td>}
                         {item.pace && <td>
                             <div style={{position: "relative"}}>
-                                <LapLabel>{getMinPerKmString(item.pace.value)}</LapLabel>
+                                <LapLabel>{getPaceString(item.pace.value)}</LapLabel>
                                 <LapFactor style={{width: `${item.pace.factor * 100}%`}} color="#00a000" />
                             </div>
                         </td>}
@@ -162,7 +160,7 @@ const ProgressPage: React.FC = () => {
                         {!item.intervalElapsedTime && <td>-</td>}
                         {item.intervalPace && <td>
                             <div style={{position: "relative"}}>
-                                <LapLabel>{getMinPerKmString(item.intervalPace.value)}</LapLabel>
+                                <LapLabel>{getPaceString(item.intervalPace.value)}</LapLabel>
                                 <LapFactor style={{width: `${item.intervalPace.factor * 100}%`}} color="#00a000" />
                             </div>
                         </td>}

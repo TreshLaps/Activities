@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
-import { getDateString, getKmString, getMinPerKmString, getTimeString } from '../utils/Formatters';
+import { getDateString, getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -58,9 +58,9 @@ const RacesPage: React.FC = () => {
                 <tbody>
                     {activities?.map(activity => (
                         <tr key={activity.id}>
-                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
                             <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>
-                            <NoWrapTd>{getMinPerKmString(activity.averageSpeed)}</NoWrapTd>
+                            <NoWrapTd>{getPaceString(activity.averageSpeed)}</NoWrapTd>
                             <NoWrapTd>{getTimeString(activity.movingTime)}</NoWrapTd>
                             <NoWrapTd>{getDateString(activity.startDate)}</NoWrapTd>
                         </tr>

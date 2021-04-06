@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
+import { TableContainer } from '../../styles/styles';
+import { Table, ValueTd } from '../utils/Table';
 import Loader from '../utils/Loader';
 
 interface Activity {
@@ -58,11 +59,11 @@ const ActivitiesPage: React.FC = () => {
                     {activities?.map(activity => {
                         return (
                             <tr key={activity.id}>
-                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
-                                <NoWrapTd>{activity.type}</NoWrapTd>
-                                <NoWrapTd>{activity.distance}</NoWrapTd>
-                                <NoWrapTd>{activity.averageSpeed}</NoWrapTd>
-                                <NoWrapTd>{activity.startDate}</NoWrapTd>
+                                <td><div style={{fontWeight: 500, whiteSpace: "pre-wrap"}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
+                                <td>{activity.type}</td>
+                                {ValueTd(activity.distance)}
+                                {ValueTd(activity.averageSpeed)}
+                                <td>{activity.startDate}</td>
                             </tr>
                         );
                     })}

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Activities.Core.DataTables;
 using Activities.Core.Extensions;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
@@ -35,12 +36,12 @@ namespace Activities.Web.Pages.ProgressTest
 
             return new
             {
-                Week = await GetList(activities, GroupKey.Week),
-                Month = await GetList(activities, GroupKey.Month)
+                Week = await GetProgress(activities, GroupKey.Week),
+                Month = await GetProgress(activities, GroupKey.Month)
             };
         }
         
-        private async Task<List<ResultItem>> GetList(IEnumerable<SummaryActivity> activities, GroupKey groupBy)
+        private async Task<List<ProgressResultItem>> GetProgress(IEnumerable<SummaryActivity> activities, GroupKey groupBy)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             DateTime startDate;
@@ -49,13 +50,13 @@ namespace Activities.Web.Pages.ProgressTest
             if (groupBy == GroupKey.Week)
             {
                 startDate = DateTime.Today;
-                endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 9);
+                endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 5);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
             else
             {
                 startDate = DateTime.Today;
-                endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddMonths(-6);
+                endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddMonths(-12);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
 
@@ -67,18 +68,18 @@ namespace Activities.Web.Pages.ProgressTest
                 {
                     if (group.Value?.Any() != true)
                     {
-                        return new ResultItem
+                        return new ProgressResultItem
                         {
                             Name = group.Key,
                             ActivityCount = 0
                         };
                     }
                     
-                    ResultItemValue intervalDistance = null;
-                    ResultItemValue intervalPace = null;
-                    ResultItemValue intervalElapsedTime = null;
-                    ResultItemValue intervalHeartrate = null;
-                    ResultItemValue lactate = null;
+                    ItemValue intervalDistance = null;
+                    ItemValue intervalPace = null;
+                    ItemValue intervalElapsedTime = null;
+                    ItemValue intervalHeartrate = null;
+                    ItemValue lactate = null;
 
                     var intervalLaps = group.Value
                         .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
@@ -109,27 +110,27 @@ namespace Activities.Web.Pages.ProgressTest
 
                     if (intervalLaps.Any())
                     {
-                        intervalDistance = new ResultItemValue(intervalLaps.Sum(lap => lap.Distance));
-                        intervalPace = new ResultItemValue(intervalLaps.Average(lap => lap.AverageSpeed));
-                        intervalElapsedTime = new ResultItemValue(intervalLaps.Sum(lap => lap.ElapsedTime));
+                        intervalDistance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
+                        intervalPace = new ItemValue(intervalLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
+                        intervalElapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
                         intervalHeartrate = intervalLaps.Any(lap => lap.AverageHeartrate > 0)
-                            ? new ResultItemValue(intervalLaps.Where(lap => lap.AverageHeartrate > 0).Average(lap => lap.AverageHeartrate))
+                            ? new ItemValue(intervalLaps.Where(lap => lap.AverageHeartrate > 0).Average(lap => lap.AverageHeartrate), ItemValueType.Heartrate)
                             : null;
                     }
 
                     if (lactates.Any())
                     {
-                        lactate = new ResultItemValue(lactates.Average());
+                        lactate = new ItemValue(lactates.Average(), ItemValueType.Number);
                     }
                     
-                    return new ResultItem
+                    return new ProgressResultItem
                     {
                         Name = group.Key,
                         ActivityCount = group.Value.Count,
-                        Distance = new ResultItemValue(group.Value.Sum(activity => activity.Distance)),
-                        Pace = new ResultItemValue(group.Value.Average(activity => activity.AverageSpeed)),
-                        ElapsedTime = new ResultItemValue(group.Value.Sum(activity => activity.MovingTime)),
-                        Heartrate = group.Value.Any(activity => activity.AverageHeartrate > 0) ? new ResultItemValue(group.Value.Where(activity => activity.AverageHeartrate > 0).Average(activity => activity.AverageHeartrate)) : null,
+                        Distance = new ItemValue(group.Value.Sum(activity => activity.Distance), ItemValueType.DistanceInMeters),
+                        Pace = new ItemValue(group.Value.Average(activity => activity.AverageSpeed), ItemValueType.MetersPerSecond),
+                        ElapsedTime = new ItemValue(group.Value.Sum(activity => activity.MovingTime), ItemValueType.TimeInSeconds),
+                        Heartrate = group.Value.Any(activity => activity.AverageHeartrate > 0) ? new ItemValue(group.Value.Where(activity => activity.AverageHeartrate > 0).Average(activity => activity.AverageHeartrate), ItemValueType.Heartrate) : null,
                         IntervalDistance = intervalDistance,
                         IntervalPace = intervalPace,
                         IntervalElapsedTime = intervalElapsedTime,
@@ -139,68 +140,34 @@ namespace Activities.Web.Pages.ProgressTest
                 })
                 .ToList();
             
-            AppendFactor(result, item => item.Distance);
-            AppendFactor(result, item => item.Pace, -2.5);
-            AppendFactor(result, item => item.ElapsedTime);
-            AppendFactor(result, item => item.Heartrate, -100);
-            AppendFactor(result, item => item.IntervalDistance);
-            AppendFactor(result, item => item.IntervalPace, -2.5);
-            AppendFactor(result, item => item.IntervalElapsedTime);
-            AppendFactor(result, item => item.IntervalHeartrate, -100);
-            AppendFactor(result, item => item.Lactate);
+            result.CalculateFactorsFor(item => item.Distance);
+            result.CalculateFactorsFor(item => item.Pace, -2.5);
+            result.CalculateFactorsFor(item => item.ElapsedTime);
+            result.CalculateFactorsFor(item => item.Heartrate, -100);
+            result.CalculateFactorsFor(item => item.IntervalDistance);
+            result.CalculateFactorsFor(item => item.IntervalPace, -2.5);
+            result.CalculateFactorsFor(item => item.IntervalElapsedTime);
+            result.CalculateFactorsFor(item => item.IntervalHeartrate, -100);
+            result.CalculateFactorsFor(item => item.Lactate);
 
             return result;
         }
-
-        private void AppendFactor(List<ResultItem> items, Func<ResultItem, ResultItemValue> propertyFunc, double valueOffset = 0)
-        {
-            var properties = items
-                .Where(item => propertyFunc(item) != null)
-                .Select(propertyFunc)
-                .ToList();
-
-            if (!properties.Any())
-            {
-                return;
-            }
-
-            var maxValue = properties.Max(property => property.Value);
-
-            foreach (var property in properties)
-            {
-                if (valueOffset > property.Value * -1)
-                {
-                    property.Factor = Math.Round(1.0 / (maxValue + valueOffset) * (property.Value + valueOffset), 2);
-                }
-            }
-        }
     }
 
-    public class ResultItem
+    public class ProgressResultItem
     {
         public string Name { get; set; }
         public int ActivityCount { get; set; }
-        public ResultItemValue Distance { get; set; }
-        public ResultItemValue Pace { get; set; }
-        public ResultItemValue ElapsedTime { get; set; }
-        public ResultItemValue Heartrate { get; set; }
+        public ItemValue Distance { get; set; }
+        public ItemValue Pace { get; set; }
+        public ItemValue ElapsedTime { get; set; }
+        public ItemValue Heartrate { get; set; }
         
-        public ResultItemValue IntervalDistance { get; set; }
-        public ResultItemValue IntervalPace { get; set; }
-        public ResultItemValue IntervalElapsedTime { get; set; }
-        public ResultItemValue IntervalHeartrate { get; set; }
+        public ItemValue IntervalDistance { get; set; }
+        public ItemValue IntervalPace { get; set; }
+        public ItemValue IntervalElapsedTime { get; set; }
+        public ItemValue IntervalHeartrate { get; set; }
         
-        public ResultItemValue Lactate { get; set; }
-    }
-
-    public class ResultItemValue
-    {
-        public double Value { get; set; }
-        public double Factor { get; set; }
-        
-        public ResultItemValue(double value)
-        {
-            Value = value;
-        }
+        public ItemValue Lactate { get; set; }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 
 namespace Activities.Core.Caching
@@ -13,9 +12,9 @@ namespace Activities.Core.Caching
         private readonly string _storagePath;
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> AsyncLocks = new();
 
-        public FileStorageService(IWebHostEnvironment webHostEnvironment)
+        public FileStorageService(string contentRootPath)
         {
-            _storagePath = Path.Combine(webHostEnvironment.ContentRootPath, "storage");
+            _storagePath = Path.Combine(contentRootPath, "storage");
         }
         
         public async Task<T> GetOrAdd<T>(string key, Func<Task<T>> action) where T : class

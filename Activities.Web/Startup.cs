@@ -20,8 +20,11 @@ namespace Activities.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _env;
+
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            _env = env;
             Configuration = configuration;
         }
 
@@ -74,8 +77,9 @@ namespace Activities.Web
                 configuration.RootPath = "ClientApp/build";
             });
             
+            services.AddTransient<FileStorageService, FileStorageService>(_ => new FileStorageService(_env.ContentRootPath));
+            services.AddTransient<IPermanentStorageService, FileStorageService>(_ => new FileStorageService(_env.ContentRootPath));
             services.AddTransient<ICachingService, CachingService>();
-            services.AddTransient<IPermanentStorageService, FileStorageService>();
             services.AddTransient<AzureBlobService, AzureBlobService>(_ => new AzureBlobService(Configuration.GetConnectionString("AzureBlob")));
             
             ScanAssembly<Startup>(services);

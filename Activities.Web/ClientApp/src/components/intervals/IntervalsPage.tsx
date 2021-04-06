@@ -324,7 +324,7 @@ const IntervalsPage: React.FC = () => {
                                         <thead>
                                             <tr>
                                                 <th id={month.date}>{month.date}</th>
-                                                <th>Date</th>
+                                                <th></th>
                                                 <th>Laps</th>
                                             </tr>
                                         </thead>
@@ -340,8 +340,13 @@ const IntervalsPage: React.FC = () => {
                                         {message && <tr><td>{message}</td></tr>}
                                         {month.activities.map(activity => (
                                             <tr key={activity.id}>
-                                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div><div style={{fontSize: "13px"}}>{activity.description}</div></td>
-                                                <NoWrapTd>{activity.date}</NoWrapTd>
+                                                <NoWrapTd style={{ width: 150 }}>{activity.date}</NoWrapTd>
+                                                <td style={{ textAlign: 'left' }}>
+                                                    <div style={{ fontWeight: 500 }}>
+                                                        <a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a>
+                                                    </div>
+                                                    <div style={{fontSize: "13px"}}>{activity.description}</div>
+                                                </td>
                                                 <td style={{minWidth: "300px"}}>
                                                     <LapsTable>
                                                         <thead>

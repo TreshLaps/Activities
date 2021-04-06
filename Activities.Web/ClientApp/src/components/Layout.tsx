@@ -17,6 +17,8 @@ const LayoutContainer = styled.div`
 const MenuWrapper = styled.div`
     background: #209cee;
     margin-bottom: 20px;
+    overflow: auto;
+    white-space: nowrap;
 `;
 
 const MenuContainer = styled.div`

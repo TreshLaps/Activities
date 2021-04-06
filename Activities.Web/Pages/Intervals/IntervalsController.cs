@@ -97,7 +97,7 @@ namespace Activities.Web.Pages.Intervals
                             return new
                             {
                                 activity.Activity.Id,
-                                Date = activity.Activity.StartDate.ToString("ddd dd. MMM yyyy"),
+                                Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
                                 activity.Activity.Name,
                                 activity.Activity.Description,
                                 Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),

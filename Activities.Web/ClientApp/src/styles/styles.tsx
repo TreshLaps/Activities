@@ -35,6 +35,19 @@ export const SubHeader = styled.h2`
     margin-bottom: 10px;
 `;
 
+export const BigScreenTd = styled.td`
+    @media(max-width: 768px) {
+        display: none;
+        n
+    }
+`
+
+export const BigScreenTh = styled.th`
+    @media(max-width: 768px) {
+        display: none;
+    }
+`
+
 export const Grid = styled.div<{columns: number}>`
     @media(min-width: 1000px) {
         display: grid;

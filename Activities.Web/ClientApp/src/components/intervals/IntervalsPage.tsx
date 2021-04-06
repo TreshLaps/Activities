@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead, TableContainer, NoWrapTd } from '../../styles/styles';
+import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead, TableContainer, NoWrapTd, BigScreenTh, BigScreenTd } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 
@@ -323,8 +323,8 @@ const IntervalsPage: React.FC = () => {
                                     {month.activities.length > 0 && 
                                         <thead>
                                             <tr>
-                                                <th id={month.date}>{month.date}</th>
-                                                <th></th>
+                                                <th colSpan={2} id={month.date}>{month.date}</th>
+                                                <BigScreenTh>Pace</BigScreenTh>
                                                 <th>Laps</th>
                                             </tr>
                                         </thead>
@@ -340,13 +340,14 @@ const IntervalsPage: React.FC = () => {
                                         {message && <tr><td>{message}</td></tr>}
                                         {month.activities.map(activity => (
                                             <tr key={activity.id}>
-                                                <NoWrapTd style={{ width: 150 }}>{activity.date}</NoWrapTd>
+                                                <NoWrapTd style={{ width: 125 }}>{activity.date}</NoWrapTd>
                                                 <td style={{ textAlign: 'left' }}>
                                                     <div style={{ fontWeight: 500 }}>
                                                         <a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a>
                                                     </div>
                                                     <div style={{fontSize: "13px"}}>{activity.description}</div>
                                                 </td>
+                                                <BigScreenTd>{activity.interval_AverageSpeed}</BigScreenTd>
                                                 <td style={{minWidth: "300px"}}>
                                                     <LapsTable>
                                                         <thead>

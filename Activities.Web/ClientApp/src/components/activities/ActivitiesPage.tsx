@@ -36,7 +36,7 @@ const ActivitiesPage: React.FC = () => {
                 setIsLoading(false);
                 setMessage("Failed to load activities.");
             });
-    });
+    }, [activities, isLoading]);
 
     if (isLoading || activities == null) {
         return (<Loader message={message} />);
@@ -58,7 +58,7 @@ const ActivitiesPage: React.FC = () => {
                     {activities?.map(activity => {
                         return (
                             <tr key={activity.id}>
-                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
                                 <NoWrapTd>{activity.type}</NoWrapTd>
                                 <NoWrapTd>{activity.distance}</NoWrapTd>
                                 <NoWrapTd>{activity.averageSpeed}</NoWrapTd>

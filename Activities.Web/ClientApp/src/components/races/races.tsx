@@ -58,7 +58,7 @@ const RacesPage: React.FC = () => {
                 <tbody>
                     {activities?.map(activity => (
                         <tr key={activity.id}>
-                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank">{activity.name}</a></div></td>
+                            <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
                             <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>
                             <NoWrapTd>{getPaceString(activity.averageSpeed)}</NoWrapTd>
                             <NoWrapTd>{getTimeString(activity.movingTime)}</NoWrapTd>

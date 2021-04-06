@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import styled from "styled-components";
-import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
-import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, TableContainer } from '../../styles/styles';
+import { StackContainer, Table, Dropdown, LapFactor, LapLabel, TableContainer } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { getKmString, getPaceString, getTimeString, round } from '../utils/Formatters';
 

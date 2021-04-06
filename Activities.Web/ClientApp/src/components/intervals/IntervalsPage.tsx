@@ -212,7 +212,7 @@ const IntervalsPage: React.FC = () => {
             {showLoader && <Loader message={message} />}
             {!showLoader && 
                 <div>
-                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter == 'Last24Months' ? 2 : 1))}>
+                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter === 'Last24Months' ? 2 : 1))}>
                         <Box>
                             <SubHeader>Distance</SubHeader>
                             {totalDistances && totalDistances.length > 0 && 

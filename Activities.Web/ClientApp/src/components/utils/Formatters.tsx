@@ -5,7 +5,7 @@ export const round = (value: number, decimals: number) => value.toFixed(decimals
 
 export const getPaceString = (metersPerSecond: number, showSuffix: boolean = false) => {
 
-    if (isNaN(metersPerSecond) || metersPerSecond == 0) {
+    if (isNaN(metersPerSecond) || metersPerSecond === 0) {
         return '';
     }
 

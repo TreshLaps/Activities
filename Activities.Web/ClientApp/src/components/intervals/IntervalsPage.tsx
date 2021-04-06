@@ -17,7 +17,7 @@ interface Activity {
     date: string;
     name: string;
     description: string;
-    interval_AverageSpeed: string;
+    interval_AveragePace: string;
     interval_AverageHeartrate: number;
     interval_Laps: any[];
 };
@@ -347,7 +347,7 @@ const IntervalsPage: React.FC = () => {
                                                     </div>
                                                     <div style={{fontSize: "13px"}}>{activity.description}</div>
                                                 </td>
-                                                <BigScreenTd>{activity.interval_AverageSpeed}</BigScreenTd>
+                                                <BigScreenTd>{activity.interval_AveragePace}</BigScreenTd>
                                                 <td style={{minWidth: "300px"}}>
                                                     <LapsTable>
                                                         <thead>

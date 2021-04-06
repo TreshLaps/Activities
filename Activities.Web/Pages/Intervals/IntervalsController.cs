@@ -100,7 +100,7 @@ namespace Activities.Web.Pages.Intervals
                                 Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
                                 activity.Activity.Name,
                                 activity.Activity.Description,
-                                Interval_AverageSpeed = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),
+                                Interval_AveragePace = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),
                                 Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                 Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
                                 Laktat = GetLactate(activity.Activity)

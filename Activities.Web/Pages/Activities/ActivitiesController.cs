@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Activities.Core.Extensions;
+using Activities.Core.DataTables;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
 using Microsoft.AspNetCore.Mvc;
@@ -33,8 +33,8 @@ namespace Activities.Web.Pages.Authentication
                         activity.Type,
                         activity.Name,
                         StartDate = activity.StartDate.ToString("dd.MM.yyyy"),
-                        Distance = activity.Distance.ToKmString(),
-                        AverageSpeed = activity.AverageSpeed.ToPaceString()
+                        Distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters),
+                        AverageSpeed = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond)
                     })
                 .ToList();
         }

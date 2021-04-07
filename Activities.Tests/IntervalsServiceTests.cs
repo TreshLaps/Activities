@@ -68,7 +68,7 @@ namespace Activities.Tests
                         Assert.AreEqual(
                             expectedResult, 
                             lap.IsInterval, 
-                            $"{(expectedResult ? "Lap not found" : "Didn't expect lap")}: {lapIndex + 1} ({lap.AverageSpeed.ToMinPerKmString()}, {lap.Distance.ToKmString()}, {lap.ElapsedTime.ToTimeString()}) - https://www.strava.com/activities/{stravaId}");
+                            $"{(expectedResult ? "Lap not found" : "Didn't expect lap")}: {lapIndex + 1} ({lap.AverageSpeed.ToPaceString()}, {lap.Distance.ToKmString()}, {lap.ElapsedTime.ToTimeString()}) - https://www.strava.com/activities/{stravaId}");
                     }
                 });
         }

@@ -34,6 +34,7 @@ namespace Activities.Tests
         [TestCase(2233746904, new [] {12, 14, 16})]
         [TestCase(4977393213, new [] {1, 2, 4, 5, 7})]
         [TestCase(4491176735, new [] {1, 3, 5, 7, 9})]
+        [TestCase(5085079645, new [] {3, 5, 7, 9, 11, 13})]
         [TestCase(1275055990, new int[0])]
         [TestCase(1164398338, new int[0])]
         [TestCase(1165907510, new int[0])]

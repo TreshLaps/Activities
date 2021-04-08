@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from "react-router-dom";
 import styled from 'styled-components';
+import { UserContext, User } from '../components/utils/UserContext';
 const LayoutContainer = styled.div`
     margin: 0 auto;
     max-width: 1400px;
@@ -51,36 +52,49 @@ const LinkContainer = styled.ul`
     }
 `;
 
+const ProfileImage = styled.img`
+    height: 48px;
+    vertical-align: middle;
+`;
+
 const Layout: React.FC<{ children: any }> = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [user, setUser] = useState<User | null | undefined>(undefined);
 
     useEffect(() => {
-        if (isAuthenticated === true) {
+        if (user) {
             return;
         }
 
-        fetch(`/api/Authentication/IsAuthenticated/`)
-            .then(response => response.json() as Promise<boolean>)
+        fetch(`/api/Authentication/user/`)
+            .then(response => response.json() as Promise<User>)
             .then(data => {
-                setIsAuthenticated(data);
+                setUser(data);
             })
-            .catch(error => setIsAuthenticated(false));
+            .catch(_ => setUser(null));
     });
 
     return (
-        <>
+        <UserContext.Provider value={user}>
             <MenuWrapper>
-                <MenuContainer>
+                <MenuContainer style={{display: "flex"}}>
                     <LinkContainer>
                         <li><NavLink exact to="/" activeClassName="navLink-active">Home</NavLink></li>
-                        {isAuthenticated &&
-                            <React.Fragment>
+                        {user &&
+                            <>
                                 <li><NavLink exact to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
                                 <li><NavLink exact to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
                                 <li><NavLink exact to="/races" activeClassName="navLink-active">Races</NavLink></li>
-                            </React.Fragment>
+                            </>
                         }
-                        <li><a href={isAuthenticated ? '/signout' : '/signin'}>{isAuthenticated ? 'Sign out' : 'Sign in'}</a></li>
+                    </LinkContainer>
+                    <LinkContainer style={{flex: "0"}}>
+                        {user && 
+                            <>
+                                <li><ProfileImage src={user.profileImageUrl} alt={user.fullName} /></li>
+                                <li><a href="signout">Sign out</a></li>
+                            </>
+                        }
+                        {!user && <li><a href="signin">Sign in</a></li>}
                     </LinkContainer>
                 </MenuContainer>   
             </MenuWrapper>
@@ -89,7 +103,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                     {children}
                 </div>
             </LayoutContainer>
-        </>
+        </UserContext.Provider>
     );
 }
     

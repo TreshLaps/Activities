@@ -24,10 +24,22 @@ namespace Activities.Web.Authentication
             return SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
         }
         
-        [HttpGet("IsAuthenticated")]
-        public async Task<bool> IsAuthenticated()
+        [HttpGet("user")]
+        public async Task<dynamic> GetUser()
         {
-            return (await HttpContext.TryGetStravaAthlete()) != null;
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
+
+            if (stravaAthlete == null)
+            {
+                return null;
+            }
+
+            return new
+            {
+                stravaAthlete.AthleteId,
+                stravaAthlete.FullName,
+                stravaAthlete.ProfileImageUrl
+            };
         }
     }
 }

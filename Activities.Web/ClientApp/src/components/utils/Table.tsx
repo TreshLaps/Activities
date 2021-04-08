@@ -21,7 +21,7 @@ export const Table = styled.table`
     > thead > tr > th {
         text-align: right;
         padding: 15px;
-        font-size: 15px;
+        font-size: inherit;
         line-height: 1;
         background: #bdc9ce;
 

@@ -38,7 +38,6 @@ export const SubHeader = styled.h2`
 export const BigScreenTd = styled.td`
     @media(max-width: 768px) {
         display: none;
-        n
     }
 `
 

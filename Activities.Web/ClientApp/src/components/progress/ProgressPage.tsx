@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import '../../../node_modules/react-vis/dist/style.css';
-import { StackContainer, Dropdown, TableContainer, Grid } from '../../styles/styles';
+import { StackContainer, Dropdown, TableContainer } from '../../styles/styles';
 import Loader from '../utils/Loader';
 import { Table, ValueTd } from '../utils/Table';
 import { addOrUpdateQueryString, removeQueryString } from '../utils/Urls';
@@ -90,31 +90,6 @@ const ProgressPage: React.FC = () => {
         </Table>
     );
 
-    const progressTable2 = (name: string, items: any[]) => (
-        <Table style={{fontSize: "11px", tableLayout: "auto"}}>
-            <thead>
-                <tr>
-                    <th>{name}</th>
-                    <th>Distance</th>
-                    <th>Time</th>
-                    <th>Pace</th>
-                    <th>HR</th>
-                </tr>
-            </thead>
-            <tbody>
-                {items.map(item => (
-                    <tr key={item.name}>
-                        <td>{item.name} - {item.activityCount}</td>
-                        {ValueTd(item.distance)}
-                        {ValueTd(item.elapsedTime)}
-                        {ValueTd(item.pace)}
-                        {ValueTd(item.heartrate)}
-                    </tr>
-                ))}
-            </tbody>
-        </Table>
-    );
-
     return (
         <div>
             <StackContainer>
@@ -127,13 +102,6 @@ const ProgressPage: React.FC = () => {
                 </Dropdown>         
             </StackContainer>
             {showLoader && <Loader message={message} />}
-            {!showLoader && progress && progress.week && 
-                <Grid columns={3}>
-                    {progressTable2('Run', progress.week)}
-                    {progressTable2('Ride', progress.week)}
-                    {progressTable2('NordicSki', progress.week)}
-                </Grid>
-            } 
             {!showLoader && progress && progress.week && 
                 <TableContainer>
                     {progressTable('Week', progress.week)}

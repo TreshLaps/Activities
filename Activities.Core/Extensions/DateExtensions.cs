@@ -11,7 +11,7 @@ namespace Activities.Core.Extensions
             if (key == GroupKey.Week)
             {
                 var startOfWeek = date.GetStartOfWeek();
-                return $"{startOfWeek:dd.} - {startOfWeek.AddDays(6):dd. MMM yyyy}";
+                return $"{startOfWeek:dd.} - {startOfWeek.AddDays(6):dd. MMM}";
             }
             
             return date.ToString("MMM yyyy");

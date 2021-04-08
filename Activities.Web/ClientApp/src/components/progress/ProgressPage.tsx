@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import '../../../node_modules/react-vis/dist/style.css';
-import { StackContainer, Dropdown, TableContainer } from '../../styles/styles';
+import { StackContainer, Dropdown, TableContainer, Grid, SubHeader } from '../../styles/styles';
 import Loader from '../utils/Loader';
-import { Table, ValueTd } from '../utils/Table';
+import { SmallTable, Table, ValueTd } from '../utils/Table';
 import { addOrUpdateQueryString, removeQueryString } from '../utils/Urls';
 
 const ProgressPage: React.FC = () => {
@@ -35,7 +35,7 @@ const ProgressPage: React.FC = () => {
         const url = appendUrlArguments(window.location.href);
         window.history.replaceState({}, '', url);
 
-        fetch(appendUrlArguments('/api/ProgressTest/'))
+        fetch(appendUrlArguments('/api/progress/'))
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setProgress(data);

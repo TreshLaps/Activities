@@ -2,10 +2,10 @@ import React, { } from 'react';
 import styled from 'styled-components';
 
 const LoaderContainer = styled.div`
-    height: 80vh;
+    height: 200px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 
     svg {

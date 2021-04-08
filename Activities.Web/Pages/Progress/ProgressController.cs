@@ -14,11 +14,11 @@ namespace Activities.Web.Pages.ProgressTest
     [ApiController]
     [Route("api/[controller]")]
     [StravaAuthenticationFilter]
-    public class ProgressTestController : ControllerBase
+    public class ProgressController : ControllerBase
     {
         private readonly ActivitiesClient _activitiesClient;
 
-        public ProgressTestController(ActivitiesClient activitiesClient)
+        public ProgressController(ActivitiesClient activitiesClient)
         {
             _activitiesClient = activitiesClient;
         }
@@ -36,12 +36,36 @@ namespace Activities.Web.Pages.ProgressTest
 
             return new
             {
-                Week = await GetProgress(activities, GroupKey.Week),
-                Month = await GetProgress(activities, GroupKey.Month)
+                Week = await GetProgress(activities, GroupKey.Week, 5),
+                Month = await GetProgress(activities, GroupKey.Month, 12)
             };
         }
+
+        [HttpGet("summary")]
+        public async Task<dynamic> GetSummary()
+        {
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
+            var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
+                .Where(activity => activity.StartDate >= DateTime.Today.GetStartOfWeek().AddDays(-7 * 5))
+                .GroupBy(activity => activity.Type)
+                .OrderByDescending(group => group.Count())
+                .ToList();
+
+            var result = new List<dynamic>();
+
+            foreach (var activity in activities)
+            {
+                result.Add(new
+                {
+                    Name = activity.First().Type,
+                    Summary = await GetProgress(activity.ToList(), GroupKey.Week, 5)
+                });
+            }
+
+            return result;
+        }
         
-        private async Task<List<ProgressResultItem>> GetProgress(IEnumerable<SummaryActivity> activities, GroupKey groupBy)
+        private async Task<List<ProgressResultItem>> GetProgress(IEnumerable<SummaryActivity> activities, GroupKey groupBy, int groupCount)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             DateTime startDate;
@@ -50,13 +74,13 @@ namespace Activities.Web.Pages.ProgressTest
             if (groupBy == GroupKey.Week)
             {
                 startDate = DateTime.Today;
-                endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 5);
+                endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * groupCount);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
             else
             {
                 startDate = DateTime.Today;
-                endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddMonths(-12);
+                endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddMonths(groupCount * -1);
                 activities = activities.Where(activity => activity.StartDate >= endDate);
             }
 

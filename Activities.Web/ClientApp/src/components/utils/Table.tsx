@@ -18,6 +18,11 @@ export const Table = styled.table`
         table-layout: fixed;
     }
 
+    @media(max-width: 768px) {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
     > thead > tr > th {
         text-align: right;
         padding: 15px;
@@ -36,8 +41,6 @@ export const Table = styled.table`
 
         @media(max-width: 768px) {
             padding: 5px;
-            font-size: 13px;
-            line-height: 1;
 
             &:first-child {
                 padding-left: 10px;
@@ -89,8 +92,6 @@ export const Table = styled.table`
 
             @media(max-width: 768px) {
                 padding: 5px;
-                font-size: 13px;
-                line-height: 1.3;
     
                 &:first-child {
                     padding-left: 10px;
@@ -101,6 +102,16 @@ export const Table = styled.table`
                 }
             }
         }
+    }
+`;
+
+export const SmallTable = styled(Table)`    
+    font-size: 11px;
+    line-height: 1.3;
+    table-layout: auto;
+
+    > thead > tr > th {
+        padding: 10px;
     }
 `;
 

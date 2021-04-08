@@ -55,6 +55,7 @@ const LinkContainer = styled.ul`
 const ProfileImage = styled.img`
     height: 48px;
     vertical-align: middle;
+    border-radius: 99px;
 `;
 
 const Layout: React.FC<{ children: any }> = ({ children }) => {
@@ -83,6 +84,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                             <>
                                 <li><NavLink exact to="/activities" activeClassName="navLink-active">Activities</NavLink></li>
                                 <li><NavLink exact to="/intervals" activeClassName="navLink-active">Intervals</NavLink></li>
+                                <li><NavLink exact to="/progress" activeClassName="navLink-active">Progress</NavLink></li>
                                 <li><NavLink exact to="/races" activeClassName="navLink-active">Races</NavLink></li>
                             </>
                         }

@@ -57,7 +57,7 @@ export const Grid = styled.div<{columns: number}>`
         grid-template-rows: auto;
     
         & > * {
-            margin-bottom: 0;
+            margin-bottom: 0 !important;
         }
     }    
 `;

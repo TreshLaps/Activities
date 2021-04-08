@@ -84,7 +84,22 @@ namespace Activities.Strava.Endpoints
             activitiesCache.Activities = activitiesCache.Activities.OrderByDescending(activity => activity.StartDate).ToList();
             activitiesCache.LastSyncDate = DateTimeOffset.UtcNow.AddMonths(-1);
             await _permanentStorageService.AddOrUpdate($"ActivitiesCache:{athleteId}", TimeSpan.MaxValue, activitiesCache);
-            return activitiesCache.Activities;
+            return activitiesCache.Activities.Where(IsValidActivityType).ToList();
+        }
+
+        private bool IsValidActivityType(SummaryActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "Run":
+                case "Ride":
+                case "VirtualRide":
+                case "Swim":
+                case "NordicSki":
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 

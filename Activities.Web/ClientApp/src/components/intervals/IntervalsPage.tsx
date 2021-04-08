@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import queryString from 'query-string';
 import {MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 import Chart, { axisTypes, getChartData } from '../charts/Chart';
-import { StackContainer, Box, SubHeader, Table, LapsTable, Grid, Dropdown, DropdownLabel, Input, LapFactor, LapLabel, WarningLabel, EmptyThead, TableContainer, NoWrapTd, BigScreenTh, BigScreenTd } from '../../styles/styles';
-import Loader from '../utils/Loader';
+import { Box, SubHeader, Table, LapsTable, Grid, LapFactor, LapLabel, EmptyThead, TableContainer, NoWrapTd, BigScreenTh, BigScreenTd } from '../../styles/styles';
+import Loader, { LoadingStatus } from '../utils/Loader';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
 
 interface ActivityMonth {
     date: string;
@@ -22,36 +22,9 @@ interface Activity {
     interval_Laps: any[];
 };
 
-const addOrUpdateQueryString = (url: string, name: string, value: string) => {
-    var separator = url.indexOf("?") === -1 ? "?" : "&";
-    var parameter = name + "=" + value;
-
-    if (url.indexOf(name + "=") === -1) {
-        var hashMatchPattern = /^(.+?)#(.+?)$/i;
-        var hashMatch = url.match(hashMatchPattern);
-
-        if (hashMatch != null) {
-            // url contains a hash like: /url/to/content#some-hash
-            return hashMatch[1] + separator + parameter + "#" + hashMatch[2];
-        }
-        else {
-            return url + separator + parameter;
-        }
-    }
-    else {
-        url = url.replace(new RegExp(name + '=[^&]+'), parameter);
-    }
-
-    return url;
-};
-  
-const removeQueryString = (url: string, name: string) => url.replace(new RegExp('[\\?|\\&]+' + name + '=[^&]+'), '');
-
-let timeoutKey : NodeJS.Timeout | null = null;
-
 const IntervalsPage: React.FC = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [message, setMessage] = useState<string>();
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+    const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityMonth[]>();
     const [lactate, setLactate] = useState<any[]>();
     const [lactateAll, setLactateAll] = useState<any[]>();
@@ -61,72 +34,15 @@ const IntervalsPage: React.FC = () => {
     const [shortPaces, setShortPaces] = useState<any[]>();
     const [mediumPaces, setMediumPaces] = useState<any[]>();
     const [longPaces, setLongPaces] = useState<any[]>();
-    const showLoader = isLoading || activities == null;
 
-    // Filters    
-    const { type, duration, year, minPace, maxPace } = queryString.parse(window.location.search);
-    const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : 'Run');
-    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : 'LastMonths');
-    const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : new Date().getFullYear());
-    const [minPaceFilter, setMinPaceFilter] = useState<number | undefined>(typeof minPace === 'string' ? parseFloat(minPace) : undefined);
-    const [maxPaceFilter, setMaxPaceFilter] = useState<number | undefined>(typeof maxPace === 'string' ? parseFloat(maxPace) : undefined);
-
-    const appendUrlArguments = function(url: string) {
-        if (typeFilter !== 'Run') {
-            url = addOrUpdateQueryString(url, 'type', typeFilter);
-        } else {
-            url = removeQueryString(url, 'type');
-        }
-
-        if (durationFilter !== 'LastMonths') {
-            url = addOrUpdateQueryString(url, 'duration', durationFilter);
-        } else {
-            url = removeQueryString(url, 'duration');
-        }
-
-        if (durationFilter === 'Year') {
-            url = addOrUpdateQueryString(url, 'year', yearFilter.toString());
-        } else {
-            url = removeQueryString(url, 'year');
-        }
-
-        if (minPaceFilter != null && minPaceFilter > 0) {
-            url = addOrUpdateQueryString(url, 'minPace', minPaceFilter.toString());
-        } else {
-            url = removeQueryString(url, 'minPace');
-        }
-
-        if (maxPaceFilter != null && maxPaceFilter > 0) {
-            url = addOrUpdateQueryString(url, 'maxPace', maxPaceFilter.toString());
-        } else {
-            url = removeQueryString(url, 'maxPace');
-        }
-
-        return url;
-    };
-
-    const refetchAsync = function() {
-        if (timeoutKey != null) {
-            clearTimeout(timeoutKey)
-        }
-
-        timeoutKey = setTimeout(() => {
-            setActivities(undefined);
-        }, 500);        
-    };
-
-    useEffect(() => {
-        if (activities != null || isLoading) {
+    useEffect(() => {        
+        if (filters === undefined) {
             return;
         }
 
-        setIsLoading(true);
-        setMessage("Loading activities ...");
+        setLoadingStatus(LoadingStatus.Loading);
 
-        const url = appendUrlArguments(window.location.href);
-        window.history.replaceState({}, '', url);
-
-        fetch(appendUrlArguments('/api/Intervals/'))
+        fetch(getUrlWithFilters('/api/intervals/', filters))
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setActivities(data.intervals);
@@ -172,47 +88,21 @@ const IntervalsPage: React.FC = () => {
                     (item) => item.label
                 ).reverse());
 
-                setIsLoading(false);
-                setMessage(undefined);
+                setLoadingStatus(LoadingStatus.None);
             })
-            .catch(error => {
+            .catch(_ => {
                 setActivities([])
-                setIsLoading(false);
-                setMessage("Failed to load activities.");
+                setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities, isLoading]);
+    }, [filters]);
 
     return (
-        <div>
-            <StackContainer>
-                <Dropdown disabled={isLoading} defaultValue={typeFilter} onChange={(v) => { setTypeFilter(v.currentTarget.value); setActivities(undefined); }}>
-                    <option value="All">All activities</option>
-                    <option value="Run">Run</option>
-                    <option value="Ride">Ride</option>
-                    <option value="NordicSki">NordicSki</option>
-                </Dropdown>
-                <Dropdown disabled={isLoading} defaultValue={durationFilter} onChange={(v) => { setDurationFilter(v.currentTarget.value); setActivities(undefined); }}>
-                    <option value="LastMonths">Last 20 weeks</option>
-                    <option value="LastYear">Last 12 months</option>
-                    <option value="Year">Year report</option>
-                </Dropdown>
-                {durationFilter === 'Year' && 
-                    <Dropdown disabled={isLoading} defaultValue={yearFilter} onChange={(v) => { setYearFilter(parseInt(v.currentTarget.value, 10)); setActivities(undefined); }}>
-                        {new Array(10).fill(0).map((item, index) => {
-                            const year = new Date().getFullYear() - index;
-                            return (<option key={year} value={year}>{year}</option>);
-                        })}
-                    </Dropdown>
-                }
-                <DropdownLabel>Pace</DropdownLabel>
-                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='4.30' defaultValue={minPaceFilter} onChange={(v) => { setMinPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
-                <Input type='number' style={{width: "80px"}} step='0.1' placeholder='3.30' defaultValue={maxPaceFilter} onChange={(v) => { setMaxPaceFilter(v.currentTarget.value.length > 0 ? parseFloat(v.currentTarget.value.replace(',', '.').replace(':', '.')) : undefined); refetchAsync(); }} />
-                {minPaceFilter && maxPaceFilter && minPaceFilter <= maxPaceFilter && <WarningLabel>Min/max pace is in wrong order.</WarningLabel>}                
-            </StackContainer>
-            {showLoader && <Loader message={message} />}
-            {!showLoader && 
+        <div>            
+            <ActivityFilter onChange={setFilters} />
+            <Loader status={loadingStatus} />
+            {loadingStatus === LoadingStatus.None && activities && 
                 <div>
-                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / (durationFilter === 'Last24Months' ? 2 : 1))}>
+                    <Grid columns={Math.ceil(((lactate && lactate.length > 0) ? 3 : 2) / ((lactate?.length ?? 0) > 12 ? 2 : 1))}>
                         <Box>
                             <SubHeader>Distance</SubHeader>
                             {totalDistances && totalDistances.length > 0 && 
@@ -337,7 +227,6 @@ const IntervalsPage: React.FC = () => {
                                         </EmptyThead>
                                     }
                                     <tbody>
-                                        {message && <tr><td>{message}</td></tr>}
                                         {month.activities.map(activity => (
                                             <tr key={activity.id}>
                                                 <NoWrapTd style={{ width: 125 }}>{activity.date}</NoWrapTd>

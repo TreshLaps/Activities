@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Grid, SubHeader } from '../../styles/styles';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
-import Loader from '../utils/Loader';
+import Loader, { LoadingStatus } from '../utils/Loader';
 import { SmallTable, ValueTd } from '../utils/Table';
 import { UserContext } from '../utils/UserContext';
 
@@ -37,7 +37,7 @@ const sumValues = (items: any[]) => {
 }
 
 const progressTable = (name: string, items: any[]) => (
-    <SmallTable>
+    <SmallTable key={name}>
         <thead>
             <tr>
                 <th>{name}</th>
@@ -64,32 +64,27 @@ const progressTable = (name: string, items: any[]) => (
 );
 
 const TopActivities: React.FC = () => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [message, setMessage] = useState<string>();
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [progress, setProgress] = useState<any>();
-    const showLoader = isLoading || progress == null;
 
     useEffect(() => {
-        if (progress != null || isLoading) {
+        if (progress != null) {
             return;
         }
 
-        setIsLoading(true);
-        setMessage("Loading progress ...");
+        setLoadingStatus(LoadingStatus.Loading);
 
         fetch('/api/progress/summary')
             .then(response => response.json() as Promise<any>)
             .then(data => {
                 setProgress(data);
-                setIsLoading(false);
-                setMessage(undefined);
+                setLoadingStatus(LoadingStatus.None);
             })
             .catch(_ => {
                 setProgress({})
-                setIsLoading(false);
-                setMessage("Failed to load activities.");
+                setLoadingStatus(LoadingStatus.Error);
             });
-    }, [progress, isLoading]);
+    }, [progress]);
 
     return (
         <UserContext.Consumer>
@@ -103,8 +98,8 @@ const TopActivities: React.FC = () => {
                     }
                     {user && 
                         <>
-                            {showLoader && <Loader message={message} />}
-                            {!showLoader && progress && 
+                            <Loader status={loadingStatus} />
+                            {loadingStatus === LoadingStatus.None && progress && 
                                 <>
                                     <SubHeader>Weekly summary</SubHeader>
                                     <Grid columns={3}>

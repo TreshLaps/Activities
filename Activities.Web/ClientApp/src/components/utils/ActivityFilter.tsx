@@ -22,10 +22,20 @@ export const getUrlWithFilters = (url: string, items: Filters) => {
     return url;
 };
 
+const defaultType = 'All';
+const defaultDuration = 'LastMonths';
+const defaultYear = new Date().getFullYear();
+
 const updateBrowserUrl = (items: Filters) => {
     let url = `${window.location.origin}${window.location.pathname}`;
 
     items.forEach((value, key) => {
+        if (key === "type" && value === defaultType ||
+            key === "duration" && value === defaultDuration ||
+            key === "year" && value === defaultYear) {
+            return;
+        }
+        
         url = addOrUpdateQueryString(url, key, value.toString());
     });
 
@@ -36,9 +46,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
     const { isLoading, onChange } = props;
     
     const { type, duration, year } = queryString.parse(window.location.search);
-    const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : 'All');
-    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : 'LastMonths');
-    const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : new Date().getFullYear());
+    const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : defaultType);
+    const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : defaultDuration);
+    const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : defaultYear);
 
     useEffect(() => {
         const items = new Map<string, string | number>();

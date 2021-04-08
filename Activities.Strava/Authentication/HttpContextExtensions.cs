@@ -35,7 +35,9 @@ namespace Activities.Strava.Authentication
             return new StravaAthleteToken
             {
                 AthleteId = Convert.ToInt64(httpContext.User.Claims.First(claim => claim.Type == ClaimTypes.NameIdentifier).Value),
-                AccessToken = await httpContext.GetTokenAsync("access_token")
+                AccessToken = await httpContext.GetTokenAsync("access_token"),
+                FullName = $"{httpContext.User.Claims.First(claim => claim.Type == ClaimTypes.GivenName).Value} {httpContext.User.Claims.First(claim => claim.Type == ClaimTypes.Surname).Value}",
+                ProfileImageUrl = httpContext.User.Claims.First(claim => claim.Type == "urn:strava:profile-medium").Value
             };
         }
     }

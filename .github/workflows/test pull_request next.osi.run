@@ -1,8 +1,6 @@
-name: .NET
+name: Testing all push and pull requests on https://next.osi.run
 
-on:
-  push:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
   build:

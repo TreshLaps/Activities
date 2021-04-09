@@ -23,7 +23,7 @@ const ProgressPage: React.FC = () => {
         setProgress(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setProgress({});
         setLoadingStatus(LoadingStatus.Error);
       });

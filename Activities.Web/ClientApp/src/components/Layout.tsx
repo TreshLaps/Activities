@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { UserContext, User } from '../components/utils/UserContext';
+import { UserContext, User } from './utils/UserContext';
+
 const LayoutContainer = styled.div`
   margin: 0 auto;
   max-width: 1400px;
@@ -66,12 +67,12 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
       return;
     }
 
-    fetch(`/api/Authentication/user/`)
+    fetch('/api/Authentication/user/')
       .then((response) => response.json() as Promise<User>)
       .then((data) => {
         setUser(data);
       })
-      .catch((_) => setUser(null));
+      .catch(() => setUser(null));
   });
 
   return (

@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { getKmString, getPaceString, getTimeString, round } from '../utils/Formatters';
+import {
+  getKmString, getPaceString, getTimeString, round,
+} from './Formatters';
 
 export const EmptyThead = styled.thead``;
 
@@ -160,6 +162,7 @@ export const ValueTd = (item: any) => {
       value = parseInt(item.value, 10).toString();
       color = '#ff1700';
       break;
+    default:
   }
 
   return (

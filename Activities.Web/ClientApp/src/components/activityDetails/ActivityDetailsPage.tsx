@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
+import styled from 'styled-components';
 import { Container } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { useParams } from 'react-router';
-import { getDateString, getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import {
+  getDateString, getKmString, getPaceString, getTimeString,
+} from '../utils/Formatters';
 import LapsChart, { Lap } from './LapsChart';
-import styled from 'styled-components';
 
 const ActionButton = styled.a`
   padding: 10px;
@@ -111,7 +113,7 @@ const ActivityDetailsPage: React.FC = () => {
         setActivity(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setActivity(undefined);
         setLoadingStatus(LoadingStatus.Error);
       });
@@ -124,7 +126,7 @@ const ActivityDetailsPage: React.FC = () => {
         setActivity(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setActivity(undefined);
         setLoadingStatus(LoadingStatus.Error);
       });

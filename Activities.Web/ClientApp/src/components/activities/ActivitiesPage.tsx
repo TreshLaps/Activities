@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { TableContainer } from '../../styles/styles';
 import { Table, ValueTd } from '../utils/Table';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { NavLink } from 'react-router-dom';
 
 interface Activity {
   id: number;
@@ -24,13 +24,13 @@ const ActivitiesPage: React.FC = () => {
 
     setLoadingStatus(LoadingStatus.Loading);
 
-    fetch(`/api/activities/`)
+    fetch('/api/activities/')
       .then((response) => response.json() as Promise<Activity[]>)
       .then((data) => {
         setActivities(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setActivities([]);
         setLoadingStatus(LoadingStatus.Error);
       });
@@ -52,21 +52,19 @@ const ActivitiesPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {activities?.map((activity) => {
-                return (
-                  <tr key={activity.id}>
-                    <td>
-                      <div style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>
-                        <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
-                      </div>
-                    </td>
-                    <td>{activity.type}</td>
-                    {ValueTd(activity.distance)}
-                    {ValueTd(activity.averageSpeed)}
-                    <td>{activity.startDate}</td>
-                  </tr>
-                );
-              })}
+              {activities?.map((activity) => (
+                <tr key={activity.id}>
+                  <td>
+                    <div style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>
+                      <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
+                    </div>
+                  </td>
+                  <td>{activity.type}</td>
+                  {ValueTd(activity.distance)}
+                  {ValueTd(activity.averageSpeed)}
+                  <td>{activity.startDate}</td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </TableContainer>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getPaceString, getTimeString } from '../utils/Formatters';
+import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Chart, { getChartData, axisTypes } from '../charts/Chart';
 import { Hint, LabelSeries, VerticalBarSeries } from 'react-vis';
 
@@ -45,19 +45,24 @@ const LapsChart: React.FC<{laps: Lap[]}> = ({ laps }) => {
         setIntervalLaps(getChartData<Lap>(laps.filter(l => l.isInterval), 
             (item) => item.lapIndex, 
             (item) => item.averageSpeed,
-            (item) => `${item.name}\n${getPaceString(item.averageSpeed, true)}\n${item.lapIndex}`
+            (item) => {
+                return `Distance: ${getKmString(item.distance)}
+                        Moving time: ${getTimeString(item.movingTime)}
+                        Pace: ${getPaceString(item.averageSpeed, true)}
+                        ${item.lactate ? `Lactate: ${item.lactate}` : ''}`
+            }
         ));
 
         setBreakLaps(getChartData<Lap>(laps.filter(l => !l.isInterval), 
             (item) => item.lapIndex, 
             (item) => item.averageSpeed,
-            (item) => `${item.name}\n${getPaceString(item.averageSpeed, true)}\n${item.lapIndex}`
+            (item) => `Distance: ${getKmString(item.distance)}\nMoving time: ${getTimeString(item.movingTime)}\nPace: ${getPaceString(item.averageSpeed, true)}`
         ));
 
         setLabels(getChartData<Lap>(laps,
             (item) => item.lapIndex, 
             (item) => item.averageSpeed,
-            (item) => item.isInterval ? `${getPaceString(item.averageSpeed, true)}` : getTimeString(item.elapsedTime)
+            (item) => item.isInterval ? `${getPaceString(item.averageSpeed, true)} ${item.lactate ? "💉" : ""}` : getTimeString(item.elapsedTime)
         ));
 
         var sortedBySpeed = laps.sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
@@ -68,8 +73,9 @@ const LapsChart: React.FC<{laps: Lap[]}> = ({ laps }) => {
 
     return (
         <div>
-            {laps && laps.length > 1 && <Chart stack={true} height={400} xDomain={hasIntervalLaps ? [1.5, laps.length - 0.5] : [1, laps.length]} xAxisType={axisTypes.Integer} yDomain={[slowSpeed, fastSpeed]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond)}>
+            {labels && labels.length > 1 && <Chart stack={true} height={400} xDomain={hasIntervalLaps ? [1.5, laps.length - 0.5] : [1, laps.length]} xAxisType={axisTypes.Integer} yDomain={[slowSpeed, fastSpeed]} yTickFormat={distancePerSecond => getPaceString(distancePerSecond)}>
                 <VerticalBarSeries
+                    animation
                     barWidth={hasIntervalLaps ? 0.5 : 1}                                            
                     data={breakLaps}
                     fill="#bdc9ce"
@@ -79,6 +85,7 @@ const LapsChart: React.FC<{laps: Lap[]}> = ({ laps }) => {
                     onValueClick={(value) => { window.location.hash = value.x.toString(); }}
                 />
                 <VerticalBarSeries
+                    animation
                     barWidth={0.5}                                            
                     data={intervalLaps}
                     fill="#4c8eff"

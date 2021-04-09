@@ -27,17 +27,24 @@ namespace Activities.Strava.Endpoints
         /// <param name="id">Activity Id</param>
         public async Task<DetailedActivity> GetActivity(string accessToken, long id)
         {
-            var activity = await _cachingService.GetOrAdd(
-                $"DetailedActivity:{id}",
-                TimeSpan.MaxValue,
-                () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
-
-            if (activity.TryTagIntervalLaps() | activity.TryParseLactatMeasurements())
+            try
             {
-                await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+                var activity = await _cachingService.GetOrAdd(
+                    $"DetailedActivity:{id}",
+                    TimeSpan.MaxValue,
+                    () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
+
+                if (activity.TryTagIntervalLaps() | activity.TryParseLactatMeasurements())
+                {
+                    await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+                }
+
+                return activity;
             }
-                    
-            return activity;
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>

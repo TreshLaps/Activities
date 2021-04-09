@@ -36,6 +36,7 @@ namespace Activities.Web.Pages.Intervals
 
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
             var intervalActivities = detailedActivities
+                .Where(activity => activity != null)
                 .Select(
                     activity => new
                     {

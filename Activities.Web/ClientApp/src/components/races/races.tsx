@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
 import { getDateString, getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Loader, { LoadingStatus } from '../utils/Loader';
@@ -52,7 +53,7 @@ const RacesPage: React.FC = () => {
                     <tbody>
                         {activities?.map(activity => (
                             <tr key={activity.id}>
-                                <td><div style={{fontWeight: 500}}><a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a></div></td>
+                                <td><div style={{fontWeight: 500}}><NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink></div></td>
                                 <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>
                                 <NoWrapTd>{getPaceString(activity.averageSpeed)}</NoWrapTd>
                                 <NoWrapTd>{getTimeString(activity.movingTime)}</NoWrapTd>

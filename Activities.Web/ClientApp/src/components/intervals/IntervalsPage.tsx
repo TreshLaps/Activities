@@ -6,6 +6,7 @@ import { Box, SubHeader, Table, LapsTable, Grid, LapFactor, LapLabel, EmptyThead
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
+import { NavLink } from 'react-router-dom';
 
 interface ActivityMonth {
     date: string;
@@ -232,7 +233,7 @@ const IntervalsPage: React.FC = () => {
                                                 <NoWrapTd style={{ width: 125 }}>{activity.date}</NoWrapTd>
                                                 <td style={{ textAlign: 'left' }}>
                                                     <div style={{ fontWeight: 500 }}>
-                                                        <a href={`https://www.strava.com/activities/${activity.id}`} target="_blank" rel="noopener noreferrer">{activity.name}</a>
+                                                        <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
                                                     </div>
                                                     <div style={{fontSize: "13px"}}>{activity.description}</div>
                                                 </td>

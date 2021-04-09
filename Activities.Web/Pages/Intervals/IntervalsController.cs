@@ -34,8 +34,11 @@ namespace Activities.Web.Pages.Intervals
             var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
             var (startDate, endDate) = filterRequest.GetDateRange();
 
-            var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
+            var detailedActivities = (await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
+                .Where(activity => activity != null);
+
             var intervalActivities = detailedActivities
+                .Where(activity => activity != null)
                 .Select(
                     activity => new
                     {

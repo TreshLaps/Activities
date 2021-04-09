@@ -69,6 +69,7 @@ namespace Activities.Web.Pages.ProgressTest
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
 
             var result = detailedActivities
+                .Where(activity => activity != null)
                 .GroupByDate(groupBy, activity => activity.StartDate, startDate, endDate)
                 .Select(group =>
                 {

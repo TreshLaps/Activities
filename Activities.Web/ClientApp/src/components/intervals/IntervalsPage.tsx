@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries } from 'react-vis';
+import {
+  MarkSeries, HexbinSeries, LineSeries, Hint, VerticalBarSeries,
+} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
-import Chart, { axisTypes, getChartData } from '../charts/Chart';
+import { NavLink } from 'react-router-dom';
+import Chart, { AxisTypes, getChartData } from '../charts/Chart';
 import {
   Box,
   SubHeader,
@@ -19,7 +22,6 @@ import {
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
-import { NavLink } from 'react-router-dom';
 
 interface ActivityMonth {
   date: string;
@@ -92,10 +94,9 @@ const IntervalsPage: React.FC = () => {
             data.distances,
             (item) => item.date,
             (item) => item.intervalDistance,
-            (item) =>
-              `${item.date}\r\n- Intervals: ${item.intervalDistance} km (${Math.round(
-                (100 / (item.nonIntervalDistance + item.intervalDistance)) * item.intervalDistance,
-              )} %)`,
+            (item) => `${item.date}\r\n- Intervals: ${item.intervalDistance} km (${Math.round(
+              (100 / (item.nonIntervalDistance + item.intervalDistance)) * item.intervalDistance,
+            )} %)`,
           ).reverse(),
         );
 
@@ -128,7 +129,7 @@ const IntervalsPage: React.FC = () => {
 
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setActivities([]);
         setLoadingStatus(LoadingStatus.Error);
       });
@@ -144,7 +145,7 @@ const IntervalsPage: React.FC = () => {
             <Box>
               <SubHeader>Distance</SubHeader>
               {totalDistances && totalDistances.length > 0 && (
-                <Chart stack={true} xType="ordinal">
+                <Chart stack xType="ordinal">
                   <VerticalBarSeries
                     barWidth={0.5}
                     data={intervalDistances}
@@ -195,9 +196,7 @@ const IntervalsPage: React.FC = () => {
                   yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
                 >
                   <VerticalBarSeries
-                    getY={(d) => {
-                      return d.y < 3 ? 3 : d.y;
-                    }}
+                    getY={(d) => (d.y < 3 ? 3 : d.y)}
                     barWidth={0.6}
                     data={shortPaces}
                     fill="#d4ce73"
@@ -209,9 +208,7 @@ const IntervalsPage: React.FC = () => {
                     }}
                   />
                   <VerticalBarSeries
-                    getY={(d) => {
-                      return d.y < 3 ? 3 : d.y;
-                    }}
+                    getY={(d) => (d.y < 3 ? 3 : d.y)}
                     barWidth={0.9}
                     data={mediumPaces}
                     fill="#448944"
@@ -223,9 +220,7 @@ const IntervalsPage: React.FC = () => {
                     }}
                   />
                   <VerticalBarSeries
-                    getY={(d) => {
-                      return d.y < 3 ? 3 : d.y;
-                    }}
+                    getY={(d) => (d.y < 3 ? 3 : d.y)}
                     barWidth={0.55}
                     data={longPaces}
                     fill="#afcbfb"
@@ -258,7 +253,7 @@ const IntervalsPage: React.FC = () => {
             {lactate && lactate.length > 0 && (
               <Box>
                 <SubHeader>Lactate</SubHeader>
-                <Chart xAxisType={axisTypes.Date} yDomain={[0, 5]}>
+                <Chart xAxisType={AxisTypes.Date} yDomain={[0, 5]}>
                   <HexbinSeries
                     sizeHexagonsWithCount
                     data={lactateAll}

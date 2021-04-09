@@ -94,7 +94,7 @@ const TopActivities: React.FC = () => {
         setProgress(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setProgress({});
         setLoadingStatus(LoadingStatus.Error);
       });
@@ -127,28 +127,26 @@ const TopActivities: React.FC = () => {
   );
 };
 
-const HomePage: React.FC = () => {
-  return (
-    <UserContext.Consumer>
-      {(user) => (
+const HomePage: React.FC = () => (
+  <UserContext.Consumer>
+    {(user) => (
+      <>
+        {user === null && (
+        <CenterContainer>
+          <p>Welcome! Sign in to proceed.</p>
+          <SignInButton href="/signin">Sign in</SignInButton>
+        </CenterContainer>
+        )}
+        {user && (
         <>
-          {user === null && (
-            <CenterContainer>
-              <p>Welcome! Sign in to proceed.</p>
-              <SignInButton href="/signin">Sign in</SignInButton>
-            </CenterContainer>
-          )}
-          {user && (
-            <>
-              <TopActivities />
-              <SubHeader>Latest activities</SubHeader>
-              <p>...</p>
-            </>
-          )}
+          <TopActivities />
+          <SubHeader>Latest activities</SubHeader>
+          <p>...</p>
         </>
-      )}
-    </UserContext.Consumer>
-  );
-};
+        )}
+      </>
+    )}
+  </UserContext.Consumer>
+);
 
 export default HomePage;

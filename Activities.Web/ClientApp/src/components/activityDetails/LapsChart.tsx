@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
-import Chart, { getChartData, axisTypes } from '../charts/Chart';
 import { Hint, LabelSeries, VerticalBarSeries } from 'react-vis';
+import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import Chart, { getChartData, AxisTypes } from '../charts/Chart';
 
 export interface Lap {
   averageCadence: number;
@@ -47,12 +47,10 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
         laps.filter((l) => l.isInterval),
         (item) => item.lapIndex,
         (item) => item.averageSpeed,
-        (item) => {
-          return `Distance: ${getKmString(item.distance)}
+        (item) => `Distance: ${getKmString(item.distance)}
                         Moving time: ${getTimeString(item.movingTime)}
                         Pace: ${getPaceString(item.averageSpeed, true)}
-                        ${item.lactate ? `Lactate: ${item.lactate}` : ''}`;
-        },
+                        ${item.lactate ? `Lactate: ${item.lactate}` : ''}`,
       ),
     );
 
@@ -61,10 +59,9 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
         laps.filter((l) => !l.isInterval),
         (item) => item.lapIndex,
         (item) => item.averageSpeed,
-        (item) =>
-          `Distance: ${getKmString(item.distance)}\nMoving time: ${getTimeString(
-            item.movingTime,
-          )}\nPace: ${getPaceString(item.averageSpeed, true)}`,
+        (item) => `Distance: ${getKmString(item.distance)}\nMoving time: ${getTimeString(
+          item.movingTime,
+        )}\nPace: ${getPaceString(item.averageSpeed, true)}`,
       ),
     );
 
@@ -73,14 +70,13 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
         laps,
         (item) => item.lapIndex,
         (item) => item.averageSpeed,
-        (item) =>
-          item.isInterval
-            ? `${getPaceString(item.averageSpeed, true)} ${item.lactate ? '💉' : ''}`
-            : getTimeString(item.elapsedTime),
+        (item) => (item.isInterval
+          ? `${getPaceString(item.averageSpeed, true)} ${item.lactate ? '💉' : ''}`
+          : getTimeString(item.elapsedTime)),
       ),
     );
 
-    var sortedBySpeed = laps.sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
+    const sortedBySpeed = laps.sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
     setSlowSpeed(sortedBySpeed[0].averageSpeed - padding);
     setFastSpeed(sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + padding);
   }, [laps]);
@@ -89,10 +85,10 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
     <div>
       {labels && labels.length > 1 && (
         <Chart
-          stack={true}
+          stack
           height={400}
           xDomain={hasIntervalLaps ? [1.5, laps.length - 0.5] : [1, laps.length]}
-          xAxisType={axisTypes.Integer}
+          xAxisType={AxisTypes.Integer}
           yDomain={[slowSpeed, fastSpeed]}
           yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
         >
@@ -120,7 +116,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
               window.location.hash = value.x.toString();
             }}
           />
-          <LabelSeries animation data={labels} labelAnchorX={'middle'} labelAnchorY="top" style={{ fontSize: 15 }} />
+          <LabelSeries animation data={labels} labelAnchorX="middle" labelAnchorY="top" style={{ fontSize: 15 }} />
           {hint?.value.label != null && hint?.owner === 'pace' && (
             <Hint value={hint.value}>
               <div

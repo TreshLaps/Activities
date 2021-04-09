@@ -31,9 +31,9 @@ const updateBrowserUrl = (items: Filters) => {
 
   items.forEach((value, key) => {
     if (
-      (key === 'type' && value === defaultType) ||
-      (key === 'duration' && value === defaultDuration) ||
-      (key === 'year' && value === defaultYear)
+      (key === 'type' && value === defaultType)
+      || (key === 'duration' && value === defaultDuration)
+      || (key === 'year' && value === defaultYear)
     ) {
       return;
     }
@@ -101,10 +101,10 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
           }}
         >
           {new Array(10).fill(0).map((_, index) => {
-            const year = new Date().getFullYear() - index;
+            const yearOption = new Date().getFullYear() - index;
             return (
-              <option key={year} value={year}>
-                {year}
+              <option key={yearOption} value={yearOption}>
+                {yearOption}
               </option>
             );
           })}

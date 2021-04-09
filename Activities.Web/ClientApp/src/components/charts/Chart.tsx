@@ -1,9 +1,11 @@
 import React from 'react';
 import { AutoSizer } from 'react-virtualized';
-import { XYPlot, XAxis, YAxis, HorizontalGridLines, RVTickFormat } from 'react-vis';
+import {
+  XYPlot, XAxis, YAxis, HorizontalGridLines, RVTickFormat,
+} from 'react-vis';
 import '../../../node_modules/react-vis/dist/style.css';
 
-export enum axisTypes {
+export enum AxisTypes {
   Number,
   Integer,
   Date,
@@ -13,7 +15,7 @@ export enum axisTypes {
 interface ChartProps {
   children: any;
   height?: number;
-  xAxisType?: axisTypes;
+  xAxisType?: AxisTypes;
   xType?: string;
   xDomain?: any;
   yDomain?: any;
@@ -22,12 +24,14 @@ interface ChartProps {
 }
 
 const Chart: React.FC<ChartProps> = (props) => {
-  const { children, height, xAxisType, stack, xDomain, yDomain, xType, yTickFormat } = props;
-  const hideXAxis = xAxisType === undefined || xAxisType === axisTypes.None;
+  const {
+    children, height, xAxisType, stack, xDomain, yDomain, xType, yTickFormat,
+  } = props;
+  const hideXAxis = xAxisType === undefined || xAxisType === AxisTypes.None;
 
   return (
     <div style={{ margin: '-10px', marginTop: '0px' }}>
-      <AutoSizer disableHeight={true}>
+      <AutoSizer disableHeight>
         {(size) => (
           <XYPlot
             height={height || 200}
@@ -36,15 +40,17 @@ const Chart: React.FC<ChartProps> = (props) => {
             xDomain={xDomain}
             yDomain={yDomain}
             xType={xType}
-            margin={{ left: 40, right: 10, top: 10, bottom: hideXAxis ? 10 : 40 }}
+            margin={{
+              left: 40, right: 10, top: 10, bottom: hideXAxis ? 10 : 40,
+            }}
           >
             <HorizontalGridLines />
             <YAxis tickFormat={yTickFormat} />
-            {xAxisType === axisTypes.Date && (
+            {xAxisType === AxisTypes.Date && (
               <XAxis tickFormat={(v) => new Date(v).toUTCString().substr(8, 8)} tickLabelAngle={30} tickPadding={30} />
             )}
-            {xAxisType === axisTypes.Number && <XAxis tickLabelAngle={30} tickPadding={30} />}
-            {xAxisType === axisTypes.Integer && <XAxis tickFormat={(val) => (Math.round(val) === val ? val : '')} />}
+            {xAxisType === AxisTypes.Number && <XAxis tickLabelAngle={30} tickPadding={30} />}
+            {xAxisType === AxisTypes.Integer && <XAxis tickFormat={(val) => (Math.round(val) === val ? val : '')} />}
             {hideXAxis && <XAxis hideTicks />}
             {children}
           </XYPlot>
@@ -60,13 +66,11 @@ export function getChartData<T>(
   getY: (item: T) => Number,
   getLabel?: (item: T) => String,
 ) {
-  return data.map((item) => {
-    return {
-      x: getX(item),
-      y: getY(item),
-      label: getLabel?.(item),
-    };
-  });
+  return data.map((item) => ({
+    x: getX(item),
+    y: getY(item),
+    label: getLabel?.(item),
+  }));
 }
 
 export default Chart;

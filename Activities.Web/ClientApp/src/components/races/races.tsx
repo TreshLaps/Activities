@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
-import { getDateString, getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import {
+  getDateString, getKmString, getPaceString, getTimeString,
+} from '../utils/Formatters';
 import Loader, { LoadingStatus } from '../utils/Loader';
 
 interface Activity {
@@ -24,13 +26,13 @@ const RacesPage: React.FC = () => {
 
     setLoadingStatus(LoadingStatus.Loading);
 
-    fetch(`/api/races/`)
+    fetch('/api/races/')
       .then((response) => response.json() as Promise<Activity[]>)
       .then((data) => {
         setActivities(data);
         setLoadingStatus(LoadingStatus.None);
       })
-      .catch((_) => {
+      .catch(() => {
         setActivities([]);
         setLoadingStatus(LoadingStatus.Error);
       });

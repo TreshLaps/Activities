@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-31_5";
+        private const string Version = "2021-04-09";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -99,8 +99,9 @@ namespace Activities.Strava.Activities
 
                 var isCloseInSpeed = GetSpeedDifference(compareLap, laps[i]) < threshold;
                 var isFasterThan = laps[i].AverageSpeed >= compareLap.AverageSpeed;
+                var isCloseInDuration = compareLap.MovingTime < 60 || Math.Abs(laps[i].MovingTime - compareLap.MovingTime) < compareLap.MovingTime * 2;
 
-                if (isCloseInSpeed || isFasterThan)
+                if ((isCloseInSpeed || isFasterThan) && isCloseInDuration)
                 {
                     result.Add((laps[i], i));
                 }

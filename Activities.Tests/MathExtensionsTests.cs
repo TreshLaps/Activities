@@ -19,7 +19,7 @@ namespace Activities.Tests
         {
             var metersPerSecond = pace.ToMetersPerSecond();
             var paceString = metersPerSecond.ToPaceString().Replace(":", ".");
-            Assert.AreEqual(pace.ToString("0.00", CultureInfo.InvariantCulture) + " /km", paceString);
+            Assert.AreEqual(pace.ToString("0.00", CultureInfo.InvariantCulture), paceString);
         }
 
         [TestCase("2021-03-31", "2021-03-29")]

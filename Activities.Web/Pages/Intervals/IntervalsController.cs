@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
+using Activities.Strava.Activities;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
 using Activities.Strava.Endpoints.Models;
@@ -23,47 +24,15 @@ namespace Activities.Web.Pages.Intervals
         }
 
         [HttpGet]
-        public async Task<dynamic> Get(string type = "Run", string duration = "LastMonths", int year = 0, double? minPace = null, double? maxPace = null, bool outliersFilter = false)
+        public async Task<dynamic> Get([FromQuery] FilterRequest filterRequest)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-            var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId)).AsEnumerable();
-            GroupKey groupKey;
-            DateTime startDate;
-            DateTime endDate;
-
-            if (type != null && type != "All")
-            {
-                activities = activities.Where(activity => activity.Type == type);
-            }
-
-            if (duration == "LastMonths")
-            {
-                startDate = DateTime.Today;
-                endDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 20);
-                activities = activities.Where(activity => activity.StartDate >= endDate);
-                groupKey = GroupKey.Week;
-            }
-            else if (duration == "LastYear")
-            {
-                startDate = DateTime.Today;
-                endDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1);
-                activities = activities.Where(activity => activity.StartDate >= endDate);
-                groupKey = GroupKey.Month;
-            }
-            else if (duration == "Year")
-            {
-                startDate =new DateTime(year + 1, 01, 01).AddDays(-1);
-                endDate = new DateTime(year, 01, 01);
-                activities = activities.Where(activity => activity.StartDate >= endDate);
-                groupKey = GroupKey.Month;
-            }
-            else
-            {
-                startDate = DateTime.Today;
-                endDate = new DateTime(DateTime.Today.Year, 01, 01);
-                activities = activities.Where(activity => activity.StartDate >= endDate);
-                groupKey = GroupKey.Month;
-            }
+            var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
+                .Where(filterRequest.Keep)
+                .ToList();
+            
+            var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
+            var (startDate, endDate) = filterRequest.GetDateRange();
 
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
             var intervalActivities = detailedActivities
@@ -72,7 +41,7 @@ namespace Activities.Web.Pages.Intervals
                     {
                         Activity = activity,
                         IntervalLaps = activity.Laps?
-                            .Where(lap => IsIntervalWithinPace(lap, minPace, maxPace))
+                            .Where(lap => lap.IsInterval)
                             .ToList()
                     })
                 .Where(activity => activity.IntervalLaps?.Any() == true)
@@ -157,7 +126,7 @@ namespace Activities.Web.Pages.Intervals
                 .Select(month =>
                 {
                     var intervalsForMonth = intervalGroups[month.Key];
-                    var intervalDistance = intervalsForMonth == null ? 0.0 : Math.Round(intervalsForMonth.Where(activity => activity.IntervalLaps != null).Sum(activity => activity.IntervalLaps.Where(lap => IsIntervalWithinPace(lap, minPace, maxPace)).Sum(lap => lap.Distance)) / 1000 , 2);
+                    var intervalDistance = intervalsForMonth == null ? 0.0 : Math.Round(intervalsForMonth.Where(activity => activity.IntervalLaps != null).Sum(activity => activity.IntervalLaps.Sum(lap => lap.Distance)) / 1000 , 2);
                     
                     return new
                     {

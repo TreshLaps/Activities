@@ -9,10 +9,6 @@ on:
 jobs:
   build:
 
-
-jobs:
-  build:
-
     runs-on: [ next ]
     
     steps:

@@ -35,12 +35,8 @@ namespace Activities.Strava.Activities
                             distance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
                             elapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
                             pace = new ItemValue(intervalLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
-                            
-                            var lapHeartrate = intervalLaps.Where(lap => lap.AverageHeartrate > 0).Select(lap => lap.AverageHeartrate).ToList();
-                            heartrate = lapHeartrate.Any() ? new ItemValue(lapHeartrate.Average(), ItemValueType.Heartrate) : null;
-
-                            var lapLactate = intervalLaps.Where(lap => lap.Lactate > 0).Select(lap => lap.Lactate.Value).ToList();
-                            lactate = lapLactate.Any() ? new ItemValue(lapLactate.Average(), ItemValueType.Number) : null;
+                            heartrate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate), ItemValueType.Heartrate);
+                            lactate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate), ItemValueType.Number);
                         }
                     }
 

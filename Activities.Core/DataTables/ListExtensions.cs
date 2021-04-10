@@ -32,5 +32,27 @@ namespace Activities.Core.DataTables
                 property.Factor = Math.Round(1.0 / (maxValue + valueOffset) * (property.Value + valueOffset), 2);
             }
         }
+
+        public static double? AverageOrNull<T>(this IEnumerable<T> items, Func<T, double?> selector)
+        {
+            var values = items
+                .Select(selector)
+                .Where(value => value != null)
+                .Cast<double>()
+                .ToList();
+
+            return values.Any() ? values.Average(): null;
+        }
+
+        public static double? SumOrNull<T>(this IEnumerable<T> items, Func<T, double?> selector)
+        {
+            var values = items
+                .Select(selector)
+                .Where(value => value != null)
+                .Cast<double>()
+                .ToList();
+
+            return values.Any() ? values.Sum(): null;
+        }
     }
 }

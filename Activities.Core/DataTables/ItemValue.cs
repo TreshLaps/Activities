@@ -11,6 +11,11 @@
             Value = value;
             Type = type;
         }
+
+        public static ItemValue TryCreate(double? value, ItemValueType type)
+        {
+            return value.HasValue ? new ItemValue(value.Value, type) : null;
+        }
     }
 
     public enum ItemValueType

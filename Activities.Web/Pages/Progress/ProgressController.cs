@@ -83,25 +83,15 @@ namespace Activities.Web.Pages.ProgressTest
                         };
                     }
                     
-                    var heartrates = group.Value
-                        .Where(item => item.Heartrate != null)
-                        .Select(item => item.Heartrate.Value)
-                        .ToList();
-                    
-                    var lactates = group.Value
-                        .Where(item => item.Lactate != null)
-                        .Select(item => item.Lactate.Value)
-                        .ToList();
-                    
                     return new ProgressResultItem
                     {
                         Name = group.Key,
                         ActivityCount = group.Value.Count,
-                        Distance = new ItemValue(group.Value.Sum(item => item.Distance.Value), ItemValueType.DistanceInMeters),
-                        ElapsedTime = new ItemValue(group.Value.Sum(item => item.ElapsedTime.Value), ItemValueType.TimeInSeconds),
-                        Pace = new ItemValue(group.Value.Average(item => item.Pace.Value), ItemValueType.MetersPerSecond),
-                        Heartrate = heartrates.Any() ? new ItemValue(heartrates.Average(), ItemValueType.Heartrate) : null,
-                        Lactate = lactates.Any() ? new ItemValue(lactates.Average(), ItemValueType.Number) : null,
+                        Distance = ItemValue.TryCreate(group.Value.Where(item => item.Distance != null).SumOrNull(activity => activity.Distance?.Value), ItemValueType.DistanceInMeters),
+                        ElapsedTime = ItemValue.TryCreate(group.Value.Where(item => item.ElapsedTime != null).SumOrNull(activity => activity.ElapsedTime?.Value), ItemValueType.TimeInSeconds),
+                        Pace = ItemValue.TryCreate(group.Value.Where(item => item.Pace != null).AverageOrNull(activity => activity.Pace?.Value), ItemValueType.MetersPerSecond),
+                        Heartrate = ItemValue.TryCreate(group.Value.Where(item => item.Heartrate != null).AverageOrNull(activity => activity.Heartrate?.Value), ItemValueType.Heartrate),
+                        Lactate = ItemValue.TryCreate(group.Value.Where(item => item.Lactate != null).AverageOrNull(activity => activity.Lactate?.Value), ItemValueType.Number)
                     };
                 })
                 .ToList();

@@ -1,75 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import '../../../node_modules/react-vis/dist/style.css';
 import { TableContainer } from '../../styles/styles';
-import { Table, ValueTd } from '../utils/Table';
 import Loader, { LoadingStatus } from '../utils/Loader';
+import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
+import { EmptyThead, Table } from '../utils/Table';
+import ActivityTr, { Activity } from '../utils/ActivityTr';
 
-interface Activity {
-  id: number;
-  type: string;
+interface ActivityGroup {
   name: string;
-  startDate: string;
-  distance: number;
-  averageSpeed: number;
+  items: Activity[];
 }
 
 const ActivitiesPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
-  const [activities, setActivities] = useState<Activity[]>();
+  const [filters, setFilters] = useState<Filters>();
+  const [activities, setActivities] = useState<ActivityGroup[]>();
 
   useEffect(() => {
-    if (activities != null) {
+    if (filters === undefined) {
       return;
     }
 
     setLoadingStatus(LoadingStatus.Loading);
 
-    fetch('/api/activities/')
-      .then((response) => response.json() as Promise<Activity[]>)
+    fetch(getUrlWithFilters('/api/activities/', filters))
+      .then((response) => response.json() as Promise<any>)
       .then((data) => {
-        setActivities(data);
+        setActivities(data.activities);
         setLoadingStatus(LoadingStatus.None);
       })
       .catch(() => {
         setActivities([]);
         setLoadingStatus(LoadingStatus.Error);
       });
-  }, [activities]);
+  }, [filters]);
+
+  const showLactate = (activities
+    && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
 
   return (
-    <>
+    <div>
+      <ActivityFilter onChange={setFilters} />
       <Loader status={loadingStatus} />
       {loadingStatus === LoadingStatus.None && activities && (
-        <TableContainer>
-          <Table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Distance</th>
-                <th>Speed</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activities?.map((activity) => (
-                <tr key={activity.id}>
-                  <td>
-                    <div style={{ fontWeight: 500, whiteSpace: 'pre-wrap' }}>
-                      <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
-                    </div>
-                  </td>
-                  <td>{activity.type}</td>
-                  {ValueTd(activity.distance)}
-                  {ValueTd(activity.averageSpeed)}
-                  <td>{activity.startDate}</td>
-                </tr>
+        <div>
+          <TableContainer>
+            <Table>
+              {activities?.map((group) => (
+                <React.Fragment key={group.name}>
+                  {group.items.length > 0 && (
+                    <thead>
+                      <tr>
+                        <th colSpan={2} id={group.name}>{group.name}</th>
+                        <th>Distance</th>
+                        <th>Time</th>
+                        <th>Pace</th>
+                        <th>HR</th>
+                        {showLactate && <th>Lactate</th>}
+                      </tr>
+                    </thead>
+                  )}
+                  {group.items.length === 0 && (
+                    <EmptyThead>
+                      <tr>
+                        <th colSpan={(showLactate ? 7 : 6)} id={group.name}>{group.name}</th>
+                      </tr>
+                    </EmptyThead>
+                  )}
+                  <tbody>
+                    {group.items.map((activity) => (
+                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} />
+                    ))}
+                  </tbody>
+                </React.Fragment>
               ))}
-            </tbody>
-          </Table>
-        </TableContainer>
+            </Table>
+          </TableContainer>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints.Models
@@ -199,5 +200,30 @@ namespace Activities.Strava.Endpoints.Models
 
         [JsonProperty("available_zones")]
         public List<string> AvailableZones { get; set; }
+
+        public double? AverageLactate
+        {
+            get
+            {
+                var items = new List<double>();
+
+                if (Lactate > 0)
+                {
+                    items.Add(Lactate.Value);
+                }
+
+                if (Laps != null)
+                {
+                    items.AddRange(Laps.Where(lap => lap.Lactate.HasValue).Select(lap => lap.Lactate.Value));
+                }
+
+                if (!items.Any())
+                {
+                    return null;
+                }
+
+                return items.Average();
+            }
+        }
     }
 }

@@ -18,9 +18,16 @@ export const Box = styled(Container)`
 export const StackContainer = styled(Container)`
   display: flex;
   flex-wrap: wrap;
+  margin-bottom: 0;
 
   & > * {
     margin-right: 20px;
+    margin-bottom: 20px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 10px;
+      margin-right: 10px;
+    }
 
     &:last-child {
       margin-right: 0;
@@ -64,6 +71,10 @@ export const Grid = styled.div<{ columns: number }>`
 
 export const TableContainer = styled.div`
   overflow-x: auto;
+
+  @media (max-width: 768px) {
+    margin: 0 -10px;
+  }
 `;
 
 export const EmptyThead = styled.thead``;
@@ -136,7 +147,6 @@ export const Table = styled.table`
       white-space: pre-wrap;
       max-width: 300px;
       text-align: right;
-      vertical-align: text-top;
       padding: 10px;
 
       &:first-child {
@@ -222,7 +232,7 @@ export const LapLabel = styled.span`
 export const Dropdown = styled.select`
   border-radius: 3px;
   border: 0;
-  padding: 10px;
+  padding: 10px 15px;
   font-family: 'Roboto', sans-serif;
   font-size: 15px;
   line-height: 1;
@@ -230,12 +240,18 @@ export const Dropdown = styled.select`
   color: #000;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 11px;
+    line-height: 1;
+  }
 `;
 
 export const Input = styled.input`
   border-radius: 3px;
   border: 0;
-  padding: 10px;
+  padding: 10px 15px;
   font-family: 'Roboto', sans-serif;
   font-size: 15px;
   line-height: 1;
@@ -243,6 +259,12 @@ export const Input = styled.input`
   color: #000;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   font-weight: 500;
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    font-size: 11px;
+    line-height: 1;
+  }
 `;
 
 export const DropdownLabel = styled.label`

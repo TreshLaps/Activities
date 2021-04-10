@@ -3,8 +3,9 @@ import styled from 'styled-components';
 import { Grid, SubHeader } from '../../styles/styles';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { SmallTable, ValueTd } from '../utils/Table';
+import { SmallTable } from '../utils/Table';
 import { UserContext } from '../utils/UserContext';
+import ValueTd from '../utils/ValueTd';
 
 const CenterContainer = styled.div`
   height: 80vh;
@@ -67,10 +68,10 @@ const progressTable = (name: string, items: any[]) => (
         <tr key={item.name}>
           <td>{item.name}</td>
           <td>{item.activityCount}</td>
-          {ValueTd(item.distance)}
-          {ValueTd(item.elapsedTime)}
-          {ValueTd(item.pace)}
-          {ValueTd(item.heartrate)}
+          <ValueTd item={item.distance} />
+          <ValueTd item={item.elapsedTime} />
+          <ValueTd item={item.pace} />
+          <ValueTd item={item.heartrate} />
         </tr>
       ))}
     </tbody>

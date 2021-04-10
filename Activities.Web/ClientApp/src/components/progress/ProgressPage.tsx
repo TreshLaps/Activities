@@ -2,13 +2,24 @@ import React, { useState, useEffect } from 'react';
 import '../../../node_modules/react-vis/dist/style.css';
 import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { Table, ValueTd } from '../utils/Table';
+import { FixedWidthTable } from '../utils/Table';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
+import ValueTd, { ItemValue } from '../utils/ValueTd';
+
+interface ProgressResultItem {
+  name: string;
+  activityCount: ItemValue;
+  distance: ItemValue;
+  elapsedTime: ItemValue;
+  pace: ItemValue;
+  heartrate: ItemValue;
+  lactate: ItemValue;
+}
 
 const ProgressPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
   const [filters, setFilters] = useState<Filters>();
-  const [progress, setProgress] = useState<any>();
+  const [progress, setProgress] = useState<ProgressResultItem[]>();
 
   useEffect(() => {
     if (filters === undefined) {
@@ -18,16 +29,19 @@ const ProgressPage: React.FC = () => {
     setLoadingStatus(LoadingStatus.Loading);
 
     fetch(getUrlWithFilters('/api/progress/', filters))
-      .then((response) => response.json() as Promise<any>)
+      .then((response) => response.json() as Promise<ProgressResultItem[]>)
       .then((data) => {
         setProgress(data);
         setLoadingStatus(LoadingStatus.None);
       })
       .catch(() => {
-        setProgress({});
+        setProgress([]);
         setLoadingStatus(LoadingStatus.Error);
       });
   }, [filters]);
+
+  const showLactate = progress
+    && (progress.filter((item) => item.lactate).length > 0 || false) === true;
 
   return (
     <div>
@@ -35,16 +49,8 @@ const ProgressPage: React.FC = () => {
       <Loader status={loadingStatus} />
       {loadingStatus !== LoadingStatus.Loading && progress && (
         <TableContainer>
-          <Table>
+          <FixedWidthTable>
             <thead>
-              <tr>
-                <th colSpan={6} style={{ padding: '10px' }}>
-                  &nbsp;
-                </th>
-                <th colSpan={5} style={{ padding: '10px', borderBottom: '2px dashed black', textAlign: 'center' }}>
-                  Intervals
-                </th>
-              </tr>
               <tr>
                 <th>&nbsp;</th>
                 <th>Activities</th>
@@ -52,31 +58,23 @@ const ProgressPage: React.FC = () => {
                 <th>Time</th>
                 <th>Pace</th>
                 <th>HR</th>
-                <th>Distance</th>
-                <th>Time</th>
-                <th>Pace</th>
-                <th>HR</th>
-                <th>Lactate</th>
+                {showLactate && <th>Lactate</th>}
               </tr>
             </thead>
             <tbody>
-              {progress.map((item: any) => (
+              {progress.map((item) => (
                 <tr key={item.name}>
                   <td>{item.name}</td>
                   <td>{item.activityCount}</td>
-                  {ValueTd(item.distance)}
-                  {ValueTd(item.elapsedTime)}
-                  {ValueTd(item.pace)}
-                  {ValueTd(item.heartrate)}
-                  {ValueTd(item.intervalDistance)}
-                  {ValueTd(item.intervalElapsedTime)}
-                  {ValueTd(item.intervalPace)}
-                  {ValueTd(item.intervalHeartrate)}
-                  {ValueTd(item.lactate)}
+                  <ValueTd item={item.distance} />
+                  <ValueTd item={item.elapsedTime} />
+                  <ValueTd item={item.pace} />
+                  <ValueTd item={item.heartrate} />
+                  {showLactate && <ValueTd item={item.lactate} />}
                 </tr>
               ))}
             </tbody>
-          </Table>
+          </FixedWidthTable>
         </TableContainer>
       )}
     </div>

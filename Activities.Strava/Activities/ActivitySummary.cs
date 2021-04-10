@@ -23,7 +23,6 @@ namespace Activities.Strava.Activities
                         distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
                         elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
                         pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
-                        heartrate = new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate);
                         heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                         lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
                     }

@@ -1,6 +1,14 @@
 name: push and pull requests on https://next.osi.run
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
 
 jobs:
   build:

@@ -33,7 +33,7 @@ namespace Activities.Web.Pages.ProgressTest
                 .ToList();
 
             var (startDate, endDate) = filterRequest.GetDateRange();
-            return await GetProgress(activities, filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month, startDate, endDate);
+            return await GetProgress(activities, filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month, startDate, endDate, filterRequest.DataType);
         }
 
         [HttpGet("summary")]
@@ -63,14 +63,15 @@ namespace Activities.Web.Pages.ProgressTest
             return result;
         }
         
-        private async Task<List<ProgressResultItem>> GetProgress(IEnumerable<SummaryActivity> activities, GroupKey groupBy, DateTime startDate, DateTime endDate)
+        private async Task<List<ProgressResultItem>> GetProgress(IEnumerable<SummaryActivity> activities, GroupKey groupBy, DateTime startDate, DateTime endDate, FilterDataType dataType = FilterDataType.Activity)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var detailedActivities = await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id));
 
             var result = detailedActivities
                 .Where(activity => activity != null)
-                .GroupByDate(groupBy, activity => activity.StartDate, startDate, endDate)
+                .ToActivitySummary(dataType)
+                .GroupByDate(groupBy, activity => activity.Activity.StartDate, startDate, endDate)
                 .Select(group =>
                 {
                     if (group.Value?.Any() != true)
@@ -82,80 +83,24 @@ namespace Activities.Web.Pages.ProgressTest
                         };
                     }
                     
-                    ItemValue intervalDistance = null;
-                    ItemValue intervalPace = null;
-                    ItemValue intervalElapsedTime = null;
-                    ItemValue intervalHeartrate = null;
-                    ItemValue lactate = null;
-
-                    var intervalLaps = group.Value
-                        .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
-                        .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
-                        .ToList();
-
-                    var lactates = group.Value
-                        .Select(
-                            activity =>
-                            {
-                                if (activity.Lactate.HasValue)
-                                {
-                                    return activity.Lactate.Value;
-                                }
-
-                                var lactateLaps = activity.Laps?.Where(lap => lap.Lactate.HasValue).ToList();
-
-                                if (lactateLaps?.Any() == true)
-                                {
-                                    return lactateLaps.Average(lap => lap.Lactate);
-                                }
-
-                                return null;
-                            })
-                        .Where(lactate => lactate.HasValue)
-                        .Cast<double>()
-                        .ToList();
-
-                    if (intervalLaps.Any())
-                    {
-                        intervalDistance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
-                        intervalPace = new ItemValue(intervalLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
-                        intervalElapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
-                        intervalHeartrate = intervalLaps.Any(lap => lap.AverageHeartrate > 0)
-                            ? new ItemValue(intervalLaps.Where(lap => lap.AverageHeartrate > 0).Average(lap => lap.AverageHeartrate), ItemValueType.Heartrate)
-                            : null;
-                    }
-
-                    if (lactates.Any())
-                    {
-                        lactate = new ItemValue(lactates.Average(), ItemValueType.Number);
-                    }
-                    
                     return new ProgressResultItem
                     {
                         Name = group.Key,
                         ActivityCount = group.Value.Count,
-                        Distance = new ItemValue(group.Value.Sum(activity => activity.Distance), ItemValueType.DistanceInMeters),
-                        Pace = new ItemValue(group.Value.Average(activity => activity.AverageSpeed), ItemValueType.MetersPerSecond),
-                        ElapsedTime = new ItemValue(group.Value.Sum(activity => activity.MovingTime), ItemValueType.TimeInSeconds),
-                        Heartrate = group.Value.Any(activity => activity.AverageHeartrate > 0) ? new ItemValue(group.Value.Where(activity => activity.AverageHeartrate > 0).Average(activity => activity.AverageHeartrate), ItemValueType.Heartrate) : null,
-                        IntervalDistance = intervalDistance,
-                        IntervalPace = intervalPace,
-                        IntervalElapsedTime = intervalElapsedTime,
-                        IntervalHeartrate = intervalHeartrate,
-                        Lactate = lactate
+                        Distance = ItemValue.TryCreate(group.Value.Where(item => item.Distance != null).SumOrNull(activity => activity.Distance?.Value), ItemValueType.DistanceInMeters),
+                        ElapsedTime = ItemValue.TryCreate(group.Value.Where(item => item.ElapsedTime != null).SumOrNull(activity => activity.ElapsedTime?.Value), ItemValueType.TimeInSeconds),
+                        Pace = ItemValue.TryCreate(group.Value.Where(item => item.Pace != null).AverageOrNull(activity => activity.Pace?.Value), ItemValueType.MetersPerSecond),
+                        Heartrate = ItemValue.TryCreate(group.Value.Where(item => item.Heartrate != null).AverageOrNull(activity => activity.Heartrate?.Value), ItemValueType.Heartrate),
+                        Lactate = ItemValue.TryCreate(group.Value.Where(item => item.Lactate != null).AverageOrNull(activity => activity.Lactate?.Value), ItemValueType.Number)
                     };
                 })
                 .ToList();
             
             result.CalculateFactorsFor(item => item.Distance);
-            result.CalculateFactorsFor(item => item.Pace, -2.5);
             result.CalculateFactorsFor(item => item.ElapsedTime);
-            result.CalculateFactorsFor(item => item.Heartrate, -100);
-            result.CalculateFactorsFor(item => item.IntervalDistance);
-            result.CalculateFactorsFor(item => item.IntervalPace, -2.5);
-            result.CalculateFactorsFor(item => item.IntervalElapsedTime);
-            result.CalculateFactorsFor(item => item.IntervalHeartrate, -100);
-            result.CalculateFactorsFor(item => item.Lactate);
+            result.CalculateFactorsFor(item => item.Pace, true);
+            result.CalculateFactorsFor(item => item.Heartrate, true);
+            result.CalculateFactorsFor(item => item.Lactate, true);
 
             return result;
         }
@@ -169,12 +114,6 @@ namespace Activities.Web.Pages.ProgressTest
         public ItemValue Pace { get; set; }
         public ItemValue ElapsedTime { get; set; }
         public ItemValue Heartrate { get; set; }
-        
-        public ItemValue IntervalDistance { get; set; }
-        public ItemValue IntervalPace { get; set; }
-        public ItemValue IntervalElapsedTime { get; set; }
-        public ItemValue IntervalHeartrate { get; set; }
-        
         public ItemValue Lactate { get; set; }
     }
 }

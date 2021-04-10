@@ -16,7 +16,7 @@ export const getPaceString = (metersPerSecond: number, showSuffix: boolean = fal
 export const getKmString = (distanceInMeters: number, decimals: number = 1) => `${round(distanceInMeters / 1000, decimals)} km`;
 
 export const getTimeString = (seconds: number) => {
-  const totalSeconds = seconds % 60;
+  const totalSeconds = Math.round(seconds % 60);
   const totalMinutes = Math.floor((seconds / 60) % 60) | 0;
   const totalHours = Math.floor(seconds / 60 / 60) | 0;
 

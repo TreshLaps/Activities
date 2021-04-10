@@ -3,13 +3,6 @@ import queryString from 'query-string';
 import { StackContainer, Dropdown } from '../../styles/styles';
 import { addOrUpdateQueryString } from './Urls';
 
-export type Filters = Map<string, string | number>;
-
-interface ActivityFilterProps {
-  isLoading?: boolean | undefined;
-  onChange: (items: Filters) => void;
-}
-
 export const getUrlWithFilters = (url: string, items: Filters) => {
   if (items === undefined) {
     return url;
@@ -25,6 +18,7 @@ export const getUrlWithFilters = (url: string, items: Filters) => {
 const defaultType = 'All';
 const defaultDuration = 'LastMonths';
 const defaultYear = new Date().getFullYear();
+const defaultDataType = 'Activity';
 
 const updateBrowserUrl = (items: Filters) => {
   let url = `${window.location.origin}${window.location.pathname}`;
@@ -34,6 +28,7 @@ const updateBrowserUrl = (items: Filters) => {
       (key === 'type' && value === defaultType)
       || (key === 'duration' && value === defaultDuration)
       || (key === 'year' && value === defaultYear)
+      || (key === 'dataType' && value === defaultDataType)
     ) {
       return;
     }
@@ -44,13 +39,24 @@ const updateBrowserUrl = (items: Filters) => {
   window.history.replaceState({}, '', url);
 };
 
-const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
-  const { isLoading, onChange } = props;
+export type Filters = Map<string, string | number>;
 
-  const { type, duration, year } = queryString.parse(window.location.search);
+interface ActivityFilterProps {
+  isLoading?: boolean | undefined;
+  onChange: (items: Filters) => void;
+  disableDataTypeFilter?: boolean | undefined;
+}
+
+const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
+  const { isLoading, onChange, disableDataTypeFilter } = props;
+
+  const {
+    type, duration, year, dataType,
+  } = queryString.parse(window.location.search);
   const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : defaultType);
   const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : defaultDuration);
   const [yearFilter, setYearFilter] = useState(typeof year === 'string' ? parseInt(year, 10) : defaultYear);
+  const [dataTypeFilter, setDataTypeFilter] = useState(typeof dataType === 'string' ? dataType : defaultDataType);
 
   useEffect(() => {
     const items = new Map<string, string | number>();
@@ -62,9 +68,13 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
       items.set('year', yearFilter);
     }
 
+    if (disableDataTypeFilter !== true) {
+      items.set('dataType', dataTypeFilter);
+    }
+
     onChange(items);
     updateBrowserUrl(items);
-  }, [typeFilter, durationFilter, yearFilter, onChange]);
+  }, [typeFilter, durationFilter, yearFilter, dataTypeFilter, onChange]);
 
   return (
     <StackContainer>
@@ -87,6 +97,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         onChange={(v) => {
           setDurationFilter(v.currentTarget.value);
         }}
+        style={(durationFilter === 'Year' ? { marginRight: '5px' } : {})}
       >
         <option value="LastMonths">Last 20 weeks</option>
         <option value="LastYear">Last 12 months</option>
@@ -108,6 +119,18 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
               </option>
             );
           })}
+        </Dropdown>
+      )}
+      {disableDataTypeFilter !== true && (
+        <Dropdown
+          disabled={isLoading}
+          defaultValue={dataTypeFilter}
+          onChange={(v) => {
+            setDataTypeFilter(v.currentTarget.value);
+          }}
+        >
+          <option value="Activity">Show activity data</option>
+          <option value="Interval">Show interval data</option>
         </Dropdown>
       )}
     </StackContainer>

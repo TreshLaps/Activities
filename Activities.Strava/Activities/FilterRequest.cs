@@ -9,6 +9,7 @@ namespace Activities.Strava.Activities
         public string Type { get; init; }
         public FilterDuration Duration { get; init; }
         public int Year { get; init; }
+        public FilterDataType DataType { get; init; }
 
         public bool Keep(SummaryActivity activity)
         {
@@ -62,6 +63,12 @@ namespace Activities.Strava.Activities
             {
                 var startDate = new DateTime(Year + 1, 01, 01).AddDays(-1);
                 var endDate = new DateTime(Year, 01, 01);
+
+                if (startDate > DateTime.Today)
+                {
+                    startDate = DateTime.Today;
+                }
+                
                 return (startDate, endDate);
             }
 
@@ -75,5 +82,11 @@ namespace Activities.Strava.Activities
         LastMonths,
         LastYear,
         Year
+    }
+
+    public enum FilterDataType
+    {
+        Activity,
+        Interval
     }
 }

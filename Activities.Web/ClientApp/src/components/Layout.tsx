@@ -21,6 +21,10 @@ const MenuWrapper = styled.div`
   margin-bottom: 20px;
   overflow: auto;
   white-space: nowrap;
+
+  @media (max-width: 768px) {
+    margin-bottom: 10px;
+  }
 `;
 
 const MenuContainer = styled.div`
@@ -31,20 +35,29 @@ const MenuContainer = styled.div`
 const LinkContainer = styled.ul`
   list-style: none;
   margin: 0;
-  padding: 0px 10px;
+  padding: 0;
   display: flex;
   flex: 1 1 auto;
   height: 64px;
   line-height: 64px;
 
+  @media (max-width: 768px) {
+    height: 50px;
+    line-height: 50px;
+  }
+
   li {
     a {
       transition: background-color 0.3s;
-      font-size: 1rem;
+      font-size: inherit;
       color: #fff;
       display: block;
-      padding: 0 16px;
+      padding: 0 20px;
       text-decoration: none;
+
+      @media (max-width: 768px) {
+        padding: 0 10px;
+      }
     }
     a:hover,
     .navLink-active {
@@ -57,6 +70,10 @@ const ProfileImage = styled.img`
   height: 48px;
   vertical-align: middle;
   border-radius: 99px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const Layout: React.FC<{ children: any }> = ({ children }) => {

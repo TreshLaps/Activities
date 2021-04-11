@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@datepicker-react/styled": "^2.8.0",
     "query-string": "^7.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

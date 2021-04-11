@@ -4,12 +4,17 @@ using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Activities
 {
-    public class FilterRequest
+    public record FilterRequest
     {
         public string Type { get; init; }
         public FilterDuration Duration { get; init; }
         public int Year { get; init; }
         public FilterDataType DataType { get; init; }
+        public double? MinPace { get; set; }
+        public double? MaxPace { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public GroupKey? GroupKey { get; set; }
 
         public bool Keep(SummaryActivity activity)
         {
@@ -44,6 +49,19 @@ namespace Activities.Strava.Activities
                 }
             }
 
+            if (Duration == FilterDuration.Custom)
+            {
+                if (StartDate.HasValue && activity.StartDate > StartDate)
+                {
+                    return false;
+                }
+                
+                if (EndDate.HasValue && activity.StartDate < EndDate)
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -72,6 +90,11 @@ namespace Activities.Strava.Activities
                 return (startDate, endDate);
             }
 
+            if (Duration == FilterDuration.Custom)
+            {
+                return (StartDate ?? DateTime.Today, EndDate ?? DateTime.Today.AddYears(-10));
+            }
+
             throw new InvalidOperationException();
         }
     }
@@ -81,12 +104,14 @@ namespace Activities.Strava.Activities
         None,
         LastMonths,
         LastYear,
-        Year
+        Year,
+        Custom
     }
 
     public enum FilterDataType
     {
         Activity,
-        Interval
+        Interval,
+        Threshold
     }
 }

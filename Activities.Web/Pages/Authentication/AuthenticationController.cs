@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Activities.Web.Authentication
+namespace Activities.Web.Pages.Authentication
 {
     [ApiController]
     [Route("api/[controller]")]

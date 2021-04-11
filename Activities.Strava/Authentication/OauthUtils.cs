@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-namespace Activities.Core.Authentication
+namespace Activities.Strava.Authentication
 {
     public static class OauthUtils
     {

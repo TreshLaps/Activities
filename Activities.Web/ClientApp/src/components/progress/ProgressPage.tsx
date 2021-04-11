@@ -29,7 +29,12 @@ const ProgressPage: React.FC = () => {
     setLoadingStatus(LoadingStatus.Loading);
 
     fetch(getUrlWithFilters('/api/progress/', filters))
-      .then((response) => response.json() as Promise<ProgressResultItem[]>)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error();
+        }
+        return response.json() as Promise<ProgressResultItem[]>;
+      })
       .then((data) => {
         setProgress(data);
         setLoadingStatus(LoadingStatus.None);
@@ -47,7 +52,7 @@ const ProgressPage: React.FC = () => {
     <div>
       <ActivityFilter onChange={setFilters} />
       <Loader status={loadingStatus} />
-      {loadingStatus !== LoadingStatus.Loading && progress && (
+      {loadingStatus === LoadingStatus.None && progress && (
         <TableContainer>
           <FixedWidthTable>
             <thead>

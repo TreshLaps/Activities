@@ -54,7 +54,7 @@ const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
   const { item } = props;
 
   if (item == null) {
-    return <td>-</td>;
+    return <td><ValueTdLabel>-</ValueTdLabel></td>;
   }
 
   let value = round(item.value, 1);

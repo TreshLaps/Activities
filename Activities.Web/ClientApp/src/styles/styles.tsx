@@ -231,14 +231,13 @@ export const LapLabel = styled.span`
 
 export const Dropdown = styled.select`
   border-radius: 3px;
-  border: 0;
+  border: thin solid #ddd;
   padding: 10px 15px;
   font-family: 'Roboto', sans-serif;
   font-size: 15px;
   line-height: 1;
   background: #fff;
   color: #000;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   font-weight: 500;
 
   @media (max-width: 768px) {
@@ -250,14 +249,13 @@ export const Dropdown = styled.select`
 
 export const Input = styled.input`
   border-radius: 3px;
-  border: 0;
+  border: thin solid #ddd;
   padding: 10px 15px;
   font-family: 'Roboto', sans-serif;
   font-size: 15px;
   line-height: 1;
   background: #fff;
   color: #000;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
   font-weight: 500;
 
   @media (max-width: 768px) {

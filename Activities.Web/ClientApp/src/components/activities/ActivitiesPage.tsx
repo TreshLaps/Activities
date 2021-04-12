@@ -24,7 +24,12 @@ const ActivitiesPage: React.FC = () => {
     setLoadingStatus(LoadingStatus.Loading);
 
     fetch(getUrlWithFilters('/api/activities/', filters))
-      .then((response) => response.json() as Promise<any>)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error();
+        }
+        return response.json() as Promise<any>;
+      })
       .then((data) => {
         setActivities(data.activities);
         setLoadingStatus(LoadingStatus.None);

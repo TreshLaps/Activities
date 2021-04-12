@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Activities.Core.DataTables;
+using Activities.Core.Extensions;
 using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Activities
 {
     public static class ActivitySummary
     {
-        public static List<ActivityDataSummary> ToActivitySummary(this IEnumerable<DetailedActivity> activities, FilterDataType dataType)
+        public static List<ActivityDataSummary> ToActivitySummary(this IEnumerable<DetailedActivity> activities, FilterRequest filterRequest)
         {
             var result = activities
                 .Select(activity =>
@@ -18,7 +19,7 @@ namespace Activities.Strava.Activities
                     ItemValue heartrate = null;
                     ItemValue lactate = null;
 
-                    if (dataType == FilterDataType.Activity)
+                    if (filterRequest.DataType == FilterDataType.Activity)
                     {
                         distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
                         elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
@@ -26,7 +27,7 @@ namespace Activities.Strava.Activities
                         heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                         lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
                     }
-                    else if (dataType == FilterDataType.Interval)
+                    else if (filterRequest.DataType == FilterDataType.Interval)
                     {
                         var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList();
 
@@ -37,6 +38,37 @@ namespace Activities.Strava.Activities
                             pace = new ItemValue(intervalLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
                             heartrate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate), ItemValueType.Heartrate);
                             lactate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate), ItemValueType.Number);
+                        }
+                    }
+                    else if (filterRequest.DataType == FilterDataType.Threshold && filterRequest.MinPace.HasValue && filterRequest.MaxPace.HasValue)
+                    {
+                        if (activity.Laps != null)
+                        {
+                            var thresholdLaps = activity.Laps
+                                .Where(
+                                    lap => lap.ElapsedTime > 120 &&
+                                           lap.AverageSpeed >= filterRequest.MinPace.Value.ToMetersPerSecond() &&
+                                           lap.AverageSpeed <= filterRequest.MaxPace.Value.ToMetersPerSecond())
+                                .ToList();
+                            
+                            if (thresholdLaps.Any())
+                            {
+                                distance = new ItemValue(thresholdLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
+                                elapsedTime = new ItemValue(thresholdLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
+                                pace = new ItemValue(thresholdLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
+                                heartrate = ItemValue.TryCreate(thresholdLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate), ItemValueType.Heartrate);
+                                lactate = ItemValue.TryCreate(thresholdLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate), ItemValueType.Number);
+                            }
+                        }
+                        else if (activity.ElapsedTime > 120 &&
+                                 activity.AverageSpeed >= filterRequest.MinPace.Value.ToMetersPerSecond() &&
+                                 activity.AverageSpeed <= filterRequest.MaxPace.Value.ToMetersPerSecond())
+                        {
+                            distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
+                            elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
+                            pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
+                            heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
+                            lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
                         }
                     }
 

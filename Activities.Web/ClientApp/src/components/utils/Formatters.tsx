@@ -31,3 +31,9 @@ export const getTimeString = (seconds: number) => {
 
 export const getDateString = (dateTimeString: string) =>
   `${dateTimeString.substr(8, 2)}.${dateTimeString.substr(5, 2)}.${dateTimeString.substr(0, 4)}`;
+
+export const getUrlDateString = (date: Date) => {
+  const month = `${(date.getMonth() + 1 < 10 ? '0' : '')}${(date.getMonth() + 1)}`;
+  const day = `${(date.getDate() < 10 ? '0' : '')}${date.getDate()}`;
+  return `${date.getFullYear()}-${month}-${day}`;
+};

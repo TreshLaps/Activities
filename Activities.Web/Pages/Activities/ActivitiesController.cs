@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Activities.Core.DataTables;
-using Activities.Core.Extensions;
 using Activities.Strava.Activities;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
+using Activities.Web.Pages.Activities.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Activities.Web.Pages.Authentication
+namespace Activities.Web.Pages.Activities
 {
     [ApiController]
     [Route("api/[controller]")]
     [StravaAuthenticationFilter]
-    public class ActivitiesController : ControllerBase
+    public class ActivitiesController : BaseActivitiesController
     {
-        private readonly ActivitiesClient _activitiesClient;
-
-        public ActivitiesController(ActivitiesClient activitiesClient)
+        public ActivitiesController(ActivitiesClient activitiesClient) : base(activitiesClient)
         {
-            _activitiesClient = activitiesClient;
         }
         
         [HttpGet("{id}")]
@@ -33,18 +28,7 @@ namespace Activities.Web.Pages.Authentication
         [HttpGet]
         public async Task<ActivitiesResult> Get([FromQuery] FilterRequest filterRequest)
         {
-            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-            var activityList = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
-                .Where(filterRequest.Keep)
-                .ToList();
-            
-            var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
-            var (startDate, endDate) = filterRequest.GetDateRange();
-
-            var activities = (await activityList.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
-                .Where(activity => activity != null)
-                .ToActivitySummary(filterRequest.DataType)
-                .GroupByDate(groupKey, activity => activity.Activity.StartDate, startDate, endDate)
+            var activities = (await GetActivitiesGroupByDate(filterRequest))
                 .Select(month => new ActivityGroup
                 {
                     Name = month.Key,
@@ -69,30 +53,5 @@ namespace Activities.Web.Pages.Authentication
                 Activities = activities
             };
         }
-    }
-
-    public class ActivitiesResult
-    {
-        public List<ActivityGroup> Activities { get; set; }
-    }
-
-    public class ActivityGroup
-    {
-        public string Name { get; set; }
-        public List<Activity> Items { get; set; }
-    }
-
-    public class Activity
-    {
-        public long Id { get; set; }
-        public string Type { get; set; }
-        public string Date { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public ItemValue Distance { get; set; }
-        public ItemValue ElapsedTime { get; set; }
-        public ItemValue Pace { get; set; }
-        public ItemValue Heartrate { get; set; }
-        public ItemValue Lactate { get; set; }
     }
 }

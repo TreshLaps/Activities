@@ -6,7 +6,7 @@ using Activities.Strava.Endpoints.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
-namespace Activities.Web.Controllers
+namespace Activities.Web.Pages.Debug
 {
     [ApiController]
     [Route("api/[controller]")]

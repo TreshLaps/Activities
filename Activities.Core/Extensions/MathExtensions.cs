@@ -1,8 +1,8 @@
-﻿using Humanizer.Localisation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
+using Humanizer.Localisation;
 
 namespace Activities.Core.Extensions
 {
@@ -14,10 +14,16 @@ namespace Activities.Core.Extensions
             {
                 return string.Empty;
             }
-            
+
             var averageSpeed = 1000 / metersPerSecond / 60;
             var averageSpeedMin = Math.Floor(averageSpeed);
             var averageSpeedSeconds = Math.Round(averageSpeed % 1 * 60);
+
+            if (averageSpeedSeconds == 60)
+            {
+                averageSpeedMin += 1;
+                averageSpeedSeconds = 0;
+            }
 
             var paceString = $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds}";
             return showSuffix ? $"{paceString} /km" : paceString;
@@ -49,6 +55,7 @@ namespace Activities.Core.Extensions
 
             return TimeSpan.FromSeconds(seconds).Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Day, precision: 2);
         }
+
         public static string ToTimeStringSeconds(this int seconds)
         {
             return TimeSpan.FromSeconds(seconds).Humanize(minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day, precision: 2);
@@ -61,7 +68,7 @@ namespace Activities.Core.Extensions
             if (items.Count % 2 == 0)
             {
                 var index = items.Count / 2;
-                
+
                 return (items[index - 1] + items[index]) / 2.0;
             }
 
@@ -70,13 +77,13 @@ namespace Activities.Core.Extensions
 
         public static DateTime GetStartOfWeek(this DateTime date)
         {
-            var dayOfWeek = (int)date.DayOfWeek - 1;
+            var dayOfWeek = (int) date.DayOfWeek - 1;
 
             if (dayOfWeek < 0)
             {
                 dayOfWeek = 6;
             }
-            
+
             return date.Date.AddDays(0 - dayOfWeek);
         }
     }

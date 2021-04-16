@@ -24,6 +24,7 @@ const defaultDuration = 'LastMonths';
 const defaultYear = new Date().getFullYear();
 const defaultDataType = 'Activity';
 const defaultGroupKey = 'Month';
+const defaultSearchString = '';
 
 const updateBrowserUrl = (items: Filters) => {
   let url = `${window.location.origin}${window.location.pathname}`;
@@ -62,7 +63,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
   const { isLoading, onChange, disableDataTypeFilter } = props;
 
   const {
-    type, duration, year, dataType, minPace, maxPace, startDate, endDate, groupKey,
+    type, duration, year, dataType, minPace, maxPace, startDate, endDate, groupKey, searchString,
   } = queryString.parse(window.location.search);
   const [typeFilter, setTypeFilter] = useState(typeof type === 'string' ? type : defaultType);
   const [durationFilter, setDurationFilter] = useState(typeof duration === 'string' ? duration : defaultDuration);
@@ -76,6 +77,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
     minPace: typeof minPace === 'string' ? parseFloat(minPace) : undefined,
     maxPace: typeof maxPace === 'string' ? parseFloat(maxPace) : undefined,
   });
+  const [searchFilter, setSearchFilter] = useState<string>(typeof searchString === 'string' ? searchString : defaultSearchString);
 
   const fetchThresholdValues = (filters: Filters) => {
     fetch(getUrlWithFilters('/api/threshold/estimate/', filters))
@@ -100,6 +102,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
 
     items.set('type', typeFilter);
     items.set('duration', durationFilter);
+    items.set('searchString', searchFilter);
 
     if (durationFilter === 'Year') {
       items.set('year', yearFilter);
@@ -136,7 +139,8 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
 
     onChange(items);
     updateBrowserUrl(items);
-  }, [typeFilter, durationFilter, yearFilter, dataTypeFilter, paceFilter, startDateFilter, endDateFilter, groupKeyFilter, onChange]);
+  }, [typeFilter, durationFilter, yearFilter, dataTypeFilter, paceFilter,
+    startDateFilter, endDateFilter, groupKeyFilter, searchFilter, onChange]);
 
   return (
     <StackContainer style={{ position: 'relative', zIndex: 100 }}>
@@ -272,6 +276,15 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
           )}
         </>
       )}
+      <Input
+        type="string"
+        style={{ width: '160px' }}
+        placeholder="Search..."
+        value={searchFilter}
+        onChange={(x) => {
+          setSearchFilter(x.currentTarget.value);
+        }}
+      />
     </StackContainer>
   );
 };

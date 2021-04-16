@@ -15,6 +15,7 @@ namespace Activities.Strava.Activities
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public GroupKey? GroupKey { get; set; }
+        public string SearchString { get; set; }
 
         public bool Keep(SummaryActivity activity)
         {
@@ -24,6 +25,14 @@ namespace Activities.Strava.Activities
             }
 
             var (startDate, endDate) = GetDateRange();
+
+            if (SearchString != null)
+            {
+                if (!activity.Name.Contains(SearchString))
+                {
+                    return false;
+                }
+            }
 
             if (Duration == FilterDuration.LastMonths)
             {

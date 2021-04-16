@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { ItemValue, ItemValueType } from '../models/ResultItem';
 import {
   getKmString, getPaceString, getTimeString, round,
 } from './Formatters';
@@ -9,7 +10,7 @@ const ValueTdLabel = styled.span`
   position: relative;
   display: block;
   min-width: 60px;
-  padding: 3px 0;
+  padding: 2px 0;
   padding-right: 3px;
 
   @media (max-width: 768px) {
@@ -25,6 +26,7 @@ const ValueTdFactor = styled.div<{ color: string }>`
   opacity: 0.3;
   max-width: 100%;
   background: ${(props) => props.color};
+  border-radius: 3px;
 `;
 
 const ValueTdFactorBackground = styled(ValueTdFactor)`
@@ -36,20 +38,6 @@ const ValueContainer = styled.div`
   position: relative;
 `;
 
-enum ItemValueType {
-  Number = 0,
-  DistanceInMeters = 1,
-  MetersPerSecond = 2,
-  TimeInSeconds = 3,
-  Heartrate = 4,
-}
-
-export interface ItemValue {
-  value: number;
-  factor: number;
-  type: ItemValueType
-}
-
 const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
   const { item } = props;
 
@@ -57,8 +45,8 @@ const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
     return <td><ValueTdLabel>-</ValueTdLabel></td>;
   }
 
-  let value = round(item.value, 1);
-  let color = '#a0a20a';
+  let value = round(item.value, 0);
+  let color = '#aaa';
 
   switch (item.type) {
     case ItemValueType.DistanceInMeters:
@@ -76,6 +64,10 @@ const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
     case ItemValueType.Heartrate:
       value = Math.round(item.value).toString();
       color = '#ff1700';
+      break;
+    case ItemValueType.Lactate:
+      value = round(item.value, 1);
+      color = '#a0a20a';
       break;
     default:
   }

@@ -23,7 +23,7 @@ const defaultType = 'All';
 const defaultDuration = 'LastMonths';
 const defaultYear = new Date().getFullYear();
 const defaultDataType = 'Activity';
-const defaultGroupKey = 'Week';
+const defaultGroupKey = 'Month';
 
 const updateBrowserUrl = (items: Filters) => {
   let url = `${window.location.origin}${window.location.pathname}`;

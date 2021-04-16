@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Grid, SubHeader } from '../../styles/styles';
-import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { SmallTable } from '../utils/Table';
 import { UserContext } from '../utils/UserContext';
 import ValueTd from '../utils/ValueTd';
+import ValueTh from '../utils/ValueTh';
 
 const CenterContainer = styled.div`
   height: 80vh;
@@ -20,7 +20,7 @@ const SignInButton = styled.a`
   border-radius: 3px;
   border: 0;
   padding: 15px 30px;
-  background: #209cee;
+  background: #c90000;
   color: #fff;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
 
@@ -29,45 +29,23 @@ const SignInButton = styled.a`
   }
 `;
 
-const sumValues = (items: any[]) => {
-  if (items.length === 0) {
-    return 0.0;
-  }
-
-  return items.reduce((sum, value) => sum + value);
-};
-
 const progressTable = (name: string, items: any[]) => (
   <SmallTable key={name}>
     <thead>
       <tr>
         <th>{name}</th>
-        <th>&nbsp;</th>
-        <th title="Distance">
-          {getKmString(sumValues(items.filter((item) => item.distance).map((item) => item.distance.value)))}
-        </th>
-        <th title="Time">
-          {getTimeString(sumValues(items.filter((item) => item.elapsedTime).map((item) => item.elapsedTime.value)))}
-        </th>
-        <th title="Pace">
-          {getPaceString(
-            sumValues(items.filter((item) => item.pace).map((item) => item.pace.value)) / items.length,
-            true,
-          )}
-        </th>
-        <th title="Average heartrate">
-          {Math.round(
-            sumValues(items.filter((item) => item.heartrate).map((item) => item.heartrate.value)) / items.length,
-          )}{' '}
-          bpm
-        </th>
+        <ValueTh items={items} valueFunc={(item) => item.activityCount} />
+        <ValueTh items={items} valueFunc={(item) => item.distance} />
+        <ValueTh items={items} valueFunc={(item) => item.elapsedTime} />
+        <ValueTh items={items} valueFunc={(item) => item.pace} />
+        <ValueTh items={items} valueFunc={(item) => item.heartrate} />
       </tr>
     </thead>
     <tbody>
       {items.map((item) => (
         <tr key={item.name}>
           <td>{item.name}</td>
-          <td>{item.activityCount}</td>
+          <td>{item.activityCount?.value}</td>
           <ValueTd item={item.distance} />
           <ValueTd item={item.elapsedTime} />
           <ValueTd item={item.pace} />

@@ -4,9 +4,11 @@ import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { FixedWidthTable } from '../utils/Table';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
-import ValueTd, { ItemValue } from '../utils/ValueTd';
+import ValueTd from '../utils/ValueTd';
+import ValueTh from '../utils/ValueTh';
+import { ItemValue, ResultItem } from '../models/ResultItem';
 
-interface ProgressResultItem {
+export interface ProgressResultItem extends ResultItem {
   name: string;
   activityCount: ItemValue;
   distance: ItemValue;
@@ -52,25 +54,25 @@ const ProgressPage: React.FC = () => {
     <div>
       <ActivityFilter onChange={setFilters} />
       <Loader status={loadingStatus} />
-      {loadingStatus === LoadingStatus.None && progress && (
+      {loadingStatus === LoadingStatus.None && progress && progress.length > 0 && (
         <TableContainer>
           <FixedWidthTable>
             <thead>
               <tr>
                 <th>&nbsp;</th>
-                <th>Activities</th>
-                <th>Distance</th>
-                <th>Time</th>
-                <th>Pace</th>
-                <th>HR</th>
-                {showLactate && <th>Lactate</th>}
+                <ValueTh items={progress} valueFunc={(item) => item.activityCount} />
+                <ValueTh items={progress} valueFunc={(item) => item.distance} />
+                <ValueTh items={progress} valueFunc={(item) => item.elapsedTime} />
+                <ValueTh items={progress} valueFunc={(item) => item.pace} />
+                <ValueTh items={progress} valueFunc={(item) => item.heartrate} />
+                {showLactate && <ValueTh items={progress} valueFunc={(item) => item.lactate} />}
               </tr>
             </thead>
             <tbody>
               {progress.map((item) => (
                 <tr key={item.name}>
                   <td>{item.name}</td>
-                  <td>{item.activityCount}</td>
+                  <ValueTd item={item.activityCount} />
                   <ValueTd item={item.distance} />
                   <ValueTd item={item.elapsedTime} />
                   <ValueTd item={item.pace} />

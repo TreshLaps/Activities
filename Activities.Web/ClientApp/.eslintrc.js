@@ -27,6 +27,7 @@ module.exports = {
     'react/destructuring-assignment': 'off',
     'implicit-arrow-linebreak': 'off',
     'no-mixed-operators': 'off',
+    'no-console': 'off',
     'max-len': ['error', { code: 140 }],
   },
 };

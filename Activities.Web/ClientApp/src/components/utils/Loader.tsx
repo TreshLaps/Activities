@@ -62,7 +62,7 @@ const Loader: React.FC<{ status: LoadingStatus; loadingMessage?: string; errorMe
           >
             <circle
               fill="none"
-              stroke="#209cee"
+              stroke="#fe3232"
               strokeWidth="6"
               strokeMiterlimit="15"
               strokeDasharray="14.2472,14.2472"
@@ -82,7 +82,7 @@ const Loader: React.FC<{ status: LoadingStatus; loadingMessage?: string; errorMe
             </circle>
             <circle
               fill="none"
-              stroke="#209cee"
+              stroke="#fe3232"
               strokeWidth="1"
               strokeMiterlimit="10"
               strokeDasharray="10,10"
@@ -100,7 +100,7 @@ const Loader: React.FC<{ status: LoadingStatus; loadingMessage?: string; errorMe
                 repeatCount="indefinite"
               />
             </circle>
-            <g fill="#209cee">
+            <g fill="#fe3232">
               <rect x="30" y="35" width="5" height="30">
                 <animateTransform
                   attributeName="transform"

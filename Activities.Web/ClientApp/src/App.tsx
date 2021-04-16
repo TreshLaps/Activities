@@ -7,6 +7,7 @@ import IntervalsPage from './components/intervals/IntervalsPage';
 import RacesPage from './components/races/races';
 import Layout from './components/Layout';
 import ProgressPage from './components/progress/ProgressPage';
+import ScatterPage from './components/scatter/ScatterPage';
 
 export default () => (
   <Layout>
@@ -15,6 +16,7 @@ export default () => (
     <Route exact path="/intervals" component={IntervalsPage} />
     <Route exact path="/progress" component={ProgressPage} />
     <Route exact path="/races" component={RacesPage} />
+    <Route exact path="/scatter" component={ScatterPage} />
     <Route exact path="/activities/:id" component={ActivitiesDetailsPage} />
   </Layout>
 );

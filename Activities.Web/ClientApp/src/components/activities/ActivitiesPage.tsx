@@ -5,6 +5,7 @@ import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
 import { EmptyThead, Table } from '../utils/Table';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
+import ValueTh from '../utils/ValueTh';
 
 interface ActivityGroup {
   name: string;
@@ -57,11 +58,11 @@ const ActivitiesPage: React.FC = () => {
                     <thead>
                       <tr>
                         <th colSpan={2} id={group.name}>{group.name}</th>
-                        <th>Distance</th>
-                        <th>Time</th>
-                        <th>Pace</th>
-                        <th>HR</th>
-                        {showLactate && <th>Lactate</th>}
+                        <ValueTh items={group.items} valueFunc={(item) => item.distance} />
+                        <ValueTh items={group.items} valueFunc={(item) => item.elapsedTime} />
+                        <ValueTh items={group.items} valueFunc={(item) => item.pace} />
+                        <ValueTh items={group.items} valueFunc={(item) => item.heartrate} />
+                        {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} />}
                       </tr>
                     </thead>
                   )}

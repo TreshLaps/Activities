@@ -8,9 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Activities.Web.Pages.Activities
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [StravaAuthenticationFilter]
     public class ActivitiesController : BaseActivitiesController
     {
         public ActivitiesController(ActivitiesClient activitiesClient) : base(activitiesClient)

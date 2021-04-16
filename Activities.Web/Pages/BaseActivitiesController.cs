@@ -5,10 +5,14 @@ using Activities.Core.Extensions;
 using Activities.Strava.Activities;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
+using Activities.Strava.Endpoints.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Activities.Web.Pages
 {
+    [ApiController]
+    [Route("api/[controller]")]
+    [StravaAuthenticationFilter]
     public class BaseActivitiesController : ControllerBase
     {
         protected readonly ActivitiesClient _activitiesClient;
@@ -18,7 +22,7 @@ namespace Activities.Web.Pages
             _activitiesClient = activitiesClient;
         }
 
-        protected async Task<List<ActivityDataSummary>> GetActivities(FilterRequest filterRequest)
+        protected async Task<List<DetailedActivity>> GetDetailedActivities(FilterRequest filterRequest)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activityList = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
@@ -27,12 +31,18 @@ namespace Activities.Web.Pages
             
             return (await activityList.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
                 .Where(activity => activity != null)
+                .ToList();
+        }
+
+        protected async Task<List<ActivityDataSummary>> GetActivitySummaries(FilterRequest filterRequest)
+        {
+            return (await GetDetailedActivities(filterRequest))
                 .ToActivitySummary(filterRequest);
         }
 
         protected async Task<Dictionary<string, List<ActivityDataSummary>>> GetActivitiesGroupByDate(FilterRequest filterRequest)
         {
-            var result = await GetActivities(filterRequest);
+            var result = await GetActivitySummaries(filterRequest);
             var (startDate, endDate) = filterRequest.GetDateRange();
             var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
 

@@ -26,6 +26,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'react/destructuring-assignment': 'off',
     'implicit-arrow-linebreak': 'off',
+    'no-mixed-operators': 'off',
     'max-len': ['error', { code: 140 }],
   },
 };

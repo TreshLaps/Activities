@@ -5,7 +5,7 @@ namespace Activities.Web.Pages.Progress.Models
     public class ProgressResultItem
     {
         public string Name { get; set; }
-        public int ActivityCount { get; set; }
+        public ItemValue ActivityCount { get; set; }
         public ItemValue Distance { get; set; }
         public ItemValue Pace { get; set; }
         public ItemValue ElapsedTime { get; set; }

@@ -1,9 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import ValueTd, { ItemValue } from './ValueTd';
+import ValueTd from './ValueTd';
+import { ItemValue, ResultItem } from '../models/ResultItem';
 
-export interface Activity {
+export interface Activity extends ResultItem {
   id: number;
   date: string;
   name: string;

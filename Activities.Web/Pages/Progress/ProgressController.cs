@@ -12,9 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Activities.Web.Pages.Progress
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [StravaAuthenticationFilter]
     public class ProgressController : BaseActivitiesController
     {
         public ProgressController(ActivitiesClient activitiesClient) : base(activitiesClient)
@@ -24,31 +21,42 @@ namespace Activities.Web.Pages.Progress
         [HttpGet]
         public async Task<List<ProgressResultItem>> Get([FromQuery] FilterRequest filterRequest)
         {
-            var result = (await  GetActivitiesGroupByDate(filterRequest))
-                .Select(group =>
-                {
-                    if (group.Value?.Any() != true)
+            var result = (await GetActivitiesGroupByDate(filterRequest))
+                .Select(
+                    group =>
                     {
+                        if (group.Value?.Any() != true)
+                        {
+                            return new ProgressResultItem
+                            {
+                                Name = group.Key
+                            };
+                        }
+
                         return new ProgressResultItem
                         {
                             Name = group.Key,
-                            ActivityCount = 0
+                            ActivityCount = ItemValue.TryCreate(group.Value.Count, ItemValueType.Number),
+                            Distance = ItemValue.TryCreate(
+                                group.Value.Where(item => item.Distance != null).SumOrNull(activity => activity.Distance?.Value),
+                                ItemValueType.DistanceInMeters),
+                            ElapsedTime = ItemValue.TryCreate(
+                                group.Value.Where(item => item.ElapsedTime != null).SumOrNull(activity => activity.ElapsedTime?.Value),
+                                ItemValueType.TimeInSeconds),
+                            Pace = ItemValue.TryCreate(
+                                group.Value.Where(item => item.Pace != null).AverageOrNull(activity => activity.Pace?.Value),
+                                ItemValueType.MetersPerSecond),
+                            Heartrate = ItemValue.TryCreate(
+                                group.Value.Where(item => item.Heartrate != null).AverageOrNull(activity => activity.Heartrate?.Value),
+                                ItemValueType.Heartrate),
+                            Lactate = ItemValue.TryCreate(
+                                group.Value.Where(item => item.Lactate != null).AverageOrNull(activity => activity.Lactate?.Value),
+                                ItemValueType.Lactate)
                         };
-                    }
-                    
-                    return new ProgressResultItem
-                    {
-                        Name = group.Key,
-                        ActivityCount = group.Value.Count,
-                        Distance = ItemValue.TryCreate(group.Value.Where(item => item.Distance != null).SumOrNull(activity => activity.Distance?.Value), ItemValueType.DistanceInMeters),
-                        ElapsedTime = ItemValue.TryCreate(group.Value.Where(item => item.ElapsedTime != null).SumOrNull(activity => activity.ElapsedTime?.Value), ItemValueType.TimeInSeconds),
-                        Pace = ItemValue.TryCreate(group.Value.Where(item => item.Pace != null).AverageOrNull(activity => activity.Pace?.Value), ItemValueType.MetersPerSecond),
-                        Heartrate = ItemValue.TryCreate(group.Value.Where(item => item.Heartrate != null).AverageOrNull(activity => activity.Heartrate?.Value), ItemValueType.Heartrate),
-                        Lactate = ItemValue.TryCreate(group.Value.Where(item => item.Lactate != null).AverageOrNull(activity => activity.Lactate?.Value), ItemValueType.Number)
-                    };
-                })
+                    })
                 .ToList();
-            
+
+            result.CalculateFactorsFor(item => item.ActivityCount);
             result.CalculateFactorsFor(item => item.Distance);
             result.CalculateFactorsFor(item => item.ElapsedTime);
             result.CalculateFactorsFor(item => item.Pace, true);
@@ -63,7 +71,7 @@ namespace Activities.Web.Pages.Progress
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var fromDate = DateTime.Today.GetStartOfWeek().AddDays(-7 * 5);
-            
+
             var activityTypes = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
                 .Where(activity => activity.StartDate >= fromDate)
                 .GroupBy(activity => activity.Type)
@@ -80,11 +88,12 @@ namespace Activities.Web.Pages.Progress
 
             foreach (var type in activityTypes)
             {
-                result.Add(new
-                {
-                    Name = type,
-                    Summary = await Get(filterRequest with { Type = type })
-                });
+                result.Add(
+                    new
+                    {
+                        Name = type,
+                        Summary = await Get(filterRequest with { Type = type })
+                    });
             }
 
             return result;

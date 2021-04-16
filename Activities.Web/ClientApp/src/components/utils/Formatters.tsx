@@ -8,8 +8,14 @@ export const getPaceString = (metersPerSecond: number, showSuffix: boolean = fal
   }
 
   const averageSpeed = 1000 / metersPerSecond / 60;
-  const averageSpeedMin = Math.floor(averageSpeed);
-  const averageSpeedSeconds = Math.round((averageSpeed % 1) * 60);
+  let averageSpeedMin = Math.floor(averageSpeed);
+  let averageSpeedSeconds = Math.round((averageSpeed % 1) * 60);
+
+  if (averageSpeedSeconds === 60) {
+    averageSpeedMin += 1;
+    averageSpeedSeconds = 0;
+  }
+
   return `${averageSpeedMin}:${averageSpeedSeconds < 10 ? '0' : ''}${averageSpeedSeconds}${showSuffix ? ' /km' : ''}`;
 };
 

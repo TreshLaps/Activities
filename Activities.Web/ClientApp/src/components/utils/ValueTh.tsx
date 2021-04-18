@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ItemValue, ItemValueType, ResultItem } from '../models/ResultItem';
 import {
+  AveragePace,
   getKmString, getPaceString, getTimeString, round,
 } from './Formatters';
 
@@ -34,7 +35,7 @@ const ValueTh: React.FC<{
       value = getKmString(summedValue);
       break;
     case ItemValueType.MetersPerSecond:
-      value = getPaceString(averageValue, true);
+      value = getPaceString(AveragePace(items, (item) => item.elapsedTime?.value, (item) => item.pace?.value) || 0, true);
       break;
     case ItemValueType.TimeInSeconds:
       value = getTimeString(summedValue);

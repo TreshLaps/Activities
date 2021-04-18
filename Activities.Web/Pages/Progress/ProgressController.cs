@@ -44,7 +44,8 @@ namespace Activities.Web.Pages.Progress
                                 group.Value.Where(item => item.ElapsedTime != null).SumOrNull(activity => activity.ElapsedTime?.Value),
                                 ItemValueType.TimeInSeconds),
                             Pace = ItemValue.TryCreate(
-                                group.Value.Where(item => item.Pace != null).AverageOrNull(activity => activity.Pace?.Value),
+                                group.Value.Where(item => item.Pace != null)
+                                    .AveragePace(activity => activity.ElapsedTime.Value, activity => activity.Pace.Value),
                                 ItemValueType.MetersPerSecond),
                             Heartrate = ItemValue.TryCreate(
                                 group.Value.Where(item => item.Heartrate != null).AverageOrNull(activity => activity.Heartrate?.Value),

@@ -20,7 +20,9 @@ import {
   BigScreenTd,
 } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import {
+  AveragePace, getKmString, getPaceString, getTimeString,
+} from '../utils/Formatters';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
 
 interface ActivityMonth {
@@ -338,11 +340,11 @@ const IntervalsPage: React.FC = () => {
                                   )}
                                 </th>
                                 <th title="Average pace">
-                                  {getPaceString(
-                                    activity.interval_Laps
-                                      .map((lap) => lap.averageSpeed)
-                                      .reduce((sum, value) => sum + value) / activity.interval_Laps.length,
-                                  )}
+                                  {getPaceString(AveragePace(
+                                    activity.interval_Laps,
+                                    (item) => item.elapsedTime,
+                                    (item) => item.averageSpeed,
+                                  ) || 0)}
                                 </th>
                                 <th title="Average heartrate">
                                   {Math.round(

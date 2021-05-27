@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import { round } from './utils/Formatters';
 import { UserContext, User } from './utils/UserContext';
 
 const LayoutContainer = styled.div`
@@ -88,6 +89,10 @@ const SignInButton = styled.a`
   }
 `;
 
+const SyncPercentage = styled.span`
+  font-weight: bold;
+`;
+
 const ProfileImage = styled.img`
   height: 48px;
   vertical-align: middle;
@@ -98,8 +103,22 @@ const ProfileImage = styled.img`
   }
 `;
 
+const checkProgress = (setSyncProgress: (value: number) => void) => {
+  fetch('/api/Sync/')
+    .then((response) => response.json() as Promise<{ progress: number }>)
+    .then((data) => {
+      setSyncProgress(data.progress);
+
+      if (data.progress < 1) {
+        setTimeout(() => checkProgress(setSyncProgress), 10000);
+      }
+    })
+    .catch(() => setTimeout(() => checkProgress(setSyncProgress), 10000));
+};
+
 const Layout: React.FC<{ children: any }> = ({ children }) => {
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [syncProgress, setSyncProgress] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -110,6 +129,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
       .then((response) => response.json() as Promise<User>)
       .then((data) => {
         setUser(data);
+        checkProgress(setSyncProgress);
       })
       .catch(() => setUser(null));
   });
@@ -169,7 +189,16 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
         </MenuContainer>
       </MenuWrapper>
       <LayoutContainer>
-        {user && <div>{children}</div>}
+        {user && syncProgress >= 1.0 && <div>{children}</div>}
+        {user && syncProgress < 1.0 && (
+        <CenterContainer>
+          <p>Loading your activities</p>
+          {syncProgress > 0.0
+          && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
+          {syncProgress === 0.0
+          && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
+        </CenterContainer>
+        )}
         {user === null && (
         <CenterContainer>
           <p>Welcome. Sign in to proceed.</p>

@@ -9,5 +9,6 @@ namespace Activities.Core.Caching
         Task AddOrUpdate(string key, TimeSpan expiration, object value);
         Task<T> Get<T>(string key);
         void Remove(string key);
+        bool ContainsKey(string key);
     }
 }

@@ -27,7 +27,7 @@ namespace Activities.Core.Caching
                             key,
                             action);
                     }
-                    
+
                     return action();
                 });
         }
@@ -46,6 +46,11 @@ namespace Activities.Core.Caching
         {
             _memoryCacheService.Remove(key);
             _permanentStorageService.Remove(key);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _permanentStorageService.ContainsKey(key);
         }
     }
 }

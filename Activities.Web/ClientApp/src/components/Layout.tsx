@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import { round } from './utils/Formatters';
 import { UserContext, User } from './utils/UserContext';
 
 const LayoutContainer = styled.div`
@@ -66,6 +67,32 @@ const LinkContainer = styled.ul`
   }
 `;
 
+const CenterContainer = styled.div`
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const SignInButton = styled.a`
+  text-decoration: none;
+  border-radius: 3px;
+  border: 0;
+  padding: 15px 30px;
+  background: #c90000;
+  color: #fff;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: #1375b6;
+  }
+`;
+
+const SyncPercentage = styled.span`
+  font-weight: bold;
+`;
+
 const ProfileImage = styled.img`
   height: 48px;
   vertical-align: middle;
@@ -76,8 +103,22 @@ const ProfileImage = styled.img`
   }
 `;
 
+const checkProgress = (setSyncProgress: (value: number) => void) => {
+  fetch('/api/Sync/')
+    .then((response) => response.json() as Promise<{ progress: number }>)
+    .then((data) => {
+      setSyncProgress(data.progress);
+
+      if (data.progress < 1) {
+        setTimeout(() => checkProgress(setSyncProgress), 10000);
+      }
+    })
+    .catch(() => setTimeout(() => checkProgress(setSyncProgress), 10000));
+};
+
 const Layout: React.FC<{ children: any }> = ({ children }) => {
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [syncProgress, setSyncProgress] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -88,6 +129,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
       .then((response) => response.json() as Promise<User>)
       .then((data) => {
         setUser(data);
+        checkProgress(setSyncProgress);
       })
       .catch(() => setUser(null));
   });
@@ -147,7 +189,22 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
         </MenuContainer>
       </MenuWrapper>
       <LayoutContainer>
-        <div>{children}</div>
+        {user && syncProgress >= 1.0 && <div>{children}</div>}
+        {user && syncProgress < 1.0 && (
+        <CenterContainer>
+          <p>Loading your activities</p>
+          {syncProgress > 0.0
+          && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
+          {syncProgress === 0.0
+          && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
+        </CenterContainer>
+        )}
+        {user === null && (
+        <CenterContainer>
+          <p>Welcome. Sign in to proceed.</p>
+          <SignInButton href="/signin">Sign in</SignInButton>
+        </CenterContainer>
+        )}
       </LayoutContainer>
     </UserContext.Provider>
   );

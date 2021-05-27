@@ -1,12 +1,12 @@
-﻿using Azure.Storage.Blobs;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Newtonsoft.Json;
 
 namespace Activities.Core.Caching
 {
@@ -21,7 +21,7 @@ namespace Activities.Core.Caching
             _connectionString = connectionString;
             _containerName = "activities";
         }
-        
+
         public async Task<T> GetOrAdd<T>(string key, Func<Task<T>> action) where T : class
         {
             var result = await Get<T>(key);
@@ -30,7 +30,7 @@ namespace Activities.Core.Caching
             {
                 return result;
             }
-            
+
             var semaphoreSlim = AsyncLocks.GetOrAdd(key, new SemaphoreSlim(1, 1));
             await semaphoreSlim.WaitAsync();
 
@@ -42,7 +42,7 @@ namespace Activities.Core.Caching
                 {
                     return result;
                 }
-                
+
                 result = await action();
                 await AddOrUpdate(key, TimeSpan.MaxValue, result);
             }
@@ -63,11 +63,11 @@ namespace Activities.Core.Caching
 
             var container = new BlobContainerClient(_connectionString, _containerName);
             await container.CreateIfNotExistsAsync();
-            
+
             await using var memoryStream = new MemoryStream();
             memoryStream.Write(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value)));
             memoryStream.Seek(0, SeekOrigin.Begin);
-            
+
             var blob = container.GetBlobClient(key);
             await blob.UploadAsync(memoryStream, new BlobHttpHeaders { ContentType = "application/json" });
         }
@@ -81,7 +81,7 @@ namespace Activities.Core.Caching
 
             var container = new BlobContainerClient(_connectionString, _containerName);
             await container.CreateIfNotExistsAsync();
-            
+
             var blob = container.GetBlobClient(key);
             var exists = await blob.ExistsAsync();
 
@@ -105,9 +105,17 @@ namespace Activities.Core.Caching
 
             var container = new BlobContainerClient(_connectionString, _containerName);
             container.CreateIfNotExists();
-            
+
             var blob = container.GetBlobClient(key);
             blob.DeleteIfExists();
+        }
+
+        public bool ContainsKey(string key)
+        {
+            var container = new BlobContainerClient(_connectionString, _containerName);
+            container.CreateIfNotExists();
+            var blob = container.GetBlobClient(key);
+            return blob.Exists();
         }
     }
 }

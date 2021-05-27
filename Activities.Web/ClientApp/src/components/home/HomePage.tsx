@@ -1,33 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { Grid, SubHeader } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { SmallTable } from '../utils/Table';
-import { UserContext } from '../utils/UserContext';
 import ValueTd from '../utils/ValueTd';
 import ValueTh from '../utils/ValueTh';
-
-const CenterContainer = styled.div`
-  height: 80vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-`;
-
-const SignInButton = styled.a`
-  text-decoration: none;
-  border-radius: 3px;
-  border: 0;
-  padding: 15px 30px;
-  background: #c90000;
-  color: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background: #1375b6;
-  }
-`;
 
 const progressTable = (name: string, items: any[]) => (
   <SmallTable key={name}>
@@ -80,52 +56,24 @@ const TopActivities: React.FC = () => {
   }, [progress]);
 
   return (
-    <UserContext.Consumer>
-      {(user) => (
-        <>
-          {user === null && (
-            <CenterContainer>
-              <p>Welcome. Sign in to proceed.</p>
-              <SignInButton href="/signin">Sign in</SignInButton>
-            </CenterContainer>
-          )}
-          {user && (
-            <>
-              <Loader status={loadingStatus} />
-              {loadingStatus === LoadingStatus.None && progress && (
-                <>
-                  <SubHeader>Weekly summary</SubHeader>
-                  <Grid columns={3}>{progress.map((item: any) => progressTable(item.name, item.summary))}</Grid>
-                </>
-              )}
-            </>
-          )}
-        </>
+    <>
+      <Loader status={loadingStatus} />
+      {loadingStatus === LoadingStatus.None && progress && (
+      <>
+        <SubHeader>Weekly summary</SubHeader>
+        <Grid columns={3}>{progress.map((item: any) => progressTable(item.name, item.summary))}</Grid>
+      </>
       )}
-    </UserContext.Consumer>
+    </>
   );
 };
 
 const HomePage: React.FC = () => (
-  <UserContext.Consumer>
-    {(user) => (
-      <>
-        {user === null && (
-        <CenterContainer>
-          <p>Welcome! Sign in to proceed.</p>
-          <SignInButton href="/signin">Sign in</SignInButton>
-        </CenterContainer>
-        )}
-        {user && (
-        <>
-          <TopActivities />
-          <SubHeader>Latest activities</SubHeader>
-          <p>...</p>
-        </>
-        )}
-      </>
-    )}
-  </UserContext.Consumer>
+  <>
+    <TopActivities />
+    <SubHeader>Latest activities</SubHeader>
+    <p>...</p>
+  </>
 );
 
 export default HomePage;

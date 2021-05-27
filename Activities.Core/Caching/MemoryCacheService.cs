@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Activities.Core.Caching
 {
@@ -24,7 +24,7 @@ namespace Activities.Core.Caching
             {
                 return result;
             }
-            
+
             var semaphoreSlim = AsyncLocks.GetOrAdd(key, new SemaphoreSlim(1, 1));
             await semaphoreSlim.WaitAsync();
 
@@ -36,7 +36,7 @@ namespace Activities.Core.Caching
                 {
                     return result;
                 }
-                
+
                 result = await action();
                 await AddOrUpdate(key, expiration, result);
             }
@@ -52,7 +52,7 @@ namespace Activities.Core.Caching
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(expiration);
-            
+
             _memoryCache.Set(key, value, cacheEntryOptions);
             return Task.CompletedTask;
         }
@@ -60,6 +60,11 @@ namespace Activities.Core.Caching
         public void Remove(string key)
         {
             _memoryCache.Remove(key);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _memoryCache.TryGetValue(key, out _);
         }
     }
 }

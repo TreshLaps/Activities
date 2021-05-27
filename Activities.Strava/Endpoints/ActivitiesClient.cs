@@ -14,7 +14,8 @@ namespace Activities.Strava.Endpoints
         private readonly ICachingService _cachingService;
         private readonly IPermanentStorageService _permanentStorageService;
 
-        public ActivitiesClient(IHttpClientFactory httpClientFactory, ICachingService cachingService, IPermanentStorageService permanentStorageService) : base(httpClientFactory)
+        public ActivitiesClient(IHttpClientFactory httpClientFactory, ICachingService cachingService, IPermanentStorageService permanentStorageService) : base(
+            httpClientFactory)
         {
             _cachingService = cachingService;
             _permanentStorageService = permanentStorageService;
@@ -47,6 +48,11 @@ namespace Activities.Strava.Endpoints
             }
         }
 
+        public bool HasActivity(long id)
+        {
+            return _cachingService.ContainsKey($"DetailedActivity:{id}");
+        }
+
         /// <summary>
         /// Returns all activities for the logged in user
         /// </summary>
@@ -72,17 +78,18 @@ namespace Activities.Strava.Endpoints
                     LastSyncDate = DateTimeOffset.UtcNow.AddYears(-10)
                 };
             }
-            
+
             var result = new List<SummaryActivity>();
             IReadOnlyList<SummaryActivity> activities;
             var page = 1;
 
             do
             {
-                activities = await Get<IReadOnlyList<SummaryActivity>>(accessToken, $"https://www.strava.com/api/v3/athlete/activities?page={page}&per_page=200&after={activitiesCache.LastSyncDate.ToUnixTimeSeconds()}");
+                activities = await Get<IReadOnlyList<SummaryActivity>>(
+                    accessToken,
+                    $"https://www.strava.com/api/v3/athlete/activities?page={page}&per_page=200&after={activitiesCache.LastSyncDate.ToUnixTimeSeconds()}");
                 result.AddRange(activities);
                 page++;
-                
             } while (activities.Any());
 
             activitiesCache.Activities.RemoveAll(activity => result.Any(a => a.Id == activity.Id));

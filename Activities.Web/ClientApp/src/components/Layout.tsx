@@ -66,6 +66,28 @@ const LinkContainer = styled.ul`
   }
 `;
 
+const CenterContainer = styled.div`
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const SignInButton = styled.a`
+  text-decoration: none;
+  border-radius: 3px;
+  border: 0;
+  padding: 15px 30px;
+  background: #c90000;
+  color: #fff;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: #1375b6;
+  }
+`;
+
 const ProfileImage = styled.img`
   height: 48px;
   vertical-align: middle;
@@ -147,7 +169,13 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
         </MenuContainer>
       </MenuWrapper>
       <LayoutContainer>
-        <div>{children}</div>
+        {user && <div>{children}</div>}
+        {user === null && (
+        <CenterContainer>
+          <p>Welcome. Sign in to proceed.</p>
+          <SignInButton href="/signin">Sign in</SignInButton>
+        </CenterContainer>
+        )}
       </LayoutContainer>
     </UserContext.Provider>
   );

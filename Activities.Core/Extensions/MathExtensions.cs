@@ -111,5 +111,10 @@ namespace Activities.Core.Extensions
 
             return date.Date.AddDays(0 - dayOfWeek);
         }
+
+        public static DateTime GetStartOfMonth(this DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, 1);
+        }
     }
 }

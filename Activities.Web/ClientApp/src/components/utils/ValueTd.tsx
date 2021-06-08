@@ -37,8 +37,8 @@ const ValueContainer = styled.div`
   position: relative;
 `;
 
-const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
-  const { item } = props;
+const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (props) => {
+  const { item, title } = props;
 
   if (item == null) {
     return <td><ValueTdLabel>-</ValueTdLabel></td>;
@@ -72,7 +72,7 @@ const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
   }
 
   return (
-    <td>
+    <td title={title}>
       <ValueContainer>
         <ValueTdLabel>{value}</ValueTdLabel>
         {item.factor > 0

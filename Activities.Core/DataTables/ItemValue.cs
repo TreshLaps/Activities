@@ -25,6 +25,7 @@
         MetersPerSecond = 2,
         TimeInSeconds = 3,
         Heartrate = 4,
-        Lactate = 5
+        Lactate = 5,
+        AverageNumber = 6
     }
 }

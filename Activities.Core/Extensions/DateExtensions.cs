@@ -13,17 +13,22 @@ namespace Activities.Core.Extensions
                 var startOfWeek = date.GetStartOfWeek();
                 return $"{startOfWeek:dd.} - {startOfWeek.AddDays(6):dd. MMM}";
             }
-            
+
             return date.ToString("MMM yyyy");
         }
 
-        public static Dictionary<string, List<T>> GroupByDate<T>(this IEnumerable<T> items, GroupKey groupKey, Func<T, DateTime> datePropertyFunc, DateTime startDate, DateTime endDate)
+        public static Dictionary<string, List<T>> GroupByDate<T>(
+            this IEnumerable<T> items,
+            GroupKey groupKey,
+            Func<T, DateTime> datePropertyFunc,
+            DateTime startDate,
+            DateTime endDate)
         {
             if (startDate < endDate)
             {
                 throw new ArgumentOutOfRangeException(nameof(startDate), "startDate has to be higher than endDate");
             }
-            
+
             var groups = new Dictionary<string, List<T>>();
             var groupedItems = items
                 .GroupBy(item => datePropertyFunc(item).GetGroupKey(groupKey))
@@ -32,6 +37,8 @@ namespace Activities.Core.Extensions
 
             if (groupKey == GroupKey.Week)
             {
+                currentDate = currentDate.GetStartOfWeek().AddDays(7).AddMinutes(-1);
+
                 do
                 {
                     var currentKey = currentDate.GetGroupKey(groupKey);
@@ -41,6 +48,8 @@ namespace Activities.Core.Extensions
             }
             else
             {
+                currentDate = currentDate.GetStartOfMonth().AddMonths(1).AddMinutes(-1);
+
                 do
                 {
                     var currentKey = currentDate.GetGroupKey(groupKey);

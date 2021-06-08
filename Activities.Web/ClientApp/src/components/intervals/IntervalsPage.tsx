@@ -323,7 +323,7 @@ const IntervalsPage: React.FC = () => {
                             {activity.date}
                           </div>
                           <div style={{ fontWeight: 500 }}>
-                            <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
+                            <NavLink to={`/activities/${activity.id}`}>{activity.name}</NavLink>
                           </div>
                           <div style={{ fontSize: '13px' }}>{activity.description}</div>
                         </td>

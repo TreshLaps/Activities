@@ -26,7 +26,7 @@ namespace Activities.Strava.Activities
                             elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
                             pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                             heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
-                            lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
+                            lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
                         }
                         else if (filterRequest.DataType == FilterDataType.Interval)
                         {
@@ -44,7 +44,7 @@ namespace Activities.Strava.Activities
                                     ItemValueType.Heartrate);
                                 lactate = ItemValue.TryCreate(
                                     intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate),
-                                    ItemValueType.Number);
+                                    ItemValueType.Lactate);
                             }
                         }
                         else if (filterRequest.DataType == FilterDataType.Threshold && filterRequest.MinPace.HasValue && filterRequest.MaxPace.HasValue)
@@ -81,7 +81,7 @@ namespace Activities.Strava.Activities
                                 elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
                                 pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                                 heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
-                                lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
+                                lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
                             }
                         }
 

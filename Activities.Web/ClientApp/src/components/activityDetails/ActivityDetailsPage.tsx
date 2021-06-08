@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { Container } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
@@ -9,6 +10,16 @@ import {
 import LapsChart, { Lap } from './LapsChart';
 
 const ActionButton = styled.a`
+  padding: 10px;
+  background-color: #005dff;
+  margin-right: 10px;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+`;
+
+const ActionButtonNav = styled(Link)`
   padding: 10px;
   background-color: #005dff;
   margin-right: 10px;
@@ -231,6 +242,8 @@ const ActivityDetailsPage: React.FC = () => {
           </ul>
 
           <h3>Actions</h3>
+          {activity.laps?.filter((lap) => lap.isInterval).length > 0
+          && <ActionButtonNav to={`/activities/${activity.id}/similar`}>Similar intervals</ActionButtonNav>}
           <ActionButton onClick={reimport}>Reimport</ActionButton>
           <ActionButton
             href={`https://www.strava.com/activities/${activity.id}`}

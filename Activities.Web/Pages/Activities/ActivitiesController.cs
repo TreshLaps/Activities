@@ -22,6 +22,12 @@ namespace Activities.Web.Pages.Activities
             return activity;
         }
 
+        [HttpPost("{id}/reimport")]
+        public void RemoveActivity(long id)
+        {
+            _activitiesClient.RemoveActivity(id);
+        }
+
         [HttpGet]
         public async Task<ActivitiesResult> Get([FromQuery] FilterRequest filterRequest)
         {

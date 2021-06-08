@@ -54,6 +54,11 @@ namespace Activities.Strava.Endpoints
             }
         }
 
+        public void RemoveActivity(long id)
+        {
+            _cachingService.Remove($"DetailedActivity:{id}");
+        }
+
         public bool HasActivity(long id)
         {
             return _cachingService.ContainsKey($"DetailedActivity:{id}");

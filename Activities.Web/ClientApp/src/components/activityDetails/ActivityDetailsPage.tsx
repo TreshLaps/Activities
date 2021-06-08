@@ -120,7 +120,7 @@ const ActivityDetailsPage: React.FC = () => {
   }, [activity]);
 
   const reimport = () => {
-    fetch(`/api/activities/${id}/reimport`)
+    fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
       .then((response) => response.json() as Promise<DetailedActivity>)
       .then((data) => {
         setActivity(data);

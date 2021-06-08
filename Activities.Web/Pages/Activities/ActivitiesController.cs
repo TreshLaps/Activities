@@ -13,7 +13,7 @@ namespace Activities.Web.Pages.Activities
         public ActivitiesController(ActivitiesClient activitiesClient) : base(activitiesClient)
         {
         }
-        
+
         [HttpGet("{id}")]
         public async Task<dynamic> GetActivity(long id)
         {
@@ -26,23 +26,26 @@ namespace Activities.Web.Pages.Activities
         public async Task<ActivitiesResult> Get([FromQuery] FilterRequest filterRequest)
         {
             var activities = (await GetActivitiesGroupByDate(filterRequest))
-                .Select(month => new ActivityGroup
-                {
-                    Name = month.Key,
-                    Items = month.Value.Select(activitySummary => new Activity
+                .Select(
+                    month => new ActivityGroup
                     {
-                        Id = activitySummary.Activity.Id,
-                        Date = activitySummary.Activity.StartDate.ToString("ddd dd. MMM"),
-                        Name = activitySummary.Activity.Name,
-                        Type = activitySummary.Activity.Type,
-                        Description = activitySummary.Activity.Description,
-                        Distance = activitySummary.Distance,
-                        ElapsedTime = activitySummary.ElapsedTime,
-                        Pace = activitySummary.Pace,
-                        Heartrate = activitySummary.Heartrate,
-                        Lactate = activitySummary.Lactate
-                    }).ToList()
-                })
+                        Name = month.Key,
+                        Items = month.Value.Select(
+                                activitySummary => new Activity
+                                {
+                                    Id = activitySummary.Activity.Id,
+                                    Date = activitySummary.Activity.StartDate.ToString("ddd dd."),
+                                    Name = activitySummary.Activity.Name,
+                                    Type = activitySummary.Activity.Type,
+                                    Description = activitySummary.Activity.Description,
+                                    Distance = activitySummary.Distance,
+                                    ElapsedTime = activitySummary.ElapsedTime,
+                                    Pace = activitySummary.Pace,
+                                    Heartrate = activitySummary.Heartrate,
+                                    Lactate = activitySummary.Lactate
+                                })
+                            .ToList()
+                    })
                 .ToList();
 
             return new ActivitiesResult

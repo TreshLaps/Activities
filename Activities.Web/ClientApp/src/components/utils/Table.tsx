@@ -72,10 +72,6 @@ export const Table = styled.table`
       border-top: thin solid #efefef;
     }
 
-    &:nth-child(odd) {
-      background: #fafafa;
-    }
-
     > td {
       max-width: 300px;
       text-align: right;

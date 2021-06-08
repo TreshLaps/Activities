@@ -24,17 +24,23 @@ namespace Activities.Strava.Endpoints
             var client = _httpClientFactory.CreateClient();
             var response = await client.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.TooManyRequests)
+            if (!response.IsSuccessStatusCode)
             {
-                throw new InvalidOperationException("Too many requests");
+                throw new RequestFailedException(response.StatusCode);
             }
-            else if (!response.IsSuccessStatusCode)
-            {
-                throw new InvalidOperationException(response.StatusCode.ToString());
-            }
-                
+
             var json = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<T>(json);
+        }
+    }
+
+    public class RequestFailedException : Exception
+    {
+        public HttpStatusCode StatusCode { get; }
+
+        public RequestFailedException(HttpStatusCode statusCode)
+        {
+            StatusCode = statusCode;
         }
     }
 }

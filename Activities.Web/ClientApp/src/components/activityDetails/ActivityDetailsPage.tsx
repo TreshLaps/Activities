@@ -120,7 +120,7 @@ const ActivityDetailsPage: React.FC = () => {
   }, [activity]);
 
   const reimport = () => {
-    fetch(`/api/activities/${id}/reimport`)
+    fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
       .then((response) => response.json() as Promise<DetailedActivity>)
       .then((data) => {
         setActivity(data);
@@ -198,9 +198,11 @@ const ActivityDetailsPage: React.FC = () => {
               <strong>Elevation:</strong> {activity.elevLow} (low), {activity.elevHigh} (high),{' '}
               {activity.totalElevationGain} (gained)
             </li>
+            {activity.gear && (
             <li>
               <strong>Gear:</strong> {activity.gear.name} ({getKmString(activity.gear.distance)})
             </li>
+            )}
             <li>
               <strong>Manual activity:</strong> {activity.manual.toString()}
             </li>
@@ -235,7 +237,7 @@ const ActivityDetailsPage: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Display on Strava
+            View on Strava
           </ActionButton>
         </Container>
       )}

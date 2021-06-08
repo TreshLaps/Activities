@@ -38,10 +38,10 @@ const TypeEmoji = styled.span`
     width: 30px;
   
     @media (max-width: 768px) {
-      font-size: 15px;
+      font-size: 13px;
       width: 17px;
       position: absolute;
-      left: 3px;
+      left: 4px;
       top: calc(50% - 8px);
     }
 `;
@@ -52,7 +52,7 @@ const ActivityDate = styled.span`
     margin-left: 15px;
     display: block;
     font-size: 9px;
-    line-height: 1.2;
+    line-height: 1;
   }
 `;
 

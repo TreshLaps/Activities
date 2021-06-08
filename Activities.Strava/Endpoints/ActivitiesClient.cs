@@ -26,7 +26,8 @@ namespace Activities.Strava.Endpoints
         /// </summary>
         /// <param name="accessToken">Strava access token</param>
         /// <param name="id">Activity Id</param>
-        public async Task<DetailedActivity> GetActivity(string accessToken, long id)
+        /// <param name="throwExceptions">If true method will throw exceptions instead of return null when there is an error.</param>
+        public async Task<DetailedActivity> GetActivity(string accessToken, long id, bool throwExceptions = false)
         {
             try
             {
@@ -44,8 +45,18 @@ namespace Activities.Strava.Endpoints
             }
             catch
             {
+                if (throwExceptions)
+                {
+                    throw;
+                }
+
                 return null;
             }
+        }
+
+        public void RemoveActivity(long id)
+        {
+            _cachingService.Remove($"DetailedActivity:{id}");
         }
 
         public bool HasActivity(long id)

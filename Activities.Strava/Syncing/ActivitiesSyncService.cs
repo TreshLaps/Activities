@@ -2,8 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
 using Activities.Strava.Endpoints.Models;
 using Activities.Strava.Syncing.Models;
@@ -13,23 +15,27 @@ namespace Activities.Strava.Syncing
     public class ActivitiesSyncService
     {
         private readonly ActivitiesClient _activitiesClient;
+        private readonly StravaOAuthService _stravaOAuthService;
         private static readonly ConcurrentDictionary<long, BatchJob> SyncJobs = new();
 
-        public ActivitiesSyncService(ActivitiesClient activitiesClient)
+        public ActivitiesSyncService(
+            ActivitiesClient activitiesClient,
+            StravaOAuthService stravaOAuthService)
         {
             _activitiesClient = activitiesClient;
+            _stravaOAuthService = stravaOAuthService;
         }
 
-        public async Task<double> GetProgress(string accessToken, long athleteId)
+        public async Task<double> GetProgress(OAuthToken token, long athleteId)
         {
-            var activities = await _activitiesClient.GetActivities(accessToken, athleteId);
+            var activities = await _activitiesClient.GetActivities(token.AccessToken, athleteId);
             IReadOnlyList<SummaryActivity> activitiesToSync = null;
 
             if (!SyncJobs.ContainsKey(athleteId))
             {
                 activitiesToSync = ActivitiesToSync(activities);
 
-                if (activitiesToSync.Count == 0)
+                if (activitiesToSync.Count < 10)
                 {
                     return 1.0;
                 }
@@ -39,7 +45,8 @@ namespace Activities.Strava.Syncing
                 athleteId,
                 (key) => new BatchJob
                 {
-                    AccessToken = accessToken,
+                    Created = DateTime.UtcNow,
+                    StravaToken = token,
                     AthleteId = key,
                     Progress = 0.0,
                     Activities = activitiesToSync
@@ -64,7 +71,7 @@ namespace Activities.Strava.Syncing
             {
                 if (SyncJobs.Count > 0)
                 {
-                    var currentJob = SyncJobs.OrderBy(job => job.Value.Activities.Count).First().Value;
+                    var currentJob = SyncJobs.OrderBy(job => job.Value.Created).First().Value;
                     await ProcessJob(currentJob, cancellationToken);
                     SyncJobs.TryRemove(currentJob.AthleteId, out _);
                 }
@@ -77,11 +84,29 @@ namespace Activities.Strava.Syncing
         {
             var processed = 0;
 
-            foreach (var activity in job.Activities)
+            for (var i = 0; i < job.Activities.Count; i++)
             {
+                var activity = job.Activities[i];
+
                 try
                 {
-                    await _activitiesClient.GetActivity(job.AccessToken, activity.Id);
+                    job.StravaToken = await _stravaOAuthService.GetOrRefreshToken(job.StravaToken);
+                    await _activitiesClient.GetActivity(job.StravaToken.AccessToken, activity.Id, true);
+                }
+                catch (RequestFailedException requestFailedException)
+                {
+                    if (requestFailedException.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        // Wait 1 minute and try again.
+                        await Task.Delay(60000, cancellationToken);
+                        i--;
+                        continue;
+                    }
+                    else
+                    {
+                        // Something failed. Abort
+                        return;
+                    }
                 }
                 catch
                 {

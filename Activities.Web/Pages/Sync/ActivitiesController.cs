@@ -19,7 +19,8 @@ namespace Activities.Web.Pages.Activities
         public async Task<dynamic> GetSyncProgress()
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-            var progress = await _activitiesSyncService.GetProgress(stravaAthlete.AccessToken, stravaAthlete.AthleteId);
+            var stravaToken = await HttpContext.TryGetStravaOAuthToken();
+            var progress = await _activitiesSyncService.GetProgress(stravaToken, stravaAthlete.AthleteId);
 
             return new
             {

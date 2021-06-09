@@ -103,17 +103,26 @@ const ProfileImage = styled.img`
   }
 `;
 
-const checkProgress = (setSyncProgress: (value: number) => void) => {
+const checkProgress = (setSyncProgress: (value: number) => void, setUser: (value: User | null | undefined) => void) => {
   fetch('/api/Sync/')
-    .then((response) => response.json() as Promise<{ progress: number }>)
-    .then((data) => {
-      setSyncProgress(data.progress);
+    .then((response) => {
+      if (response.status === 401) {
+        setUser(null);
+        return null;
+      }
 
-      if (data.progress < 1) {
-        setTimeout(() => checkProgress(setSyncProgress), 10000);
+      return response.json() as Promise<{ progress: number }>;
+    })
+    .then((data) => {
+      if (data) {
+        setSyncProgress(data.progress);
+
+        if (data.progress < 1) {
+          setTimeout(() => checkProgress(setSyncProgress, setUser), 10000);
+        }
       }
     })
-    .catch(() => setTimeout(() => checkProgress(setSyncProgress), 10000));
+    .catch(() => setTimeout(() => checkProgress(setSyncProgress, setUser), 10000));
 };
 
 const Layout: React.FC<{ children: any }> = ({ children }) => {
@@ -129,7 +138,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
       .then((response) => response.json() as Promise<User>)
       .then((data) => {
         setUser(data);
-        checkProgress(setSyncProgress);
+        checkProgress(setSyncProgress, setUser);
       })
       .catch(() => setUser(null));
   });

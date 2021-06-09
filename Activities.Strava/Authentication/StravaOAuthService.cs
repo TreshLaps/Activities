@@ -57,6 +57,11 @@ namespace Activities.Strava.Authentication
                     new HttpRequestMessage(HttpMethod.Post, new Uri(StravaAuthenticationDefaults.TokenEndpoint))
                         { Content = new FormUrlEncodedContent(pairs) });
 
+                if (!tokenResponse.IsSuccessStatusCode)
+                {
+                    throw new InvalidOperationException(tokenResponse.StatusCode.ToString());
+                }
+
                 var json = await tokenResponse.Content.ReadAsStringAsync();
                 var refreshedToken = JsonConvert.DeserializeObject<RefresToken>(json);
 

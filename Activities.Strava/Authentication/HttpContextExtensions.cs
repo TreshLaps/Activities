@@ -47,7 +47,7 @@ namespace Activities.Strava.Authentication
         {
             var accessToken = await httpContext.GetTokenAsync("access_token");
 
-            if (accessToken == null)
+            if (accessToken == null || !DateTime.TryParse(await httpContext.GetTokenAsync("expires_at"), out var expiresAt) || expiresAt < DateTime.UtcNow)
             {
                 return null;
             }

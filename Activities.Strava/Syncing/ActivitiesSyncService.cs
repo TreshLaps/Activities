@@ -97,7 +97,6 @@ namespace Activities.Strava.Syncing
                 {
                     if (requestFailedException.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable)
                     {
-                        // Wait 1 minute and try again.
                         await Task.Delay(30000, cancellationToken);
                         i--;
                         continue;

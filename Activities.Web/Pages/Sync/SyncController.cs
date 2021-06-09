@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
 using Activities.Strava.Syncing;
@@ -20,12 +21,30 @@ namespace Activities.Web.Pages.Activities
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var stravaToken = await HttpContext.TryGetStravaOAuthToken();
-            var progress = await _activitiesSyncService.GetProgress(stravaToken, stravaAthlete.AthleteId);
 
-            return new
+            if (stravaToken == null)
             {
-                Progress = progress
-            };
+                return Unauthorized();
+            }
+
+            try
+            {
+                var progress = await _activitiesSyncService.GetProgress(stravaToken, stravaAthlete.AthleteId);
+
+                return new
+                {
+                    Progress = progress
+                };
+            }
+            catch (RequestFailedException requestFailedException)
+            {
+                if (requestFailedException.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return SignOut();
+                }
+
+                throw;
+            }
         }
     }
 }

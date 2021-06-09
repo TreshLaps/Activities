@@ -25,7 +25,18 @@ namespace Activities.Strava.Authentication
             }
 
             var stravaOAuthService = context.HttpContext.RequestServices.GetService<StravaOAuthService>();
-            var updatedToken = await stravaOAuthService.GetOrRefreshToken(token);
+
+            OAuthToken updatedToken;
+
+            try
+            {
+                updatedToken = await stravaOAuthService.GetOrRefreshToken(token);
+            }
+            catch (Exception)
+            {
+                context.RejectPrincipal();
+                return;
+            }
 
             context.Properties.StoreTokens(
                 new[]

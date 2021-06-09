@@ -1,10 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Activities.Core.DataTables;
+using Activities.Core.Extensions;
 using Activities.Strava.Activities;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
+using Activities.Strava.Endpoints.Models;
 using Activities.Web.Pages.Activities.Models;
 using Microsoft.AspNetCore.Mvc;
+using Activity = Activities.Web.Pages.Activities.Models.Activity;
 
 namespace Activities.Web.Pages.Activities
 {
@@ -58,6 +64,118 @@ namespace Activities.Web.Pages.Activities
             {
                 Activities = activities
             };
+        }
+
+        [HttpGet("{id}/similar")]
+        public async Task<dynamic> GetSimilarActivity(long id)
+        {
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
+            var mainActivity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, id);
+
+            if (mainActivity.Laps?.Any(lap => lap.IsInterval) != true)
+            {
+                return NotFound();
+            }
+
+            var activities = (await GetDetailedActivities(
+                    new FilterRequest
+                    {
+                        Type = mainActivity.Type,
+                        Duration = FilterDuration.Custom,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddYears(-3)
+                    }))
+                .Where(activity => activity.Laps?.Any(lap => lap.IsInterval) == true)
+                .Where(activity => IsSimilarActivity(mainActivity, activity))
+                .ToList();
+
+            var startDate = activities.OrderByDescending(activity => activity.StartDate).First().StartDate;
+            var endDate = activities.OrderByDescending(activity => activity.StartDate).Last().StartDate;
+
+            var groupedActivities = activities
+                .ToActivitySummary(
+                    new FilterRequest
+                    {
+                        DataType = FilterDataType.Interval
+                    })
+                .GroupByDate(GroupKey.Month, activity => activity.Activity.StartDate, startDate, endDate)
+                .Select(
+                    month => new ActivityGroup
+                    {
+                        Name = month.Key,
+                        Items = month.Value.Select(
+                                activitySummary => new Activity
+                                {
+                                    Id = activitySummary.Activity.Id,
+                                    Date = activitySummary.Activity.StartDate.ToString("ddd dd."),
+                                    Name = activitySummary.Activity.Name,
+                                    Type = activitySummary.Activity.Type,
+                                    Description = activitySummary.Activity.Description,
+                                    Distance = activitySummary.Distance,
+                                    ElapsedTime = activitySummary.ElapsedTime,
+                                    Pace = activitySummary.Pace,
+                                    Heartrate = activitySummary.Heartrate,
+                                    Lactate = activitySummary.Lactate,
+                                    Laps = new ItemValue(activitySummary.Activity.Laps.Count(lap => lap.IsInterval), ItemValueType.AverageNumber)
+                                })
+                            .ToList()
+                    })
+                .ToList();
+
+            return new ActivitiesResult
+            {
+                Activities = groupedActivities
+            };
+        }
+
+        private bool IsSimilarActivity(DetailedActivity activity1, DetailedActivity activity2)
+        {
+            if (activity1.StartLatlng?.Count != 2 || activity2.StartLatlng?.Count != 2)
+            {
+                return false;
+            }
+
+            if (Math.Abs(activity1.StartLatlng[0] - activity2.StartLatlng[0]) > 1 || Math.Abs(activity1.StartLatlng[1] - activity2.StartLatlng[1]) > 1)
+            {
+                return false;
+            }
+
+            var lapsDifference = Math.Abs(activity1.Laps.Count(lap => lap.IsInterval) - activity2.Laps.Count(lap => lap.IsInterval));
+            var lapsDistanceDifference = Math.Abs(
+                                             activity1.Laps.Where(lap => lap.IsInterval).Average(lap => lap.Distance) -
+                                             activity2.Laps.Where(lap => lap.IsInterval).Average(lap => lap.Distance)) /
+                                         100;
+            var segmentsDifference = GetSegmentDifference(GetIntervalSegments(activity1), GetIntervalSegments(activity2));
+
+            var differenceScore = lapsDifference + lapsDistanceDifference + segmentsDifference;
+            return differenceScore < 10;
+        }
+
+        private int GetSegmentDifference(List<long> segments1, List<long> segments2)
+        {
+            var difference = 0;
+            difference += segments1.Count(segment => !segments2.Contains(segment));
+            difference += segments2.Count(segment => !segments1.Contains(segment));
+            return difference;
+        }
+
+        private List<long> GetIntervalSegments(DetailedActivity activity)
+        {
+            var intervalLaps = activity.Laps
+                .Where(lap => lap.IsInterval)
+                .Select(
+                    lap => new
+                    {
+                        lap.StartDate,
+                        EndDate = lap.StartDate.AddSeconds(lap.ElapsedTime)
+                    })
+                .ToList();
+
+            return activity.SegmentEfforts
+                .Where(segment => intervalLaps.Any(lap => segment.StartDate >= lap.StartDate && segment.StartDate < lap.EndDate))
+                .Select(segment => segment.Segment.Id)
+                .Distinct()
+                .ToList();
         }
     }
 }

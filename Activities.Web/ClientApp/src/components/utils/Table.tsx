@@ -50,9 +50,10 @@ export const Table = styled.table`
   > ${EmptyThead} > tr > th {
     background: #ddd;
     color: #555;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     font-weight: normal;
+    font-size: 11px;
 
     @media (max-width: 768px) {
         padding: 4px 3px;

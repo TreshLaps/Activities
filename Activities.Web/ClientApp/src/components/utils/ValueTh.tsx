@@ -12,8 +12,9 @@ const Th = styled.th`
 
 const ValueTh: React.FC<{
   items: ResultItem[],
-  valueFunc: (item:ResultItem) => ItemValue }> = (props) => {
-  const { items, valueFunc } = props;
+  valueFunc: (item:ResultItem) => ItemValue,
+  title?: string | undefined }> = (props) => {
+  const { items, valueFunc, title } = props;
 
   if (items == null || items.length === 0) {
     return <Th>&nbps;</Th>;
@@ -44,13 +45,14 @@ const ValueTh: React.FC<{
       value = Math.round(averageValue).toString();
       break;
     case ItemValueType.Lactate:
+    case ItemValueType.AverageNumber:
       value = round(averageValue, 1);
       break;
     default:
   }
 
   return (
-    <Th>{value}</Th>
+    <Th title={title}>{value}</Th>
   );
 };
 

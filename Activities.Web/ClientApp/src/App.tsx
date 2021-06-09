@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Route } from 'react-router';
 import HomePage from './components/home/HomePage';
 import ActivitiesPage from './components/activities/ActivitiesPage';
+import SimiliarActivitiesPage from './components/activities/SimilarActivitiesPage';
 import ActivitiesDetailsPage from './components/activityDetails/ActivityDetailsPage';
 import IntervalsPage from './components/intervals/IntervalsPage';
 import RacesPage from './components/races/races';
@@ -18,5 +19,6 @@ export default () => (
     <Route exact path="/races" component={RacesPage} />
     <Route exact path="/scatter" component={ScatterPage} />
     <Route exact path="/activities/:id" component={ActivitiesDetailsPage} />
+    <Route exact path="/activities/:id/similar" component={SimiliarActivitiesPage} />
   </Layout>
 );

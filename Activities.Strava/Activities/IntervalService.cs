@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-04-09";
+        private const string Version = "2021-06-10";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -19,7 +19,7 @@ namespace Activities.Strava.Activities
 
             activity._IntervalVersion = Version;
             activity._LactateVersion = null;
-                
+
             if (activity.Laps == null)
             {
                 return true;
@@ -59,6 +59,18 @@ namespace Activities.Strava.Activities
                 }
             }
 
+            // Remove first lap if it's slower than the rest of the intervals by a given margin.
+            if (activity.Laps.Count > 1 && activity.Laps[0].IsInterval)
+            {
+                var isSlowestLapByMargin =
+                    activity.Laps[0].AverageSpeed < activity.Laps.Skip(1).Where(lap => lap.IsInterval).Min(lap => lap.AverageSpeed) * 0.99;
+
+                if (isSlowestLapByMargin)
+                {
+                    activity.Laps[0].IsInterval = false;
+                }
+            }
+
             if (IsAutoLapOrSimilar(activity.Laps))
             {
                 foreach (var lap in activity.Laps)
@@ -76,7 +88,7 @@ namespace Activities.Strava.Activities
             {
                 return false;
             }
-            
+
             var lapsOrderedByDistance = laps.OrderBy(lap => lap.Distance).Skip(1).SkipLast(1).ToList();
             var averageDistance = lapsOrderedByDistance.Average(lap => lap.Distance);
 
@@ -91,7 +103,7 @@ namespace Activities.Strava.Activities
             for (var i = 0; i < laps.Count; i++)
             {
                 var isNotFirstLapOrSimilar = i != 0 || IsProbablyNotIntervalLap(laps[i]) && IsPauseLapComparedTo(i, laps, laps[i + 1]);
-                
+
                 if (!IsIntervalLap(i, laps, perfectMatch: false) && isNotFirstLapOrSimilar)
                 {
                     continue;
@@ -106,14 +118,14 @@ namespace Activities.Strava.Activities
                     result.Add((laps[i], i));
                 }
             }
-            
+
             return result;
         }
 
         private static bool IsIntervalLap(int lapIndex, List<Lap> laps, bool perfectMatch = true)
         {
             var lap = laps[lapIndex];
-            
+
             if (IsProbablyNotIntervalLap(lap))
             {
                 return false;
@@ -152,7 +164,7 @@ namespace Activities.Strava.Activities
             var isGreatDistanceDifference = Math.Abs(lap.Distance - intervalLap.Distance) > Math.Max(lap.Distance, intervalLap.Distance) * 0.5;
             var isShortLap = lap.Distance < 500;
             var isStationary = lap.MovingTime < lap.ElapsedTime / 2;
-            
+
             var isShortAndStationary = isShortLap && isStationary;
             var isShortAndSlower = isShortLap && isSlowerThanIntervalLap;
             var isLongAndSlowerAndDifferent = !isShortLap && isSlowerThanIntervalLap && isLessThanDoubleDistanceOfIntervalLap && isGreatDistanceDifference;
@@ -165,11 +177,16 @@ namespace Activities.Strava.Activities
             {
                 return false;
             }
-            
+
             return isShortAndStationary || isShortAndSlower || isLongAndSlowerAndDifferent;
         }
 
         private static double GetSpeedDifference(Lap lap, Lap otherLap) => Math.Abs(Math.Log(lap.AverageSpeed) - Math.Log(otherLap.AverageSpeed));
-        private static bool IsProbablyNotIntervalLap(Lap lap) => lap.MovingTime < 10 || (lap.Distance < 500 && Math.Abs(lap.MovingTime - lap.ElapsedTime) > 30) || lap.MovingTime > 60 * 60 || lap.Distance > 11000 || lap.AverageSpeed * 3.6 < 12;
+
+        private static bool IsProbablyNotIntervalLap(Lap lap) => lap.MovingTime < 10 ||
+                                                                 (lap.Distance < 500 && Math.Abs(lap.MovingTime - lap.ElapsedTime) > 30) ||
+                                                                 lap.MovingTime > 60 * 60 ||
+                                                                 lap.Distance > 11000 ||
+                                                                 lap.AverageSpeed * 3.6 < 12;
     }
 }

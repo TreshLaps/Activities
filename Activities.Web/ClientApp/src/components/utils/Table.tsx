@@ -115,7 +115,9 @@ export const SmallTable = styled(Table)`
   line-height: 1.3;
   table-layout: auto;
 
-  > thead > tr > th {
-    padding: 10px;
+  @media (min-width: 769px) {
+    > thead > tr > th {
+      padding: 10px;
+    }
   }
 `;

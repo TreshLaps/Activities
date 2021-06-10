@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import ValueTd from './ValueTd';
 import { ItemValue, ResultItem } from '../models/ResultItem';
+import { getActivityEmoji } from '../../styles/TypeEmoji';
 
 export interface Activity extends ResultItem {
   id: number;
@@ -33,7 +34,17 @@ const BoldNavLink = styled(NavLink)`
     text-decoration: none;
   `;
 
-const TypeEmoji = styled.span`
+const ActivityDate = styled.span`  
+  @media (max-width: 768px) {
+    white-space: pre-line;
+    margin-left: 15px;
+    display: block;
+    font-size: 9px;
+    line-height: 1;
+  }
+`;
+
+export const TypeEmoji = styled.span`
     display: inline-block;
     font-size: 17px;
     width: 30px;
@@ -46,30 +57,6 @@ const TypeEmoji = styled.span`
       top: calc(50% - 8px);
     }
 `;
-
-const ActivityDate = styled.span`  
-  @media (max-width: 768px) {
-    white-space: pre-line;
-    margin-left: 15px;
-    display: block;
-    font-size: 9px;
-    line-height: 1;
-  }
-`;
-
-const getActivityEmoji = (type: string) => {
-  switch (type) {
-    case 'Run':
-      return '🏃‍♂️';
-    case 'Ride':
-    case 'VirtualRide':
-      return '🚴‍♂️';
-    case 'NordicSki':
-      return '⛷';
-    default:
-      return '';
-  }
-};
 
 const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean }> = (props) => {
   const { activity, showLactate } = props;

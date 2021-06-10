@@ -66,6 +66,34 @@ namespace Activities.Web.Pages.Activities
             };
         }
 
+        [HttpGet("summary")]
+        public async Task<List<Activity>> GetSummary()
+        {
+            var activities = (await GetActivitySummaries(
+                    new FilterRequest
+                    {
+                        Duration = FilterDuration.LastMonths
+                    }))
+                .Take(6)
+                .Select(
+                    activitySummary => new Activity
+                    {
+                        Id = activitySummary.Activity.Id,
+                        Date = activitySummary.Activity.StartDate.ToString("ddd dd."),
+                        Name = activitySummary.Activity.Name,
+                        Type = activitySummary.Activity.Type,
+                        Description = activitySummary.Activity.Description,
+                        Distance = activitySummary.Distance,
+                        ElapsedTime = activitySummary.ElapsedTime,
+                        Pace = activitySummary.Pace,
+                        Heartrate = activitySummary.Heartrate,
+                        Lactate = activitySummary.Lactate
+                    })
+                .ToList();
+
+            return activities;
+        }
+
         [HttpGet("{id}/similar")]
         public async Task<dynamic> GetSimilarActivity(long id)
         {

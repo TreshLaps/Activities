@@ -40,7 +40,8 @@ namespace Activities.Web.Pages.Activities
                         ElapsedTime = activitySummary.ElapsedTime,
                         Pace = activitySummary.Pace,
                         Heartrate = activitySummary.Heartrate,
-                        Lactate = activitySummary.Lactate
+                        Lactate = activitySummary.Lactate,
+                        Feeling = activitySummary.Feeling
                     }).ToList()
                 })
                 .ToList();

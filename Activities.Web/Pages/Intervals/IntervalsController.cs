@@ -75,7 +75,8 @@ namespace Activities.Web.Pages.Intervals
                                 Interval_AveragePace = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),
                                 Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                 Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
-                                Laktat = GetLactate(activity.Activity)
+                                Laktat = GetLactate(activity.Activity),
+                                Feeling = activity.Activity.Feeling
                             };
                         })
                         .ToList()

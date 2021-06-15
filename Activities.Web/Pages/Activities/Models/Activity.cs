@@ -14,5 +14,6 @@ namespace Activities.Web.Pages.Activities.Models
         public ItemValue Pace { get; set; }
         public ItemValue Heartrate { get; set; }
         public ItemValue Lactate { get; set; }
+        public ItemValue Feeling { get; set; }
     }
 }

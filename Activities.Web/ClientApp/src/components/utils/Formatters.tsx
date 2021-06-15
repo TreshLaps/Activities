@@ -43,3 +43,15 @@ export const getUrlDateString = (date: Date) => {
   const day = `${(date.getDate() < 10 ? '0' : '')}${date.getDate()}`;
   return `${date.getFullYear()}-${month}-${day}`;
 };
+
+export const getFeelingEmoji = (feeling: number) => {
+  let emoji = '-';
+  if (feeling === 3) {
+    emoji = '😁';
+  } else if (feeling === 2) {
+    emoji = '🙂';
+  } else if (feeling === 1) {
+    emoji = '🥵';
+  }
+  return emoji;
+};

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../../../node_modules/react-vis/dist/style.css';
+import { useParams } from 'react-router';
 import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
 import { EmptyThead, Table } from '../utils/Table';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 import ValueTh from '../utils/ValueTh';
@@ -12,19 +12,20 @@ interface ActivityGroup {
   items: Activity[];
 }
 
-const ActivitiesPage: React.FC = () => {
+const SimiliarActivitiesPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
-  const [filters, setFilters] = useState<Filters>();
   const [activities, setActivities] = useState<ActivityGroup[]>();
 
+  const { id } = useParams<{ id: string | undefined }>();
+
   useEffect(() => {
-    if (filters === undefined) {
+    if (activities !== undefined) {
       return;
     }
 
     setLoadingStatus(LoadingStatus.Loading);
 
-    fetch(getUrlWithFilters('/api/activities/', filters))
+    fetch(`/api/activities/${id}/similar`)
       .then((response) => {
         if (!response.ok) {
           throw new Error();
@@ -39,14 +40,13 @@ const ActivitiesPage: React.FC = () => {
         setActivities([]);
         setLoadingStatus(LoadingStatus.Error);
       });
-  }, [filters]);
+  }, [activities]);
 
   const showLactate = (activities
     && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
 
   return (
     <div>
-      <ActivityFilter onChange={setFilters} />
       <Loader status={loadingStatus} />
       {loadingStatus === LoadingStatus.None && activities && (
         <div>
@@ -58,6 +58,7 @@ const ActivitiesPage: React.FC = () => {
                     <thead>
                       <tr>
                         <th colSpan={2} id={group.name}>{group.name}</th>
+                        <ValueTh items={group.items} valueFunc={(item) => item.laps} title="Laps" />
                         <ValueTh items={group.items} valueFunc={(item) => item.distance} title="Distance" />
                         <ValueTh items={group.items} valueFunc={(item) => item.elapsedTime} title="Time" />
                         <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
@@ -69,7 +70,7 @@ const ActivitiesPage: React.FC = () => {
                   {group.items.length === 0 && (
                     <EmptyThead>
                       <tr>
-                        <th colSpan={(showLactate ? 7 : 6)} id={group.name}>{group.name}</th>
+                        <th colSpan={(showLactate ? 8 : 7)} id={group.name}>{group.name}</th>
                       </tr>
                     </EmptyThead>
                   )}
@@ -88,4 +89,4 @@ const ActivitiesPage: React.FC = () => {
   );
 };
 
-export default ActivitiesPage;
+export default SimiliarActivitiesPage;

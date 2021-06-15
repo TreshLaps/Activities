@@ -10,8 +10,7 @@ const ValueTdLabel = styled.span`
   position: relative;
   display: block;
   min-width: 60px;
-  padding: 2px 0;
-  padding-right: 3px;
+  padding: 2px 3px 1px 0px;
 
   @media (max-width: 768px) {
     min-width: 40px;
@@ -23,7 +22,7 @@ const ValueTdFactor = styled.div<{ color: string }>`
   right: 0;
   top: -4px;
   bottom: -4px;
-  opacity: 0.3;
+  opacity: 0.4;
   max-width: 100%;
   background: ${(props) => props.color};
   border-radius: 3px;
@@ -38,8 +37,8 @@ const ValueContainer = styled.div`
   position: relative;
 `;
 
-const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
-  const { item } = props;
+const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (props) => {
+  const { item, title } = props;
 
   if (item == null) {
     return <td><ValueTdLabel>-</ValueTdLabel></td>;
@@ -73,7 +72,7 @@ const ValueTd: React.FC<{ item: ItemValue }> = (props) => {
   }
 
   return (
-    <td>
+    <td title={title}>
       <ValueContainer>
         <ValueTdLabel>{value}</ValueTdLabel>
         {item.factor > 0

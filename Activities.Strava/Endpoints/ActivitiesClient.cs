@@ -14,7 +14,8 @@ namespace Activities.Strava.Endpoints
         private readonly ICachingService _cachingService;
         private readonly IPermanentStorageService _permanentStorageService;
 
-        public ActivitiesClient(IHttpClientFactory httpClientFactory, ICachingService cachingService, IPermanentStorageService permanentStorageService) : base(httpClientFactory)
+        public ActivitiesClient(IHttpClientFactory httpClientFactory, ICachingService cachingService, IPermanentStorageService permanentStorageService) : base(
+            httpClientFactory)
         {
             _cachingService = cachingService;
             _permanentStorageService = permanentStorageService;
@@ -25,7 +26,8 @@ namespace Activities.Strava.Endpoints
         /// </summary>
         /// <param name="accessToken">Strava access token</param>
         /// <param name="id">Activity Id</param>
-        public async Task<DetailedActivity> GetActivity(string accessToken, long id)
+        /// <param name="throwExceptions">If true method will throw exceptions instead of return null when there is an error.</param>
+        public async Task<DetailedActivity> GetActivity(string accessToken, long id, bool throwExceptions = false)
         {
             try
             {
@@ -43,8 +45,23 @@ namespace Activities.Strava.Endpoints
             }
             catch
             {
+                if (throwExceptions)
+                {
+                    throw;
+                }
+
                 return null;
             }
+        }
+
+        public void RemoveActivity(long id)
+        {
+            _cachingService.Remove($"DetailedActivity:{id}");
+        }
+
+        public bool HasActivity(long id)
+        {
+            return _cachingService.ContainsKey($"DetailedActivity:{id}");
         }
 
         /// <summary>
@@ -72,17 +89,18 @@ namespace Activities.Strava.Endpoints
                     LastSyncDate = DateTimeOffset.UtcNow.AddYears(-10)
                 };
             }
-            
+
             var result = new List<SummaryActivity>();
             IReadOnlyList<SummaryActivity> activities;
             var page = 1;
 
             do
             {
-                activities = await Get<IReadOnlyList<SummaryActivity>>(accessToken, $"https://www.strava.com/api/v3/athlete/activities?page={page}&per_page=200&after={activitiesCache.LastSyncDate.ToUnixTimeSeconds()}");
+                activities = await Get<IReadOnlyList<SummaryActivity>>(
+                    accessToken,
+                    $"https://www.strava.com/api/v3/athlete/activities?page={page}&per_page=200&after={activitiesCache.LastSyncDate.ToUnixTimeSeconds()}");
                 result.AddRange(activities);
                 page++;
-                
             } while (activities.Any());
 
             activitiesCache.Activities.RemoveAll(activity => result.Any(a => a.Id == activity.Id));

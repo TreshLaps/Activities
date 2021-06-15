@@ -20,7 +20,9 @@ import {
   BigScreenTd,
 } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import {
+  AveragePace, getKmString, getPaceString, getTimeString,
+} from '../utils/Formatters';
 import ActivityFilter, { getUrlWithFilters, Filters } from '../utils/ActivityFilter';
 
 interface ActivityMonth {
@@ -296,7 +298,7 @@ const IntervalsPage: React.FC = () => {
                   {month.activities.length > 0 && (
                     <thead>
                       <tr>
-                        <th colSpan={2} id={month.date}>
+                        <th colSpan={1} id={month.date}>
                           {month.date}
                         </th>
                         <BigScreenTh>Pace</BigScreenTh>
@@ -316,15 +318,17 @@ const IntervalsPage: React.FC = () => {
                   <tbody>
                     {month.activities.map((activity) => (
                       <tr key={activity.id}>
-                        <NoWrapTd style={{ width: 125 }}>{activity.date}</NoWrapTd>
-                        <td style={{ textAlign: 'left' }}>
+                        <td style={{ textAlign: 'left', minWidth: '140px' }}>
+                          <div style={{ marginBottom: '4px', fontWeight: 'bold', fontSize: '11px' }}>
+                            {activity.date}
+                          </div>
                           <div style={{ fontWeight: 500 }}>
-                            <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
+                            <NavLink to={`/activities/${activity.id}`}>{activity.name}</NavLink>
                           </div>
                           <div style={{ fontSize: '13px' }}>{activity.description}</div>
                         </td>
                         <BigScreenTd>{activity.interval_AveragePace}</BigScreenTd>
-                        <td style={{ minWidth: '300px' }}>
+                        <td style={{ minWidth: '220px' }}>
                           <LapsTable>
                             <thead>
                               <tr>
@@ -336,11 +340,11 @@ const IntervalsPage: React.FC = () => {
                                   )}
                                 </th>
                                 <th title="Average pace">
-                                  {getPaceString(
-                                    activity.interval_Laps
-                                      .map((lap) => lap.averageSpeed)
-                                      .reduce((sum, value) => sum + value) / activity.interval_Laps.length,
-                                  )}
+                                  {getPaceString(AveragePace(
+                                    activity.interval_Laps,
+                                    (item) => item.elapsedTime,
+                                    (item) => item.averageSpeed,
+                                  ) || 0)}
                                 </th>
                                 <th title="Average heartrate">
                                   {Math.round(

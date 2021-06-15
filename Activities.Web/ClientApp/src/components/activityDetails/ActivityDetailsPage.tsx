@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { Container } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
@@ -9,6 +10,16 @@ import {
 import LapsChart, { Lap } from './LapsChart';
 
 const ActionButton = styled.a`
+  padding: 10px;
+  background-color: #005dff;
+  margin-right: 10px;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+`;
+
+const ActionButtonNav = styled(Link)`
   padding: 10px;
   background-color: #005dff;
   margin-right: 10px;
@@ -120,7 +131,7 @@ const ActivityDetailsPage: React.FC = () => {
   }, [activity]);
 
   const reimport = () => {
-    fetch(`/api/activities/${id}/reimport`)
+    fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
       .then((response) => response.json() as Promise<DetailedActivity>)
       .then((data) => {
         setActivity(data);
@@ -198,9 +209,11 @@ const ActivityDetailsPage: React.FC = () => {
               <strong>Elevation:</strong> {activity.elevLow} (low), {activity.elevHigh} (high),{' '}
               {activity.totalElevationGain} (gained)
             </li>
+            {activity.gear && (
             <li>
               <strong>Gear:</strong> {activity.gear.name} ({getKmString(activity.gear.distance)})
             </li>
+            )}
             <li>
               <strong>Manual activity:</strong> {activity.manual.toString()}
             </li>
@@ -229,13 +242,15 @@ const ActivityDetailsPage: React.FC = () => {
           </ul>
 
           <h3>Actions</h3>
+          {activity.laps?.filter((lap) => lap.isInterval).length > 0
+          && <ActionButtonNav to={`/activities/${activity.id}/similar`}>Similar intervals</ActionButtonNav>}
           <ActionButton onClick={reimport}>Reimport</ActionButton>
           <ActionButton
             href={`https://www.strava.com/activities/${activity.id}`}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Display on Strava
+            View on Strava
           </ActionButton>
         </Container>
       )}

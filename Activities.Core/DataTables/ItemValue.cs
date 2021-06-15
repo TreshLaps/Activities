@@ -26,6 +26,7 @@
         TimeInSeconds = 3,
         Heartrate = 4,
         Lactate = 5,
-        Feeling = 6
+        AverageNumber = 6,
+        Feeling = 7
     }
 }

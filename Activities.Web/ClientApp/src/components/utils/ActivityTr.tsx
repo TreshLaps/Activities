@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import ValueTd from './ValueTd';
 import { ItemValue, ResultItem } from '../models/ResultItem';
+import { getActivityEmoji } from '../../styles/TypeEmoji';
 
 export interface Activity extends ResultItem {
   id: number;
@@ -15,6 +16,7 @@ export interface Activity extends ResultItem {
   pace: ItemValue;
   heartrate: ItemValue;
   lactate: ItemValue;
+  laps: ItemValue;
 }
 
 const DescriptionText = styled.div`
@@ -32,43 +34,29 @@ const BoldNavLink = styled(NavLink)`
     text-decoration: none;
   `;
 
-const TypeEmoji = styled.span`
-    display: inline-block;
-    font-size: 17px;
-    width: 30px;
-  
-    @media (max-width: 768px) {
-      font-size: 15px;
-      width: 17px;
-      position: absolute;
-      left: 3px;
-      top: calc(50% - 8px);
-    }
-`;
-
 const ActivityDate = styled.span`  
   @media (max-width: 768px) {
     white-space: pre-line;
     margin-left: 15px;
     display: block;
     font-size: 9px;
-    line-height: 1.2;
+    line-height: 1;
   }
 `;
 
-const getActivityEmoji = (type: string) => {
-  switch (type) {
-    case 'Run':
-      return '🏃‍♂️';
-    case 'Ride':
-    case 'VirtualRide':
-      return '🚴‍♂️';
-    case 'NordicSki':
-      return '⛷';
-    default:
-      return '';
-  }
-};
+export const TypeEmoji = styled.span`
+    display: inline-block;
+    font-size: 17px;
+    width: 30px;
+  
+    @media (max-width: 768px) {
+      font-size: 13px;
+      width: 17px;
+      position: absolute;
+      left: 4px;
+      top: calc(50% - 8px);
+    }
+`;
 
 const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean }> = (props) => {
   const { activity, showLactate } = props;
@@ -82,14 +70,15 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean }> = (prop
         </div>
       </td>
       <td style={{ textAlign: 'left', width: '100%', whiteSpace: 'pre-wrap' }}>
-        <BoldNavLink to={`activities/${activity.id}`}>{activity.name}</BoldNavLink>
+        <BoldNavLink to={`/activities/${activity.id}`}>{activity.name}</BoldNavLink>
         <DescriptionText>{activity.description}</DescriptionText>
       </td>
-      <ValueTd item={activity.distance} />
-      <ValueTd item={activity.elapsedTime} />
-      <ValueTd item={activity.pace} />
-      <ValueTd item={activity.heartrate} />
-      {showLactate && <ValueTd item={activity.lactate} />}
+      {activity.laps && <ValueTd item={activity.laps} title="Laps" />}
+      <ValueTd item={activity.distance} title="Distance" />
+      <ValueTd item={activity.elapsedTime} title="Time" />
+      <ValueTd item={activity.pace} title="Pace" />
+      <ValueTd item={activity.heartrate} title="Heartrate" />
+      {showLactate && <ValueTd item={activity.lactate} title="Lactate" />}
     </tr>
   );
 };

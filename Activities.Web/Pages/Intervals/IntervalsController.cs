@@ -30,7 +30,7 @@ namespace Activities.Web.Pages.Intervals
             var activities = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
                 .Where(filterRequest.Keep)
                 .ToList();
-            
+
             var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
             var (startDate, endDate) = filterRequest.GetDateRange();
 
@@ -60,131 +60,156 @@ namespace Activities.Web.Pages.Intervals
                 .GroupByDate(groupKey, activity => activity.Activity.StartDate, startDate, endDate);
 
             var intervals = intervalGroups
-                .Select(month => new
-                {
-                    Date = month.Key,
-                    Activities = month.Value
-                        .Select(activity =>
+                .Select(
+                    month => new
+                    {
+                        Date = month.Key,
+                        Activities = month.Value
+                            .Select(
+                                activity =>
+                                {
+                                    return new
+                                    {
+                                        activity.Activity.Id,
+                                        Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
+                                        activity.Activity.Name,
+                                        activity.Activity.Description,
+                                        Interval_AveragePace = activity.IntervalLaps.AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                            .Value.ToPaceString(),
+                                        Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
+                                        Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
+                                        Laktat = GetLactate(activity.Activity),
+                                        Feeling = activity.Activity.Feeling
+                                    };
+                                })
+                            .ToList()
+                    })
+                .ToList();
+
+            var measurements = intervalGroups
+                .Select(
+                    month =>
+                    {
+                        if (!month.Value.Any())
                         {
                             return new
                             {
-                                activity.Activity.Id,
-                                Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
-                                activity.Activity.Name,
-                                activity.Activity.Description,
-                                Interval_AveragePace = activity.IntervalLaps.Average(lap => lap.AverageSpeed).ToPaceString(),
-                                Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
-                                Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
-                                Laktat = GetLactate(activity.Activity),
-                                Feeling = activity.Activity.Feeling
+                                Date = string.Empty,
+                                Lactate = (double?) null
                             };
-                        })
-                        .ToList()
-                })
-                .ToList();
-            
-            var measurements = intervalGroups
-                .Select(month =>
-                {
-                    if (!month.Value.Any())
-                    {
-                        return new { 
-                            Date = string.Empty, 
-                            Lactate = (double?) null
-                        };
-                    }
-                    
-                    var measures = month.Value
-                        .Select(activity => GetLactate(activity.Activity))
-                        .Where(activity => activity.Any())
-                        .Select(activity => activity.Average())
-                        .ToList();
+                        }
 
-                    var averageFileTime = (long)month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
-                    var averageDate = DateTime.FromFileTime(averageFileTime);
-                    
-                    return new
-                    {
-                        Date = averageDate.ToString("yyyy-MM-dd"),
-                        Lactate = measures.Any() ? (double?)Math.Round(measures.Median(), 1) : null
-                    };
-                })
+                        var measures = month.Value
+                            .Select(activity => GetLactate(activity.Activity))
+                            .Where(activity => activity.Any())
+                            .Select(activity => activity.Average())
+                            .ToList();
+
+                        var averageFileTime = (long) month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
+                        var averageDate = DateTime.FromFileTime(averageFileTime);
+
+                        return new
+                        {
+                            Date = averageDate.ToString("yyyy-MM-dd"),
+                            Lactate = measures.Any() ? (double?) Math.Round(measures.Median(), 1) : null
+                        };
+                    })
                 .Where(item => item.Lactate.HasValue)
                 .ToList();
-            
+
             var allMeasurements = intervalActivities
-                .Select(activity => new
-                {
-                    Date = activity.Activity.StartDate,
-                    Lactate = GetLactate(activity.Activity)
-                })
-                .SelectMany(activity => activity.Lactate.Select(lactate => new
-                {
-                    Date = activity.Date,
-                    Lactate = lactate
-                }))
+                .Select(
+                    activity => new
+                    {
+                        Date = activity.Activity.StartDate,
+                        Lactate = GetLactate(activity.Activity)
+                    })
+                .SelectMany(
+                    activity => activity.Lactate.Select(
+                        lactate => new
+                        {
+                            Date = activity.Date,
+                            Lactate = lactate
+                        }))
                 .ToList();
-            
+
             var distances = detailedActivities
                 .GroupByDate(groupKey, activity => activity.StartDate, startDate, endDate)
-                .Select(month =>
-                {
-                    var intervalsForMonth = intervalGroups[month.Key];
-                    var intervalDistance = intervalsForMonth == null ? 0.0 : Math.Round(intervalsForMonth.Where(activity => activity.IntervalLaps != null).Sum(activity => activity.IntervalLaps.Sum(lap => lap.Distance)) / 1000 , 2);
-                    
-                    return new
+                .Select(
+                    month =>
                     {
-                        Date = month.Key,
-                        NonIntervalDistance = Math.Round((month.Value.Sum(activity => activity.Distance) / 1000) - intervalDistance, 2),
-                        IntervalDistance = intervalDistance
-                    };
-                })
+                        var intervalsForMonth = intervalGroups[month.Key];
+                        var intervalDistance = intervalsForMonth == null
+                            ? 0.0
+                            : Math.Round(
+                                intervalsForMonth.Where(activity => activity.IntervalLaps != null)
+                                    .Sum(activity => activity.IntervalLaps.Sum(lap => lap.Distance)) /
+                                1000,
+                                2);
+
+                        return new
+                        {
+                            Date = month.Key,
+                            NonIntervalDistance = Math.Round((month.Value.Sum(activity => activity.Distance) / 1000) - intervalDistance, 2),
+                            IntervalDistance = intervalDistance
+                        };
+                    })
                 .ToList();
-            
+
             var paces = intervalGroups
-                .Select(month =>
-                {
-                    var shortPaces = new List<double>();
-                    var mediumPaces = new List<double>();
-                    var longPaces = new List<double>();
-                    var shortPaceMaxThreshold = 2 * 60;
-                    var mediumPaceMaxThreshold = 10 * 60;
-
-                    foreach (var activity in month.Value)
+                .Select(
+                    month =>
                     {
-                        if (activity.IntervalLaps.Any(lap => lap.ElapsedTime < shortPaceMaxThreshold))
-                        {
-                            shortPaces.Add(activity.IntervalLaps.Where(lap => lap.ElapsedTime < shortPaceMaxThreshold).Average(lap => lap.AverageSpeed));
-                        }
-                        
-                        if (activity.IntervalLaps.Any(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold))
-                        {
-                            mediumPaces.Add(activity.IntervalLaps.Where(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold).Average(lap => lap.AverageSpeed));
-                        }
-                        
-                        if (activity.IntervalLaps.Any(lap => lap.ElapsedTime >= mediumPaceMaxThreshold))
-                        {
-                            longPaces.Add(activity.IntervalLaps.Where(lap => lap.ElapsedTime >= mediumPaceMaxThreshold).Average(lap => lap.AverageSpeed));
-                        }
-                    }
-                    
-                    var averageShortPace = shortPaces.Any() ? shortPaces.Average() : 0;
-                    var averageMediumPace = mediumPaces.Any() ? mediumPaces.Average() : 0;
-                    var averageLongPace = longPaces.Any() ? longPaces.Average() : 0;
+                        var shortPaces = new List<double>();
+                        var mediumPaces = new List<double>();
+                        var longPaces = new List<double>();
+                        var shortPaceMaxThreshold = 2 * 60;
+                        var mediumPaceMaxThreshold = 10 * 60;
 
-                    var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString()} (< 2 min)" : null;
-                    var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString()}" : null;
-                    var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString()} (> 10 min)" : null;
-                    
-                    return new
-                    {
-                        Date = month.Key,
-                        AverageShortPace = averageShortPace,
-                        AverageMediumPace = averageMediumPace,
-                        AverageLongPace = averageLongPace,
-                        Label = $"{month.Key}{shortString}{mediumString}{longString}\r\n\r\nActivities: {month.Value.Count()}"
-                    };
-                })
+                        foreach (var activity in month.Value)
+                        {
+                            if (activity.IntervalLaps.Any(lap => lap.ElapsedTime < shortPaceMaxThreshold))
+                            {
+                                shortPaces.Add(
+                                    activity.IntervalLaps.Where(lap => lap.ElapsedTime < shortPaceMaxThreshold)
+                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .Value);
+                            }
+
+                            if (activity.IntervalLaps.Any(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold))
+                            {
+                                mediumPaces.Add(
+                                    activity.IntervalLaps.Where(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold)
+                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .Value);
+                            }
+
+                            if (activity.IntervalLaps.Any(lap => lap.ElapsedTime >= mediumPaceMaxThreshold))
+                            {
+                                longPaces.Add(
+                                    activity.IntervalLaps.Where(lap => lap.ElapsedTime >= mediumPaceMaxThreshold)
+                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .Value);
+                            }
+                        }
+
+                        var averageShortPace = shortPaces.Any() ? shortPaces.Average() : 0;
+                        var averageMediumPace = mediumPaces.Any() ? mediumPaces.Average() : 0;
+                        var averageLongPace = longPaces.Any() ? longPaces.Average() : 0;
+
+                        var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString()} (< 2 min)" : null;
+                        var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString()}" : null;
+                        var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString()} (> 10 min)" : null;
+
+                        return new
+                        {
+                            Date = month.Key,
+                            AverageShortPace = averageShortPace,
+                            AverageMediumPace = averageMediumPace,
+                            AverageLongPace = averageLongPace,
+                            Label = $"{month.Key}{shortString}{mediumString}{longString}\r\n\r\nActivities: {month.Value.Count()}"
+                        };
+                    })
                 .ToList();
 
             return new
@@ -197,7 +222,12 @@ namespace Activities.Web.Pages.Intervals
             };
         }
 
-        private List<LapResult> GetLapsResult(List<Lap> laps, double? maxDistance = null, double? maxSpeed = null, double? maxHeartrate = null, double? maxDuration = null)
+        private List<LapResult> GetLapsResult(
+            List<Lap> laps,
+            double? maxDistance = null,
+            double? maxSpeed = null,
+            double? maxHeartrate = null,
+            double? maxDuration = null)
         {
             if (laps == null)
             {
@@ -208,7 +238,7 @@ namespace Activities.Web.Pages.Intervals
             var maxLapDuration = maxDuration ?? laps.Max(lap => lap.ElapsedTime);
             var maxLapSpeed = maxSpeed ?? laps.Max(lap => lap.AverageSpeed);
             var maxLapHeartrate = maxHeartrate ?? laps.Max(lap => lap.AverageHeartrate);
-            
+
             return laps
                 .Select(lap => new LapResult(lap, maxLapDistance, maxLapSpeed, maxLapHeartrate, maxLapDuration))
                 .ToList();
@@ -216,7 +246,9 @@ namespace Activities.Web.Pages.Intervals
 
         private bool IsIntervalWithinPace(Lap lap, double? minPace, double? maxPace)
         {
-            return lap.IsInterval && (minPace == null || lap.AverageSpeed >= minPace.Value.ToMetersPerSecond()) && (maxPace == null || lap.AverageSpeed <= maxPace.Value.ToMetersPerSecond());
+            return lap.IsInterval &&
+                   (minPace == null || lap.AverageSpeed >= minPace.Value.ToMetersPerSecond()) &&
+                   (maxPace == null || lap.AverageSpeed <= maxPace.Value.ToMetersPerSecond());
         }
 
         private IReadOnlyList<double> GetLactate(DetailedActivity activity)
@@ -253,7 +285,7 @@ namespace Activities.Web.Pages.Intervals
             IsInterval = lap.IsInterval;
             Distance = lap.Distance;
             AverageSpeed = lap.AverageSpeed;
-            AverageHeartrate = (int)lap.AverageHeartrate;
+            AverageHeartrate = (int) lap.AverageHeartrate;
             ElapsedTime = lap.ElapsedTime;
             Lactate = lap.Lactate;
 
@@ -271,7 +303,7 @@ namespace Activities.Web.Pages.Intervals
         public int AverageHeartrate { get; init; }
         public int ElapsedTime { get; init; }
         public double? Lactate { get; init; }
-        
+
         public double DistanceFactor { get; init; }
         public double AverageSpeedFactor { get; init; }
         public double AverageHeartrateFactor { get; init; }

@@ -152,6 +152,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         <option value="Ride">Ride</option>
         <option value="VirtualRide">VirtualRide</option>
         <option value="NordicSki">NordicSki</option>
+        <option value="Swim">Swim</option>
       </Dropdown>
       <Dropdown
         disabled={isLoading}

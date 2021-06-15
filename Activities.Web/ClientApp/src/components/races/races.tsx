@@ -58,7 +58,7 @@ const RacesPage: React.FC = () => {
                 <tr key={activity.id}>
                   <td>
                     <div style={{ fontWeight: 500 }}>
-                      <NavLink to={`activities/${activity.id}`}>{activity.name}</NavLink>
+                      <NavLink to={`/activities/${activity.id}`}>{activity.name}</NavLink>
                     </div>
                   </td>
                   <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>

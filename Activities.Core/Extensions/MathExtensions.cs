@@ -29,6 +29,31 @@ namespace Activities.Core.Extensions
             return showSuffix ? $"{paceString} /km" : paceString;
         }
 
+        public static double? AveragePace<T>(this IEnumerable<T> items, Func<T, double?> durationFunc, Func<T, double?> paceFunc)
+        {
+            var totalDuration = 0.0;
+            var total = 0.0;
+
+            foreach (var item in items)
+            {
+                var duration = durationFunc(item);
+                var pace = paceFunc(item);
+
+                if (duration != null && pace != null)
+                {
+                    totalDuration += duration.Value;
+                    total += pace.Value * duration.Value;
+                }
+            }
+
+            if (totalDuration == 0.0)
+            {
+                return null;
+            }
+
+            return total / totalDuration;
+        }
+
         public static double ToMetersPerSecond(this double minPerKm)
         {
             // 5.30
@@ -85,6 +110,11 @@ namespace Activities.Core.Extensions
             }
 
             return date.Date.AddDays(0 - dayOfWeek);
+        }
+
+        public static DateTime GetStartOfMonth(this DateTime date)
+        {
+            return new DateTime(date.Year, date.Month, 1);
         }
     }
 }

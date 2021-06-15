@@ -16,7 +16,7 @@ namespace Activities.Core.Caching
         {
             _storagePath = Path.Combine(contentRootPath, "storage");
         }
-        
+
         public async Task<T> GetOrAdd<T>(string key, Func<Task<T>> action) where T : class
         {
             var result = await Get<T>(key);
@@ -25,7 +25,7 @@ namespace Activities.Core.Caching
             {
                 return result;
             }
-            
+
             var semaphoreSlim = AsyncLocks.GetOrAdd(key, new SemaphoreSlim(1, 1));
             await semaphoreSlim.WaitAsync();
 
@@ -37,7 +37,7 @@ namespace Activities.Core.Caching
                 {
                     return result;
                 }
-                
+
                 result = await action();
                 await AddOrUpdate(key, TimeSpan.MaxValue, result);
             }
@@ -55,7 +55,7 @@ namespace Activities.Core.Caching
             {
                 return;
             }
-            
+
             EnsureDirectoryExists();
             var filePath = GetFilePath(key);
             var json = JsonConvert.SerializeObject(value);
@@ -84,10 +84,18 @@ namespace Activities.Core.Caching
         public void Remove(string key)
         {
             var filePath = GetFilePath(key);
+
             if (File.Exists(filePath) && !key.Contains("\\") && !key.Contains("/") && !key.Contains(".."))
             {
                 File.Delete(filePath);
             }
+        }
+
+        public bool ContainsKey(string key)
+        {
+            EnsureDirectoryExists();
+            var filePath = GetFilePath(key);
+            return File.Exists(filePath);
         }
 
         private void EnsureDirectoryExists()

@@ -50,9 +50,10 @@ export const Table = styled.table`
   > ${EmptyThead} > tr > th {
     background: #ddd;
     color: #555;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
     font-weight: normal;
+    font-size: 11px;
 
     @media (max-width: 768px) {
         padding: 4px 3px;
@@ -70,10 +71,6 @@ export const Table = styled.table`
   > tbody > tr {
     > td {
       border-top: thin solid #efefef;
-    }
-
-    &:nth-child(odd) {
-      background: #fafafa;
     }
 
     > td {
@@ -118,7 +115,9 @@ export const SmallTable = styled(Table)`
   line-height: 1.3;
   table-layout: auto;
 
-  > thead > tr > th {
-    padding: 10px;
+  @media (min-width: 769px) {
+    > thead > tr > th {
+      padding: 10px;
+    }
   }
 `;

@@ -39,7 +39,7 @@ export const SubHeader = styled.h2`
   font-size: 17px;
   line-height: 1;
   margin: 0;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 `;
 
 export const BigScreenTd = styled.td`
@@ -62,6 +62,15 @@ export const Grid = styled.div<{ columns: number }>`
     margin-bottom: 20px;
     grid-template-columns: repeat(${(props) => props.columns}, minmax(0, 1fr));
     grid-template-rows: auto;
+
+    & > * {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    margin: 0 -10px;
+    margin-bottom: 10px;
 
     & > * {
       margin-bottom: 0 !important;

@@ -55,3 +55,28 @@ export const getFeelingEmoji = (feeling: number) => {
   }
   return emoji;
 };
+
+export function AveragePace<T>(
+  items: T[],
+  durationFunc: (item: T) => number | null,
+  paceFunc: (item: T) => number | null,
+) {
+  let totalDuration = 0.0;
+  let total = 0.0;
+
+  items.forEach((item) => {
+    const duration = durationFunc(item);
+    const pace = paceFunc(item);
+
+    if (duration && pace) {
+      totalDuration += duration;
+      total += pace * duration;
+    }
+  });
+
+  if (totalDuration === 0.0) {
+    return null;
+  }
+
+  return total / totalDuration;
+}

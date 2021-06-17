@@ -161,18 +161,13 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink exact to="/intervals" activeClassName="navLink-active">
-                    Intervals
-                  </NavLink>
-                </li>
-                <li>
                   <NavLink exact to="/progress" activeClassName="navLink-active">
                     Progress
                   </NavLink>
                 </li>
                 <li>
-                  <NavLink exact to="/races" activeClassName="navLink-active">
-                    Races
+                  <NavLink exact to="/intervals" activeClassName="navLink-active">
+                    Intervals (Beta)
                   </NavLink>
                 </li>
               </>

@@ -26,10 +26,7 @@ namespace Activities.Strava.Endpoints
 
         public Task<IReadOnlyList<SummaryClub>> GetAthleteClubs(string accessToken)
         {
-            return _cachingService.GetOrAdd(
-                $"GetAthleteClubs:{accessToken}",
-                TimeSpan.FromMinutes(10),
-                () => Get<IReadOnlyList<SummaryClub>>(accessToken, $"https://www.strava.com/api/v3/athlete/clubs?per_page=200"));
+            return Get<IReadOnlyList<SummaryClub>>(accessToken, $"https://www.strava.com/api/v3/athlete/clubs?per_page=200");
         }
     }
 }

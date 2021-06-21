@@ -170,6 +170,9 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                     Intervals (Beta)
                   </NavLink>
                 </li>
+                <li>
+                  <a href="https://wiki.osi.run/" target="_blank" rel="noreferrer">Wiki/FAQ</a>
+                </li>
               </>
             )}
           </LinkContainer>

@@ -46,6 +46,7 @@ enum WorkoutType {
   Race = 1,
   Long = 2,
   Workout = 3,
+  BikeRace = 11,
 }
 
 interface DetailedActivity {

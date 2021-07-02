@@ -3,29 +3,26 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { round } from './utils/Formatters';
 import { UserContext, User } from './utils/UserContext';
+import LandingPage from './landing/LandingPage';
 
 const LayoutContainer = styled.div`
   margin: 0 auto;
   max-width: 1400px;
+  padding-top: 20px;
 
   @media (max-width: 1440px) {
-    padding: 0 20px;
+    padding: 20px 20px 0 20px;
   }
 
   @media (max-width: 768px) {
-    padding: 0 10px;
+    padding: 10px 10px 0 10px;
   }
 `;
 
 const MenuWrapper = styled.div`
   background: #c90000;
-  margin-bottom: 20px;
   overflow: auto;
   white-space: nowrap;
-
-  @media (max-width: 768px) {
-    margin-bottom: 10px;
-  }
 `;
 
 const MenuContainer = styled.div`
@@ -75,19 +72,19 @@ const CenterContainer = styled.div`
   align-items: center;
 `;
 
-const SignInButton = styled.a`
-  text-decoration: none;
-  border-radius: 3px;
-  border: 0;
-  padding: 15px 30px;
-  background: #c90000;
-  color: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+// const SignInButton = styled.a`
+//   text-decoration: none;
+//   border-radius: 3px;
+//   border: 0;
+//   padding: 15px 30px;
+//   background: #c90000;
+//   color: #fff;
+//   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
 
-  &:hover {
-    background: #1375b6;
-  }
-`;
+//   &:hover {
+//     background: #1375b6;
+//   }
+// `;
 
 const SyncPercentage = styled.span`
   font-weight: bold;
@@ -207,10 +204,11 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
         </CenterContainer>
         )}
         {user === null && (
-        <CenterContainer>
-          <p>Welcome. Sign in to proceed.</p>
-          <SignInButton href="/signin">Sign in</SignInButton>
-        </CenterContainer>
+        // <CenterContainer>
+        //   {/* <p>Welcome. Sign in to proceed.</p>
+        //   <SignInButton href="/signin">Sign in</SignInButton> */}
+        // </CenterContainer>
+          <LandingPage />
         )}
       </LayoutContainer>
     </UserContext.Provider>

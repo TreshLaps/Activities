@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ItemValue, ItemValueType } from '../models/ResultItem';
 import {
+  getFeelingEmoji,
   getKmString, getPaceString, getTimeString, round,
 } from './Formatters';
 
@@ -67,6 +68,9 @@ const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (prop
     case ItemValueType.Lactate:
       value = round(item.value, 1);
       color = '#a0a20a';
+      break;
+    case ItemValueType.Feeling:
+      value = getFeelingEmoji(item.value);
       break;
     default:
   }

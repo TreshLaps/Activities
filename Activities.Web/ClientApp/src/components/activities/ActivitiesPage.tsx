@@ -32,6 +32,7 @@ const ActivitiesPage: React.FC = () => {
         return response.json() as Promise<any>;
       })
       .then((data) => {
+        console.log(JSON.stringify(data.activities));
         setActivities(data.activities);
         setLoadingStatus(LoadingStatus.None);
       })
@@ -43,6 +44,11 @@ const ActivitiesPage: React.FC = () => {
 
   const showLactate = (activities
     && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
+
+  const showFeeling = (activities
+    && activities.filter((group) => group.items?.filter((activity) => activity.feeling !== null)).length > 0) === true;
+
+  const numberOfColumns = 6 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
 
   return (
     <div>
@@ -63,19 +69,20 @@ const ActivitiesPage: React.FC = () => {
                         <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
                         <ValueTh items={group.items} valueFunc={(item) => item.heartrate} title="Heartrate" />
                         {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} title="Lactate" />}
+                        {showFeeling && <th title="Feeling">Feeling</th>}
                       </tr>
                     </thead>
                   )}
                   {group.items.length === 0 && (
                     <EmptyThead>
                       <tr>
-                        <th colSpan={(showLactate ? 7 : 6)} id={group.name}>{group.name}</th>
+                        <th colSpan={numberOfColumns} id={group.name}>{group.name}</th>
                       </tr>
                     </EmptyThead>
                   )}
                   <tbody>
                     {group.items.map((activity) => (
-                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} />
+                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} showFeeling={showFeeling} />
                     ))}
                   </tbody>
                 </React.Fragment>

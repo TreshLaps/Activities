@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Container } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
-  getDateString, getKmString, getPaceString, getTimeString,
+  getDateString, getFeelingTitle, getKmString, getPaceString, getTimeString,
 } from '../utils/Formatters';
 import LapsChart, { Lap } from './LapsChart';
 
@@ -64,6 +64,7 @@ interface DetailedActivity {
   elevHigh: number;
   elevLow: number;
   endLatlng: number[];
+  feeling?: number;
   flagged: boolean;
   gear: { id: string; primary: boolean; name: string; resourceState: number; distance: number };
   gearId: string;
@@ -176,6 +177,11 @@ const ActivityDetailsPage: React.FC = () => {
             {activity.hasHeartrate && (
               <li>
                 <strong>Heartrate:</strong> {activity.averageHeartrate} (avg), {activity.maxHeartrate} (max)
+              </li>
+            )}
+            {activity.feeling && (
+              <li>
+                <strong>Feeling:</strong> {getFeelingTitle(activity.feeling)}
               </li>
             )}
           </ul>

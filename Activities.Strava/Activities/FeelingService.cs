@@ -48,7 +48,7 @@ namespace Activities.Strava.Activities
 
             if (matches.Any())
             {
-                var feeling = matches[0].Groups[0].Value;
+                var feeling = matches[0].Groups[1].Value;
 
                 switch (feeling)
                 {

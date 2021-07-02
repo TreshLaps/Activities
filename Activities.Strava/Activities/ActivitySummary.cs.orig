@@ -11,23 +11,52 @@ namespace Activities.Strava.Activities
         public static List<ActivityDataSummary> ToActivitySummary(this IEnumerable<DetailedActivity> activities, FilterRequest filterRequest)
         {
             var result = activities
+<<<<<<< HEAD
+                .Select(activity =>
+                {
+                    ItemValue distance = null;
+                    ItemValue elapsedTime = null;
+                    ItemValue pace = null;
+                    ItemValue heartrate = null;
+                    ItemValue lactate = null;
+                    ItemValue Feeling = null;
+
+                    if (filterRequest.DataType == FilterDataType.Activity)
+                    {
+                        distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
+                        elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
+                        pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
+                        heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
+                        lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
+                    }
+                    else if (filterRequest.DataType == FilterDataType.Interval)
+=======
                 .Select(
                     activity =>
+>>>>>>> main
                     {
                         ItemValue distance = null;
                         ItemValue elapsedTime = null;
                         ItemValue pace = null;
                         ItemValue heartrate = null;
                         ItemValue lactate = null;
-                        ItemValue feeling = null;
 
                         if (filterRequest.DataType == FilterDataType.Activity)
                         {
+<<<<<<< HEAD
+                            distance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
+                            elapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
+                            pace = new ItemValue(intervalLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
+                            heartrate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate), ItemValueType.Heartrate);
+                            lactate = ItemValue.TryCreate(intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate), ItemValueType.Number);
+                            Feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
+=======
                             distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
                             elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
                             pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                             heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                             lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
+>>>>>>> main
                         }
                         else if (filterRequest.DataType == FilterDataType.Interval)
                         {
@@ -35,6 +64,14 @@ namespace Activities.Strava.Activities
 
                             if (intervalLaps?.Any() == true)
                             {
+<<<<<<< HEAD
+                                distance = new ItemValue(thresholdLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
+                                elapsedTime = new ItemValue(thresholdLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
+                                pace = new ItemValue(thresholdLaps.Average(lap => lap.AverageSpeed), ItemValueType.MetersPerSecond);
+                                heartrate = ItemValue.TryCreate(thresholdLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate), ItemValueType.Heartrate);
+                                lactate = ItemValue.TryCreate(thresholdLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate), ItemValueType.Number);
+                                Feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
+=======
                                 distance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
                                 elapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
                                 pace = new ItemValue(
@@ -46,11 +83,19 @@ namespace Activities.Strava.Activities
                                 lactate = ItemValue.TryCreate(
                                     intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate),
                                     ItemValueType.Lactate);
-                                feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
+>>>>>>> main
                             }
                         }
                         else if (filterRequest.DataType == FilterDataType.Threshold && filterRequest.MinPace.HasValue && filterRequest.MaxPace.HasValue)
                         {
+<<<<<<< HEAD
+                            distance = new ItemValue(activity.Distance, ItemValueType.DistanceInMeters);
+                            elapsedTime = new ItemValue(activity.MovingTime, ItemValueType.TimeInSeconds);
+                            pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
+                            heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
+                            lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Number) : null;
+                            Feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
+=======
                             if (activity.Laps != null)
                             {
                                 var thresholdLaps = activity.Laps
@@ -73,7 +118,6 @@ namespace Activities.Strava.Activities
                                     lactate = ItemValue.TryCreate(
                                         thresholdLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate),
                                         ItemValueType.Number);
-                                    feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                                 }
                             }
                             else if (activity.ElapsedTime > 120 &&
@@ -85,10 +129,23 @@ namespace Activities.Strava.Activities
                                 pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                                 heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                                 lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
-                                feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                             }
+>>>>>>> main
                         }
 
+<<<<<<< HEAD
+                    return new ActivityDataSummary
+                    {
+                        Activity = activity,
+                        Distance = distance,
+                        ElapsedTime = elapsedTime,
+                        Pace = pace,
+                        Heartrate = heartrate,
+                        Lactate = lactate,
+                        Feeling = Feeling
+                    };
+                })
+=======
                         return new ActivityDataSummary
                         {
                             Activity = activity,
@@ -96,10 +153,10 @@ namespace Activities.Strava.Activities
                             ElapsedTime = elapsedTime,
                             Pace = pace,
                             Heartrate = heartrate,
-                            Lactate = lactate,
-                            Feeling = feeling
+                            Lactate = lactate
                         };
                     })
+>>>>>>> main
                 .Where(activity => activity.Distance != null)
                 .ToList();
 

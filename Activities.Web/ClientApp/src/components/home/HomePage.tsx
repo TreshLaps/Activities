@@ -115,6 +115,9 @@ const ActivitiesSummary: React.FC = () => {
   const showLactate = (activities
     && activities.filter((activity: any) => activity.lactate).length > 0) === true;
 
+  const showFeeling = (activities
+    && activities.filter((activity: any) => activity.feeling != null).length > 0) === true;
+
   return (
     <>
       <Loader status={loadingStatus} />
@@ -132,11 +135,12 @@ const ActivitiesSummary: React.FC = () => {
                   <ValueTh items={activities} valueFunc={(item) => item.pace} title="Pace" />
                   <ValueTh items={activities} valueFunc={(item) => item.heartrate} title="Heartrate" />
                   {showLactate && <ValueTh items={activities} valueFunc={(item) => item.lactate} title="Lactate" />}
+                  {showFeeling && <th title="Feeling">Feeling</th>}
                 </tr>
               </thead>
               <tbody>
                 {activities.map((activity: any) => (
-                  <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} />
+                  <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} showFeeling={showFeeling} />
                 ))}
               </tbody>
             </Table>

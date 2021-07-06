@@ -13,7 +13,7 @@ jobs:
     - name: stop osi service
       run: sudo /bin/systemctl stop osi.service
     - name: snapshot filesystem
-      run: ssh 192.168.0.2 /usr/sbin/btrfs subvolume snapshot -r /data/osirun/ /data/osirun/.$(date +%Y-%m-%d-%T)
+      run: ssh 192.168.0.10 /usr/sbin/btrfs subvolume snapshot -r /data/osirun/ /data/osirun/.$(date +%Y-%m-%d-%T)
     - name: git pull
       run: git  -C /data/osirun/Activities/ pull
     - name: dotnet publish

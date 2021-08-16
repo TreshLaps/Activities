@@ -36,6 +36,8 @@ namespace Activities.Tests
         [TestCase(4491176735, new[] { 1, 3, 5, 7, 9 })]
         [TestCase(5085079645, new[] { 3, 5, 7, 9, 11, 13 })]
         [TestCase(5356115018, new[] { 3, 5, 7, 9, 11 })]
+        [TestCase(5776260527, new[] { 2, 4, 6, 8, 10 })]
+        [TestCase(5706689060, new[] { 2, 4, 6, 8, 10, 12 })]
         [TestCase(1275055990, new int[0])]
         [TestCase(1164398338, new int[0])]
         [TestCase(1165907510, new int[0])]

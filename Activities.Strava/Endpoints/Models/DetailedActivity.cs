@@ -111,6 +111,8 @@ namespace Activities.Strava.Endpoints.Models
 
         [JsonProperty("description")] public string Description { get; set; }
 
+        [JsonProperty("private_note")] public string PrivateNote { get; set; }
+
         [JsonProperty("calories")] public double Calories { get; set; }
 
         [JsonProperty("perceived_exertion")] public object PerceivedExertion { get; set; }

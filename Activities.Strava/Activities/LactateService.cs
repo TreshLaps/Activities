@@ -10,7 +10,7 @@ namespace Activities.Strava.Activities
     public static class LactateService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-03-30";
+        private const string Version = "2021-08-16";
 
         public static bool TryParseLactatMeasurements(this DetailedActivity activity)
         {
@@ -22,6 +22,7 @@ namespace Activities.Strava.Activities
             activity._LactateVersion = Version;
 
             var measurements = GetLactateFromDescription(activity.Description);
+            measurements.AddRange(GetLactateFromDescription(activity.PrivateNote));
             var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
 
             foreach (var lap in intervalLaps)
@@ -40,20 +41,20 @@ namespace Activities.Strava.Activities
                     intervalLaps[measurement.Lap.Value - 1].Lactate = measurement.Value;
                 }
             }
-            
+
             return true;
         }
 
         public static List<(double Value, int? Lap)> GetLactateFromDescription(string description)
         {
             var result = new List<(double Value, int? Lap)>();
-            
+
             if (string.IsNullOrWhiteSpace(description))
             {
                 return result;
             }
-            
-            var regexes = new []
+
+            var regexes = new[]
             {
                 @"([0-9][,\.][0-9])[\W]*\(([0-9]+)\)",
                 @"💉[\W]*([0-9][,\.][0-9])[\W]*etter[\W]*([0-9]+)",

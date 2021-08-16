@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-06-10";
+        private const string Version = "2021-08-12";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -32,14 +32,14 @@ namespace Activities.Strava.Activities
 
             for (var i = 1; i < activity.Laps.Count - 1; i++)
             {
-                if (!IsIntervalLap(i, activity.Laps))
+                if (!IsIntervalLap(i, activity.Laps, true))
                 {
                     continue;
                 }
 
                 var similarLaps = GetSimilarLaps(i, activity.Laps, 0.1);
 
-                if (similarLaps.Count < 3)
+                if (similarLaps.Count < 2)
                 {
                     continue;
                 }
@@ -169,7 +169,7 @@ namespace Activities.Strava.Activities
             var isShortAndSlower = isShortLap && isSlowerThanIntervalLap;
             var isLongAndSlowerAndDifferent = !isShortLap && isSlowerThanIntervalLap && isLessThanDoubleDistanceOfIntervalLap && isGreatDistanceDifference;
 
-            var isIdenticalInDistance = Math.Abs(lap.Distance - intervalLap.Distance) < 10;
+            var isIdenticalInDistance = Math.Abs(lap.Distance - intervalLap.Distance) < 20;
             var isIdenticalInDuration = Math.Abs(lap.ElapsedTime - intervalLap.ElapsedTime) < 10;
             var isIdentical = lap.Distance > 100 && isIdenticalInDistance && isIdenticalInDuration;
 
@@ -187,6 +187,6 @@ namespace Activities.Strava.Activities
                                                                  (lap.Distance < 500 && Math.Abs(lap.MovingTime - lap.ElapsedTime) > 30) ||
                                                                  lap.MovingTime > 60 * 60 ||
                                                                  lap.Distance > 11000 ||
-                                                                 lap.AverageSpeed * 3.6 < 12;
+                                                                 lap.AverageSpeed * 3.6 < 8;
     }
 }

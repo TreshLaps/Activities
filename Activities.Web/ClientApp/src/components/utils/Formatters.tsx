@@ -47,11 +47,11 @@ export const getUrlDateString = (date: Date) => {
 export const getFeelingEmoji = (feeling: number) => {
   let emoji = '-';
   if (feeling === 3) {
-      emoji = '↗️';  //'😁';
+    emoji = '😎'; // '😁';
   } else if (feeling === 2) {
-      emoji = '➡️';  //'🙂';
+    emoji = '🙂'; // '🙂';
   } else if (feeling === 1) {
-      emoji = '↘️';  //'🥵';
+    emoji = '🥵'; // '🥵';
   }
   return emoji;
 };

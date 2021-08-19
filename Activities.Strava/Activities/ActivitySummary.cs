@@ -28,6 +28,7 @@ namespace Activities.Strava.Activities
                             pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                             heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                             lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
+                            feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                         }
                         else if (filterRequest.DataType == FilterDataType.Interval)
                         {

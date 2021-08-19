@@ -6,7 +6,7 @@ namespace Activities.Strava.Activities
     public static class FeelingService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-06-14";
+        private const string Version = "2021-08-19_v2";
 
         public static bool TryParseFeelingParameter(this DetailedActivity activity)
         {
@@ -17,12 +17,7 @@ namespace Activities.Strava.Activities
 
             activity._FeelingVersion = Version;
 
-            var parameter = GetFeelingFromDescription(activity.Description);
-
-            if (parameter == null)
-            {
-                parameter = GetFeelingFromDescription(activity.PrivateNote);
-            }
+            var parameter = GetFeelingFromDescription(activity.Description) ?? GetFeelingFromDescription(activity.PrivateNote);
 
             if (parameter == null)
             {
@@ -42,11 +37,11 @@ namespace Activities.Strava.Activities
                 return result;
             }
 
-            var match = Regex.Match(description.ToLower(), @"følelse: (lett|vanlig|tung)");
+            var match = Regex.Match(description.ToLower(), @"følelse([: ]*)(lett|vanlig|tung)");
 
             if (match.Success)
             {
-                var feeling = match.Groups[1].Value;
+                var feeling = match.Groups[2].Value;
 
                 switch (feeling)
                 {

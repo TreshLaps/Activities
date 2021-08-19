@@ -45,6 +45,9 @@ const SimiliarActivitiesPage: React.FC = () => {
   const showLactate = (activities
     && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
 
+  const showFeeling = (activities
+    && activities.filter((group) => group.items?.filter((activity) => activity.feeling != null)).length > 0) === true;
+
   return (
     <div>
       <Loader status={loadingStatus} />
@@ -64,6 +67,7 @@ const SimiliarActivitiesPage: React.FC = () => {
                         <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
                         <ValueTh items={group.items} valueFunc={(item) => item.heartrate} title="Heartrate" />
                         {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} title="Lactate" />}
+                        {showFeeling && <th title="Feeling">Feeling</th>}
                       </tr>
                     </thead>
                   )}
@@ -76,7 +80,7 @@ const SimiliarActivitiesPage: React.FC = () => {
                   )}
                   <tbody>
                     {group.items.map((activity) => (
-                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} />
+                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} showFeeling={showFeeling} />
                     ))}
                   </tbody>
                 </React.Fragment>

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import ValueTd from './ValueTd';
 import { ItemValue, ResultItem } from '../models/ResultItem';
 import { getActivityEmoji } from '../../styles/TypeEmoji';
+import { getFeelingEmoji, getFeelingTitle } from './Formatters';
 
 export interface Activity extends ResultItem {
   id: number;
@@ -18,6 +19,7 @@ export interface Activity extends ResultItem {
   heartrate: ItemValue;
   lactate: ItemValue;
   laps: ItemValue;
+  feeling: ItemValue;
 }
 
 const DescriptionText = styled.div`
@@ -59,8 +61,22 @@ export const TypeEmoji = styled.span`
     }
 `;
 
-const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean }> = (props) => {
-  const { activity, showLactate } = props;
+export const FeelingEmoji = styled.span`
+    display: inline-block;
+    font-size: 17px;
+    width: 30px;
+  
+    @media (max-width: 768px) {
+      font-size: 13px;
+      width: 17px;
+      position: absolute;
+      left: 4px;
+      top: calc(50% - 8px);
+    }
+`;
+
+const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeling: boolean }> = (props) => {
+  const { activity, showLactate, showFeeling } = props;
 
   return (
     <tr key={activity.id} style={activity.isRace ? { background: 'linear-gradient(to right, #cfa652, #FCF6BA, #B38728)' } : undefined}>
@@ -80,6 +96,16 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean }> = (prop
       <ValueTd item={activity.pace} title="Pace" />
       <ValueTd item={activity.heartrate} title="Heartrate" />
       {showLactate && <ValueTd item={activity.lactate} title="Lactate" />}
+      {(showFeeling && activity.feeling)
+      && (
+        <td>
+          <div>
+            <FeelingEmoji title={getFeelingTitle(activity.feeling.value)}>
+              {getFeelingEmoji(activity.feeling.value)}
+            </FeelingEmoji>
+          </div>
+        </td>
+      )}
     </tr>
   );
 };

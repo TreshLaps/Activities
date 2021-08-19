@@ -6,6 +6,7 @@ export enum ItemValueType {
   Heartrate = 4,
   Lactate = 5,
   AverageNumber = 6,
+  Feeling = 7,
 }
 
 export interface ItemValue {
@@ -22,4 +23,5 @@ export interface ResultItem {
   heartrate: ItemValue;
   lactate: ItemValue;
   laps: ItemValue;
+  feeling: ItemValue;
 }

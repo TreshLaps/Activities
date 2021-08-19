@@ -9,6 +9,9 @@ namespace Activities.Strava.Endpoints.Models
     {
         public string _IntervalVersion { get; set; }
         public string _LactateVersion { get; set; }
+        public string _FeelingVersion { get; set; }
+
+        public int? Feeling { get; set; }
 
         public double? Lactate { get; set; }
 

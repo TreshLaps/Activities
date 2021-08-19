@@ -55,7 +55,8 @@ namespace Activities.Web.Pages.Activities
                                     ElapsedTime = activitySummary.ElapsedTime,
                                     Pace = activitySummary.Pace,
                                     Heartrate = activitySummary.Heartrate,
-                                    Lactate = activitySummary.Lactate
+                                    Lactate = activitySummary.Lactate,
+                                    Feeling = activitySummary.Feeling
                                 })
                             .ToList()
                     })
@@ -89,7 +90,8 @@ namespace Activities.Web.Pages.Activities
                         ElapsedTime = activitySummary.ElapsedTime,
                         Pace = activitySummary.Pace,
                         Heartrate = activitySummary.Heartrate,
-                        Lactate = activitySummary.Lactate
+                        Lactate = activitySummary.Lactate,
+                        Feeling = activitySummary.Feeling
                     })
                 .ToList();
 
@@ -147,7 +149,8 @@ namespace Activities.Web.Pages.Activities
                                     Pace = activitySummary.Pace,
                                     Heartrate = activitySummary.Heartrate,
                                     Lactate = activitySummary.Lactate,
-                                    Laps = new ItemValue(activitySummary.Activity.Laps.Count(lap => lap.IsInterval), ItemValueType.AverageNumber)
+                                    Laps = new ItemValue(activitySummary.Activity.Laps.Count(lap => lap.IsInterval), ItemValueType.AverageNumber),
+                                    Feeling = activitySummary.Feeling
                                 })
                             .ToList()
                     })

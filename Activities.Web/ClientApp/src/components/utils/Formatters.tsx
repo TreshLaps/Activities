@@ -44,6 +44,30 @@ export const getUrlDateString = (date: Date) => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
+export const getFeelingEmoji = (feeling: number) => {
+  let emoji = '-';
+  if (feeling === 3) {
+    emoji = '😎'; // '😁';
+  } else if (feeling === 2) {
+    emoji = '🙂'; // '🙂';
+  } else if (feeling === 1) {
+    emoji = '🥵'; // '🥵';
+  }
+  return emoji;
+};
+
+export const getFeelingTitle = (feeling: number) => {
+  let title = '-';
+  if (feeling === 3) {
+    title = 'Easy';
+  } else if (feeling === 2) {
+    title = 'Normal';
+  } else if (feeling === 1) {
+    title = 'Heavy';
+  }
+  return title;
+};
+
 export function AveragePace<T>(
   items: T[],
   durationFunc: (item: T) => number | null,

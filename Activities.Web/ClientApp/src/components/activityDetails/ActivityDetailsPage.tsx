@@ -145,8 +145,6 @@ const ActivityDetailsPage: React.FC = () => {
       });
   };
 
-  console.log(activity);
-
   return (
     <>
       <Loader status={loadingStatus} />

@@ -32,7 +32,6 @@ const ActivitiesPage: React.FC = () => {
         return response.json() as Promise<any>;
       })
       .then((data) => {
-        console.log(JSON.stringify(data.activities));
         setActivities(data.activities);
         setLoadingStatus(LoadingStatus.None);
       })

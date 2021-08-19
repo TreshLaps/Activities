@@ -78,8 +78,6 @@ export const FeelingEmoji = styled.span`
 const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeling: boolean }> = (props) => {
   const { activity, showLactate, showFeeling } = props;
 
-  console.log(JSON.stringify(activity));
-
   return (
     <tr key={activity.id} style={activity.isRace ? { background: 'linear-gradient(to right, #cfa652, #FCF6BA, #B38728)' } : undefined}>
       <td>

@@ -82,7 +82,7 @@ const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (prop
         {item.factor > 0
     && (
     <>
-      <ValueTdFactorBackground color="#f5f5f5" />
+      <ValueTdFactorBackground color="rgba(240, 240, 240, 0.7)" />
       <ValueTdFactor style={{ width: `${item.factor * 100}%` }} color={color} />
     </>
     )}

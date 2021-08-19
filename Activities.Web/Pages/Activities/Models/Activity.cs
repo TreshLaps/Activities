@@ -9,6 +9,7 @@ namespace Activities.Web.Pages.Activities.Models
         public string Date { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public bool IsRace { get; set; }
         public ItemValue Distance { get; set; }
         public ItemValue ElapsedTime { get; set; }
         public ItemValue Pace { get; set; }

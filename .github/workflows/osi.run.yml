@@ -13,12 +13,12 @@ jobs:
     - name: stop osi service
       run: sudo /bin/systemctl stop osi.service
     - name: snapshot filesystem
-      run: ssh 192.168.0.2 /usr/sbin/btrfs subvolume snapshot -r /data/osirun/ /data/osirun/.$(date +%Y-%m-%d-%T)
+      run: sudo snapper -c root create
     - name: git pull
-      run: git  -C /data/osirun/Activities/ pull
+      run: git  -C /home/fyksen/Activities/ pull
     - name: dotnet publish
-      run: cd /data/osirun/Activities/Activities.Web/ && exec dotnet publish
+      run: cd /home/fyksen/Activities/Activities.Web/ && exec dotnet publish
     - name: start osi service
       run: sudo /bin/systemctl start osi.service
     - name: Make a log post
-      run: date >> /data/persistant/log.txt | echo "Ran git pull" >> /data/persistant/log.txt
+      run: date >> /home/fyksen/git-update.log | echo "Ran git pull" >> /home/fyksen/git-update.log

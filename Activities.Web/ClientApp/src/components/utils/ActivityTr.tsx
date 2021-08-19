@@ -11,6 +11,7 @@ export interface Activity extends ResultItem {
   date: string;
   name: string;
   type: string;
+  isRace?: boolean;
   description: string;
   distance: ItemValue;
   elapsedTime: ItemValue;
@@ -80,7 +81,7 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeli
   console.log(JSON.stringify(activity));
 
   return (
-    <tr key={activity.id}>
+    <tr key={activity.id} style={activity.isRace ? { background: 'linear-gradient(to right, #cfa652, #FCF6BA, #B38728)' } : undefined}>
       <td>
         <div>
           <TypeEmoji title={activity.type}>{getActivityEmoji(activity.type)}</TypeEmoji>

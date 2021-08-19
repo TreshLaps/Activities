@@ -1,10 +1,5 @@
-﻿using Activities.Strava.Endpoints.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
+using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Activities
 {
@@ -26,6 +21,11 @@ namespace Activities.Strava.Activities
 
             if (parameter == null)
             {
+                parameter = GetFeelingFromDescription(activity.PrivateNote);
+            }
+
+            if (parameter == null)
+            {
                 return false;
             }
 
@@ -42,13 +42,11 @@ namespace Activities.Strava.Activities
                 return result;
             }
 
-            var regex = @"følelse: (lett|vanlig|tung)";
+            var match = Regex.Match(description.ToLower(), @"følelse: (lett|vanlig|tung)");
 
-            var matches = Regex.Matches(description.ToLower(), regex, RegexOptions.Multiline);
-
-            if (matches.Any())
+            if (match.Success)
             {
-                var feeling = matches[0].Groups[1].Value;
+                var feeling = match.Groups[1].Value;
 
                 switch (feeling)
                 {

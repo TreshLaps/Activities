@@ -1,6 +1,6 @@
 {
-  "short_name": "Dashboard",
-  "name": "Application Insights Dashboard",
+  "short_name": "osi.run",
+  "name": "osi.run",
   "icons": [
     {
       "src": "favicon.ico",

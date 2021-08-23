@@ -95,6 +95,7 @@ interface DetailedActivity {
   startDateLocal: string;
   startLatlng: number[];
   sufferScore: number;
+  ignoreIntervals: boolean;
   timezone: string;
   totalElevationGain: number;
   totalPhotoCount: number;
@@ -110,8 +111,8 @@ interface DetailedActivity {
 const ActivityDetailsPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
   const [activity, setActivity] = useState<DetailedActivity>();
-
   const { id } = useParams<{ id: string | undefined }>();
+  const hasIntervals = activity?.laps != null && activity.laps.filter((lap) => lap.isInterval).length > 0;
 
   useEffect(() => {
     if (activity !== undefined) {
@@ -134,9 +135,20 @@ const ActivityDetailsPage: React.FC = () => {
 
   const reimport = () => {
     fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
-      .then((response) => response.json() as Promise<DetailedActivity>)
-      .then((data) => {
-        setActivity(data);
+      .then(() => {
+        setActivity(undefined);
+        setLoadingStatus(LoadingStatus.None);
+      })
+      .catch(() => {
+        setActivity(undefined);
+        setLoadingStatus(LoadingStatus.Error);
+      });
+  };
+
+  const toggleIgnoreIntervals = () => {
+    fetch(`/api/activities/${id}/toggleIgnoreIntervals`, { method: 'POST' })
+      .then(() => {
+        setActivity(undefined);
         setLoadingStatus(LoadingStatus.None);
       })
       .catch(() => {
@@ -190,6 +202,16 @@ const ActivityDetailsPage: React.FC = () => {
             <>
               <h3>Laps</h3>
               <LapsChart laps={activity.laps} />
+              {hasIntervals
+            && (
+            <div style={{ marginTop: '20px' }}>
+              <strong>Ignore as intervals: </strong>
+              <ActionButton
+                onClick={toggleIgnoreIntervals}
+              >{activity.ignoreIntervals.toString()}
+              </ActionButton>
+            </div>
+            )}
             </>
           )}
 
@@ -247,7 +269,7 @@ const ActivityDetailsPage: React.FC = () => {
           </ul>
 
           <h3>Actions</h3>
-          {activity.laps?.filter((lap) => lap.isInterval).length > 0
+          {hasIntervals
           && <ActionButtonNav to={`/activities/${activity.id}/similar`}>Similar intervals</ActionButtonNav>}
           <ActionButton onClick={reimport}>Reimport</ActionButton>
           <ActionButton

@@ -15,6 +15,8 @@ namespace Activities.Strava.Endpoints.Models
 
         public double? Lactate { get; set; }
 
+        public bool IgnoreIntervals { get; set; }
+
         [JsonProperty("resource_state")] public int ResourceState { get; set; }
 
         [JsonProperty("athlete")] public Athlete Athlete { get; set; }

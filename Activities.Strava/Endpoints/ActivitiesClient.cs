@@ -54,6 +54,16 @@ namespace Activities.Strava.Endpoints
             }
         }
 
+        public async Task ToggleIgnoreIntervals(long id)
+        {
+            var activity = await _cachingService.GetOrAdd<DetailedActivity>(
+                $"DetailedActivity:{id}",
+                TimeSpan.MaxValue,
+                () => throw new InvalidOperationException());
+            activity.IgnoreIntervals = !activity.IgnoreIntervals;
+            await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+        }
+
         public void RemoveActivity(long id)
         {
             _cachingService.Remove($"DetailedActivity:{id}");

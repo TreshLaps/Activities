@@ -11,6 +11,7 @@ namespace Activities.Strava.Activities
         public static List<ActivityDataSummary> ToActivitySummary(this IEnumerable<DetailedActivity> activities, FilterRequest filterRequest)
         {
             var result = activities
+                .Where(activity => filterRequest.DataType != FilterDataType.Interval || !activity.IgnoreIntervals)
                 .Select(
                     activity =>
                     {
@@ -19,7 +20,7 @@ namespace Activities.Strava.Activities
                         ItemValue pace = null;
                         ItemValue heartrate = null;
                         ItemValue lactate = null;
-                        ItemValue feeling = null;
+                        ItemValue feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
 
                         if (filterRequest.DataType == FilterDataType.Activity)
                         {
@@ -28,7 +29,6 @@ namespace Activities.Strava.Activities
                             pace = new ItemValue(activity.AverageSpeed, ItemValueType.MetersPerSecond);
                             heartrate = activity.AverageHeartrate > 0 ? new ItemValue(activity.AverageHeartrate, ItemValueType.Heartrate) : null;
                             lactate = activity.AverageLactate.HasValue ? new ItemValue(activity.AverageLactate.Value, ItemValueType.Lactate) : null;
-                            feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                         }
                         else if (filterRequest.DataType == FilterDataType.Interval)
                         {
@@ -47,7 +47,6 @@ namespace Activities.Strava.Activities
                                 lactate = ItemValue.TryCreate(
                                     intervalLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate),
                                     ItemValueType.Lactate);
-                                feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                             }
                         }
                         else if (filterRequest.DataType == FilterDataType.Threshold && filterRequest.MinPace.HasValue && filterRequest.MaxPace.HasValue)
@@ -74,7 +73,6 @@ namespace Activities.Strava.Activities
                                     lactate = ItemValue.TryCreate(
                                         thresholdLaps.Where(lap => lap.Lactate > 0).AverageOrNull(lap => lap.Lactate),
                                         ItemValueType.Number);
-                                    feeling = activity.Feeling.HasValue ? new ItemValue(activity.Feeling.Value, ItemValueType.Feeling) : null;
                                 }
                             }
                             else if (activity.ElapsedTime > 120 &&

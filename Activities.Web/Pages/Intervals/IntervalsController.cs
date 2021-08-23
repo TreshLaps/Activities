@@ -39,6 +39,7 @@ namespace Activities.Web.Pages.Intervals
 
             var intervalActivities = detailedActivities
                 .Where(activity => activity != null)
+                .Where(activity => !activity.IgnoreIntervals)
                 .Select(
                     activity => new
                     {

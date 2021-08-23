@@ -34,6 +34,12 @@ namespace Activities.Web.Pages.Activities
             _activitiesClient.RemoveActivity(id);
         }
 
+        [HttpPost("{id}/toggleIgnoreIntervals")]
+        public Task ToggleIgnoreIntervals(long id)
+        {
+            return _activitiesClient.ToggleIgnoreIntervals(id);
+        }
+
         [HttpGet]
         public async Task<ActivitiesResult> Get([FromQuery] FilterRequest filterRequest)
         {

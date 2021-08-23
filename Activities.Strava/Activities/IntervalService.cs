@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-08-12";
+        private const string Version = "2021-08-23";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -76,6 +76,28 @@ namespace Activities.Strava.Activities
                 foreach (var lap in activity.Laps)
                 {
                     lap.IsInterval = false;
+                }
+            }
+
+            for (var i = 1; i < activity.Laps.Count - 1; i++)
+            {
+                var currentLap = activity.Laps[i];
+
+                if (currentLap.IsInterval)
+                {
+                    continue;
+                }
+
+                var similarIntervalLaps = activity.Laps
+                    .Where(lap => lap.IsInterval)
+                    .Where(lap => Math.Abs(lap.Distance - currentLap.Distance) < currentLap.Distance * 0.5)
+                    .Where(lap => Math.Abs(lap.AverageSpeed - currentLap.AverageSpeed) < currentLap.AverageSpeed * 0.1)
+                    .ToList();
+
+
+                if (similarIntervalLaps.Any())
+                {
+                    currentLap.IsInterval = true;
                 }
             }
 

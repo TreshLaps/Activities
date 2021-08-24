@@ -106,6 +106,12 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeli
           </div>
         </td>
       )}
+      {(showFeeling && activity.feeling == null)
+      && (
+        <td>
+          <div>&nbsp;</div>
+        </td>
+      )}
     </tr>
   );
 };

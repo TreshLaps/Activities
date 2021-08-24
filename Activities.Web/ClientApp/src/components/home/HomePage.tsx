@@ -135,7 +135,7 @@ const ActivitiesSummary: React.FC = () => {
                   <ValueTh items={activities} valueFunc={(item) => item.pace} title="Pace" />
                   <ValueTh items={activities} valueFunc={(item) => item.heartrate} title="Heartrate" />
                   {showLactate && <ValueTh items={activities} valueFunc={(item) => item.lactate} title="Lactate" />}
-                  {showFeeling && <th title="Feeling">Feeling</th>}
+                  {showFeeling && <th title="Feeling">&nbsp;&nbsp;&nbsp;</th>}
                 </tr>
               </thead>
               <tbody>

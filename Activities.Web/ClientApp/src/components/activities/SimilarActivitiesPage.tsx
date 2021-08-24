@@ -48,6 +48,8 @@ const SimiliarActivitiesPage: React.FC = () => {
   const showFeeling = (activities
     && activities.filter((group) => group.items?.filter((activity) => activity.feeling != null)).length > 0) === true;
 
+  const numberOfColumns = 7 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
+
   return (
     <div>
       <Loader status={loadingStatus} />
@@ -67,14 +69,14 @@ const SimiliarActivitiesPage: React.FC = () => {
                         <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
                         <ValueTh items={group.items} valueFunc={(item) => item.heartrate} title="Heartrate" />
                         {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} title="Lactate" />}
-                        {showFeeling && <th title="Feeling">Feeling</th>}
+                        {showFeeling && <th title="Feeling">&nbsp;&nbsp;&nbsp;</th>}
                       </tr>
                     </thead>
                   )}
                   {group.items.length === 0 && (
                     <EmptyThead>
                       <tr>
-                        <th colSpan={(showLactate ? 8 : 7)} id={group.name}>{group.name}</th>
+                        <th colSpan={numberOfColumns} id={group.name}>{group.name}</th>
                       </tr>
                     </EmptyThead>
                   )}

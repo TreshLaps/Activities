@@ -1,13 +1,13 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-  border-radius: 3px;
+  border-radius: 5px;
   margin-bottom: 20px;
 `;
 
 export const Box = styled(Container)`
   background: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
   padding: 20px;
 
   @media (max-width: 1440px) {
@@ -79,10 +79,9 @@ export const Grid = styled.div<{ columns: number }>`
 `;
 
 export const TableContainer = styled.div`
-  overflow-x: auto;
-
   @media (max-width: 768px) {
     margin: 0 -10px;
+    overflow-x: auto;
   }
 `;
 
@@ -94,18 +93,18 @@ export const Table = styled.table`
   width: 100%;
   border-spacing: 0;
   border-collapse: separate;
-  border-radius: 3px;
+  border-radius: 5px;
   margin-bottom: 20px;
   background: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
   overflow: hidden;
 
   > thead > tr > th {
     text-align: right;
-    padding: 15px;
+    padding: 13px 15px 10px;
     font-size: 15px;
     line-height: 1;
-    background: #bdc9ce;
+    background: lightblue;
 
     &:first-child {
       text-align: left;

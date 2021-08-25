@@ -6,10 +6,10 @@ export const Table = styled.table`
   width: 100%;
   border-spacing: 0;
   border-collapse: separate;
-  border-radius: 3px;
+  border-radius: 5px;
   margin-bottom: 20px;
   background: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
   overflow: hidden;
 
   @media (max-width: 768px) {
@@ -20,10 +20,10 @@ export const Table = styled.table`
 
   > thead > tr > th {
     text-align: right;
-    padding: 15px;
+    padding: 13px 15px 10px;
     font-size: inherit;
     line-height: 1;
-    background: #bdc9ce;
+    background: lightblue;
 
     &:first-child {
       text-align: left;

@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities
     public static class IntervalService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-08-23";
+        private const string Version = "2021-08-25";
 
         public static bool TryTagIntervalLaps(this DetailedActivity activity)
         {
@@ -79,29 +79,73 @@ namespace Activities.Strava.Activities
                 }
             }
 
-            for (var i = 1; i < activity.Laps.Count - 1; i++)
+            for (var i = 0; i < activity.Laps.Count; i++)
             {
-                var currentLap = activity.Laps[i];
+                var matchingLap = GetClosestMatchingLap(i, activity.Laps);
 
-                if (currentLap.IsInterval)
+                if (matchingLap.IsInterval && CheckIfLapIsInterval(activity, i))
                 {
-                    continue;
-                }
-
-                var similarIntervalLaps = activity.Laps
-                    .Where(lap => lap.IsInterval)
-                    .Where(lap => Math.Abs(lap.Distance - currentLap.Distance) < currentLap.Distance * 0.5)
-                    .Where(lap => Math.Abs(lap.AverageSpeed - currentLap.AverageSpeed) < currentLap.AverageSpeed * 0.1)
-                    .ToList();
-
-
-                if (similarIntervalLaps.Any())
-                {
-                    currentLap.IsInterval = true;
+                    activity.Laps[i].IsInterval = true;
                 }
             }
 
             return true;
+        }
+
+        private static bool CheckIfLapIsInterval(DetailedActivity activity, int i)
+        {
+            var currentLap = activity.Laps[i];
+
+            if (currentLap.IsInterval)
+            {
+                return true;
+            }
+
+            var similarIntervalLaps = activity.Laps
+                .Where(lap => lap.IsInterval)
+                .Where(lap => Math.Abs(lap.Distance - currentLap.Distance) < currentLap.Distance * 0.5)
+                .Where(lap => Math.Abs(lap.AverageSpeed - currentLap.AverageSpeed) < currentLap.AverageSpeed * 0.1)
+                .ToList();
+
+
+            if (similarIntervalLaps.Any() && HasNonIntervalNeighbor(i, activity.Laps))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool HasNonIntervalNeighbor(int index, List<Lap> laps)
+        {
+            if (index > 0 && laps[index - 1].IsInterval == false)
+            {
+                return true;
+            }
+
+            if (index < laps.Count && laps[index + 1].IsInterval == false)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static Lap GetClosestMatchingLap(int index, List<Lap> laps)
+        {
+            return laps
+                .Where((_, i) => i != index)
+                .OrderBy(
+                    lap =>
+                    {
+                        var difference = 0.0;
+                        difference += Math.Abs(lap.Distance - laps[index].Distance) / 100;
+                        difference += Math.Abs(lap.AverageSpeed - laps[index].AverageSpeed) * 10;
+                        difference += Math.Abs(lap.ElapsedTime - laps[index].ElapsedTime) / 10.0;
+                        difference += Math.Abs(lap.MovingTime - laps[index].MovingTime) / 10.0;
+                        return difference;
+                    })
+                .First();
         }
 
         private static bool IsAutoLapOrSimilar(List<Lap> laps)

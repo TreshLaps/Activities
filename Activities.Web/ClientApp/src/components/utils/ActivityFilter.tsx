@@ -103,6 +103,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
 
     if (durationFilter === 'Year') {
       items.set('year', yearFilter);
+    }
+
+    if (durationFilter === 'LastYear' || durationFilter === 'Last3Years' || durationFilter === 'Year') {
       items.set('groupKey', groupKeyFilter);
     }
 
@@ -164,7 +167,8 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
       >
         <option value="LastMonths">Last 20 weeks</option>
         <option value="LastYear">Last 12 months</option>
-        <option value="Year">Year report</option>
+        <option value="Last3Years">Last 3 years</option>
+        <option value="Year">Single year</option>
         <option value="Custom">Custom range</option>
       </Dropdown>
       {durationFilter === 'Year' && (
@@ -193,7 +197,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         isLoading={isLoading}
       />
       )}
-      {(durationFilter === 'Year' || durationFilter === 'Custom') && (
+      {(durationFilter === 'Year' || durationFilter === 'Custom' || durationFilter === 'LastYear' || durationFilter === 'Last3Years') && (
       <Dropdown
         disabled={isLoading}
         defaultValue={groupKeyFilter}

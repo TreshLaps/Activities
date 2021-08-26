@@ -203,6 +203,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
       >
         <option value="Week">Week</option>
         <option value="Month">Month</option>
+        <option value="Quarter">Quarter</option>
       </Dropdown>
       )}
       {disableDataTypeFilter !== true && (

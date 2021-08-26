@@ -25,15 +25,7 @@ namespace Activities.Strava.Activities
 
             var (startDate, endDate) = GetDateRange();
 
-            if (Duration == FilterDuration.LastMonths)
-            {
-                if (activity.StartDate.Date < endDate)
-                {
-                    return false;
-                }
-            }
-
-            if (Duration == FilterDuration.LastYear)
+            if (Duration is FilterDuration.LastMonths or FilterDuration.LastYear or FilterDuration.Last3Years)
             {
                 if (activity.StartDate.Date < endDate)
                 {
@@ -55,7 +47,7 @@ namespace Activities.Strava.Activities
                 {
                     return false;
                 }
-                
+
                 if (EndDate.HasValue && activity.StartDate < EndDate)
                 {
                     return false;
@@ -77,6 +69,11 @@ namespace Activities.Strava.Activities
                 return (DateTime.Today, new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-1));
             }
 
+            if (Duration == FilterDuration.Last3Years)
+            {
+                return (DateTime.Today, new DateTime(DateTime.Today.Year, DateTime.Today.Month, 01).AddYears(-3));
+            }
+
             if (Duration == FilterDuration.Year && Year > 2000 && Year <= DateTime.Today.Year)
             {
                 var startDate = new DateTime(Year + 1, 01, 01).AddDays(-1);
@@ -86,7 +83,7 @@ namespace Activities.Strava.Activities
                 {
                     startDate = DateTime.Today;
                 }
-                
+
                 return (startDate, endDate);
             }
 
@@ -105,6 +102,7 @@ namespace Activities.Strava.Activities
         LastMonths,
         LastYear,
         Year,
+        Last3Years,
         Custom
     }
 

@@ -14,6 +14,12 @@ namespace Activities.Core.Extensions
                 return $"{startOfWeek:dd.} - {startOfWeek.AddDays(6):dd. MMM}";
             }
 
+            if (key == GroupKey.Quarter)
+            {
+                var quarter = (int)Math.Ceiling(date.Month / 3.0);
+                return $"Q{quarter} {date:yyyy}";
+            }
+
             return date.ToString("MMM yyyy");
         }
 
@@ -46,6 +52,15 @@ namespace Activities.Core.Extensions
                     currentDate = currentDate.AddDays(-7);
                 } while (currentDate >= endDate);
             }
+            else if (groupKey == GroupKey.Quarter)
+            {
+                do
+                {
+                    var currentKey = currentDate.GetGroupKey(groupKey);
+                    groups.Add(currentKey, groupedItems.ContainsKey(currentKey) ? groupedItems[currentKey] : new List<T>());
+                    currentDate = currentDate.AddMonths(-3);
+                } while (currentDate >= endDate);
+            }
             else
             {
                 currentDate = currentDate.GetStartOfMonth().AddMonths(1).AddMinutes(-1);
@@ -65,6 +80,7 @@ namespace Activities.Core.Extensions
     public enum GroupKey
     {
         Week,
-        Month
+        Month,
+        Quarter
     }
 }

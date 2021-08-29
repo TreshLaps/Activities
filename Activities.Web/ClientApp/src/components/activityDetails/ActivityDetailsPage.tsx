@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { Container } from '../../styles/styles';
+import { Box, Container } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
   getDateString, getFeelingTitle, getKmString, getPaceString, getTimeString,
@@ -27,6 +27,14 @@ const ActionButtonNav = styled(Link)`
   font-weight: 500;
   cursor: pointer;
   color: white;
+`;
+
+const Heading = styled.h2`
+  font-size: 40px;
+  font-weight: normal;
+  line-height: 1.2;
+  margin: 0;
+  margin-top: 40px;
 `;
 
 interface Split {
@@ -162,7 +170,8 @@ const ActivityDetailsPage: React.FC = () => {
       <Loader status={loadingStatus} />
       {loadingStatus === LoadingStatus.None && activity && (
         <Container>
-          <h2>{activity.name}</h2>
+          <Heading>{activity.name}</Heading>
+          <p>{activity.description}</p>
           <ul>
             <li>
               <strong>Type:</strong> {activity.type} {activity.workoutType && `(${WorkoutType[activity.workoutType]})`}
@@ -196,22 +205,13 @@ const ActivityDetailsPage: React.FC = () => {
               </li>
             )}
           </ul>
-          <p>{activity.description}</p>
 
-          {activity.laps && (
+          {activity.laps && activity.laps.length > 1 && (
             <>
               <h3>Laps</h3>
-              <LapsChart laps={activity.laps} />
-              {hasIntervals
-            && (
-            <div style={{ marginTop: '20px' }}>
-              <strong>Ignore as intervals: </strong>
-              <ActionButton
-                onClick={toggleIgnoreIntervals}
-              >{activity.ignoreIntervals.toString()}
-              </ActionButton>
-            </div>
-            )}
+              <Box>
+                <LapsChart laps={activity.laps} />
+              </Box>
             </>
           )}
 
@@ -270,11 +270,18 @@ const ActivityDetailsPage: React.FC = () => {
 
           <h3>Actions</h3>
           {hasIntervals
-          && <ActionButtonNav to={`/activities/${activity.id}/similar`}>Similar intervals</ActionButtonNav>}
+          && (
+          <>
+            <ActionButtonNav to={`/activities/${activity.id}/similar`}>View similar intervals</ActionButtonNav>
+            <ActionButton
+              onClick={toggleIgnoreIntervals}
+            >Ignore in interval summaries: {activity.ignoreIntervals.toString().toUpperCase()}
+            </ActionButton>
+          </>
+          )}
           <ActionButton onClick={reimport}>Reimport</ActionButton>
           <ActionButton
             href={`https://www.strava.com/activities/${activity.id}`}
-            target="_blank"
             rel="noopener noreferrer"
           >
             View on Strava

@@ -83,7 +83,7 @@ namespace Activities.Strava.Activities
             {
                 var matchingLap = GetClosestMatchingLap(i, activity.Laps);
 
-                if (matchingLap.IsInterval && CheckIfLapIsInterval(activity, i))
+                if (matchingLap != null && matchingLap.IsInterval && CheckIfLapIsInterval(activity, i))
                 {
                     activity.Laps[i].IsInterval = true;
                 }
@@ -133,6 +133,11 @@ namespace Activities.Strava.Activities
 
         private static Lap GetClosestMatchingLap(int index, List<Lap> laps)
         {
+            if (laps.Count < 2)
+            {
+                return null;
+            }
+
             return laps
                 .Where((_, i) => i != index)
                 .OrderBy(

@@ -192,25 +192,22 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
           </LinkContainer>
         </MenuContainer>
       </MenuWrapper>
-      <LayoutContainer>
-        {user && syncProgress >= 1.0 && <div>{children}</div>}
-        {user && syncProgress < 1.0 && (
-        <CenterContainer>
-          <p>Loading your activities</p>
-          {syncProgress > 0.0
-          && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
-          {syncProgress === 0.0
-          && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
-        </CenterContainer>
-        )}
-        {user === null && (
-        // <CenterContainer>
-        //   {/* <p>Welcome. Sign in to proceed.</p>
-        //   <SignInButton href="/signin">Sign in</SignInButton> */}
-        // </CenterContainer>
-          <LandingPage />
-        )}
-      </LayoutContainer>
+      {user ? (
+        <LayoutContainer>
+          {user && syncProgress >= 1.0 && <div>{children}</div>}
+          {user && syncProgress < 1.0 && (
+          <CenterContainer>
+            <p>Loading your activities</p>
+            {syncProgress > 0.0
+                && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
+            {syncProgress === 0.0
+                && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
+          </CenterContainer>
+          )}
+        </LayoutContainer>
+      ) : (
+        <LandingPage />
+      )}
     </UserContext.Provider>
   );
 };

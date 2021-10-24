@@ -72,20 +72,6 @@ const CenterContainer = styled.div`
   align-items: center;
 `;
 
-// const SignInButton = styled.a`
-//   text-decoration: none;
-//   border-radius: 3px;
-//   border: 0;
-//   padding: 15px 30px;
-//   background: #c90000;
-//   color: #fff;
-//   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-
-//   &:hover {
-//     background: #1375b6;
-//   }
-// `;
-
 const SyncPercentage = styled.span`
   font-weight: bold;
 `;

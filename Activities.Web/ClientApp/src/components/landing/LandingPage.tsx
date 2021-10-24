@@ -3,65 +3,86 @@ import styled from 'styled-components';
 import { Droplet, Pulse, Run } from 'styled-icons/boxicons-regular';
 import foto from '../../assets/markus_ser_viktig_ut.jpg';
 
+const LandingContainer = styled.div`
+    max-width: 1400px;
+    margin: 0 auto;
+`;
+
 const BannerWrapper = styled.div`
-    background-image: url('${foto}'); /* fallback */
-    background-image: linear-gradient(to right, #f7f7fa, rgba(226,234,253,0.2)), url('${foto}');
-    background-position: right top;
-    background-size: auto 120%;
-    background-repeat: no-repeat;
     width: 100%;
-    height: 400px;
+    margin: 100px 0;
+    background: #fff;
+    border-radius: 10px;
     position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+
+    span {
+      font-size: 50px;
+      color: #c90000;
+      padding-left: 50px;
+    }
+
+    img {
+      display: block;
+      height: 200px;
+      object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+      display: block;
+      margin: 0;
+      border-radius: 0;
+      margin-bottom: 50px;
+
+      span {
+        display: block;
+        font-size: 30px;
+        line-height: 1.5;
+        padding-left: 0;
+        padding: 20px;
+        text-align: center;
+      }
+
+      img {
+        width: 100%;
+      }
+    }
 `;
 
 const ContentWrapper = styled.div`
     width: 100%;
-    flex: 1;
+    display: flex;
     flex-wrap: wrap;
-    display: flex;
-    flex-direction: row;
     justify-content: space-evenly;
-    align-items: center;
-`;
 
-const LandingContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    // min-height: 100vh;
-`;
-
-const BannerText = styled.h1`
-    color: #c90000;
-    font-size: 3rem;
-    font-family: Roboto Mono;
-    padding: 5rem;
-    text-align: center;
-    bottom: 0;
-    position: absolute;
+    svg {
+      width: 100px;
+      margin: 0 auto;
+      display: block;
+    }
 `;
 
 const BoxWrapper = styled.div`
-  width: 15rem;
-  padding: 2rem;
-  color: #4c566a;
-  :hover {
-    color: #111317;
-    font-color: #111317;
-  }
+  padding: 10px;
+  max-width: 400px;
+  font-size: 20px;
+  line-height: 1.5;
 `;
 
 const BoxText = styled.p`
-  color: inherit;
-  font-size: 1rem;
-  font-family: Roboto Mono;
   text-align: center;
+  margin-bottom: 20px;
+  margin-top: 5px;
 `;
 
-const LandingPage: React.FC<{ children?: any }> = ({ children }) => (
+const LandingPage: React.FC<{ children?: any }> = () => (
   <LandingContainer>
     <BannerWrapper>
-      <BannerText>&quot;All you need is red cells&quot;</BannerText>
-      {children}
+      <span>“All you need is red cells”</span>
+      <img src={foto} alt="Markus ser viktig ut" />
     </BannerWrapper>
     <ContentWrapper>
       <BoxWrapper>

@@ -3,29 +3,26 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { round } from './utils/Formatters';
 import { UserContext, User } from './utils/UserContext';
+import LandingPage from './landing/LandingPage';
 
 const LayoutContainer = styled.div`
   margin: 0 auto;
   max-width: 1400px;
+  padding-top: 20px;
 
   @media (max-width: 1440px) {
-    padding: 0 20px;
+    padding: 20px 20px 0 20px;
   }
 
   @media (max-width: 768px) {
-    padding: 0 10px;
+    padding: 10px 10px 0 10px;
   }
 `;
 
 const MenuWrapper = styled.div`
   background: #c90000;
-  margin-bottom: 20px;
   overflow: auto;
   white-space: nowrap;
-
-  @media (max-width: 768px) {
-    margin-bottom: 10px;
-  }
 `;
 
 const MenuContainer = styled.div`
@@ -73,20 +70,6 @@ const CenterContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-`;
-
-const SignInButton = styled.a`
-  text-decoration: none;
-  border-radius: 3px;
-  border: 0;
-  padding: 15px 30px;
-  background: #c90000;
-  color: #fff;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background: #1375b6;
-  }
 `;
 
 const SyncPercentage = styled.span`
@@ -195,24 +178,22 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
           </LinkContainer>
         </MenuContainer>
       </MenuWrapper>
-      <LayoutContainer>
-        {user && syncProgress >= 1.0 && <div>{children}</div>}
-        {user && syncProgress < 1.0 && (
-        <CenterContainer>
-          <p>Loading your activities</p>
-          {syncProgress > 0.0
-          && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
-          {syncProgress === 0.0
-          && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
-        </CenterContainer>
-        )}
-        {user === null && (
-        <CenterContainer>
-          <p>Welcome. Sign in to proceed.</p>
-          <SignInButton href="/signin">Sign in</SignInButton>
-        </CenterContainer>
-        )}
-      </LayoutContainer>
+      {user ? (
+        <LayoutContainer>
+          {user && syncProgress >= 1.0 && <div>{children}</div>}
+          {user && syncProgress < 1.0 && (
+          <CenterContainer>
+            <p>Loading your activities</p>
+            {syncProgress > 0.0
+                && <div><SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage></div>}
+            {syncProgress === 0.0
+                && <div>Progress: <SyncPercentage>{round(syncProgress * 100, 0)} %</SyncPercentage> (Waiting for available slot)</div>}
+          </CenterContainer>
+          )}
+        </LayoutContainer>
+      ) : (
+        <LandingPage />
+      )}
     </UserContext.Provider>
   );
 };

@@ -19,16 +19,16 @@ namespace Activities.Core.Caching
             return _memoryCacheService.GetOrAdd(
                 key,
                 expiration == TimeSpan.MaxValue ? TimeSpan.FromDays(2) : expiration,
-                () =>
+                async () =>
                 {
                     if (expiration == TimeSpan.MaxValue)
                     {
-                        return _permanentStorageService.GetOrAdd(
+                        return await _permanentStorageService.GetOrAdd(
                             key,
                             action);
                     }
 
-                    return action();
+                    return await action();
                 });
         }
 

@@ -10,23 +10,29 @@ import {
 import LapsChart, { Lap } from './LapsChart';
 
 const ActionButton = styled.a`
-  padding: 10px;
+  padding: 13px 15px; 
   background-color: #005dff;
   margin-right: 10px;
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;
   color: white;
+  display: inline-block;
+  margin-bottom: 10px;
+  line-height: 1;
 `;
 
 const ActionButtonNav = styled(Link)`
-  padding: 10px;
+  padding: 13px 15px;
   background-color: #005dff;
   margin-right: 10px;
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;
   color: white;
+  display: inline-block;
+  margin-bottom: 10px;
+  line-height: 1;
 `;
 
 const Heading = styled.h2`
@@ -274,18 +280,18 @@ const ActivityDetailsPage: React.FC = () => {
           <>
             <ActionButtonNav to={`/activities/${activity.id}/similar`}>View similar intervals</ActionButtonNav>
             <ActionButton
+              href={`https://www.strava.com/activities/${activity.id}`}
+              rel="noopener noreferrer"
+            >
+              View on Strava
+            </ActionButton>
+            <ActionButton
               onClick={toggleIgnoreIntervals}
             >Ignore in interval summaries: {activity.ignoreIntervals.toString().toUpperCase()}
             </ActionButton>
           </>
           )}
           <ActionButton onClick={reimport}>Reimport</ActionButton>
-          <ActionButton
-            href={`https://www.strava.com/activities/${activity.id}`}
-            rel="noopener noreferrer"
-          >
-            View on Strava
-          </ActionButton>
         </Container>
       )}
     </>

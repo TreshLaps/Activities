@@ -153,6 +153,7 @@ const IntervalsPage: React.FC = () => {
                     data={intervalDistances}
                     fill="#4c8eff"
                     stroke="#4c8eff"
+                    style={{ shapeRendering: 'crispEdges' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'distance' })}
                     onValueMouseOut={() => setHint(null)}
                     onValueClick={(value) => {
@@ -164,6 +165,7 @@ const IntervalsPage: React.FC = () => {
                     data={totalDistances}
                     fill="#bdc9ce"
                     stroke="#bdc9ce"
+                    style={{ shapeRendering: 'crispEdges' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'distance' })}
                     onValueMouseOut={() => setHint(null)}
                     onValueClick={(value) => {
@@ -203,6 +205,7 @@ const IntervalsPage: React.FC = () => {
                     data={shortPaces}
                     fill="#d4ce73"
                     stroke={0}
+                    style={{ shapeRendering: 'crispEdges' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
                     onValueMouseOut={() => setHint(null)}
                     onValueClick={(value) => {
@@ -215,6 +218,7 @@ const IntervalsPage: React.FC = () => {
                     data={mediumPaces}
                     fill="#448944"
                     stroke={0}
+                    style={{ shapeRendering: 'crispEdges' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
                     onValueMouseOut={() => setHint(null)}
                     onValueClick={(value) => {
@@ -227,6 +231,7 @@ const IntervalsPage: React.FC = () => {
                     data={longPaces}
                     fill="#afcbfb"
                     stroke={0}
+                    style={{ shapeRendering: 'crispEdges' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
                     onValueMouseOut={() => setHint(null)}
                     onValueClick={(value) => {

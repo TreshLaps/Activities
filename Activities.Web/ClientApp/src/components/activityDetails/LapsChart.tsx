@@ -92,7 +92,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
       {chart.laps?.length > 1 && (
         <Chart
           stack
-          height={400}
+          height={300}
           xDomain={[0, chart.totalMovingTime]}
           xAxisType={AxisTypes.None}
           yDomain={[slowSpeed, fastSpeed]}

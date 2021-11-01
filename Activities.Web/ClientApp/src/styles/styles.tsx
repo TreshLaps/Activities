@@ -10,8 +10,10 @@ export const Box = styled(Container)`
   box-shadow: rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px, rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
   padding: 20px;
 
-  @media (max-width: 1440px) {
-    padding: 10px;
+  @media (max-width: 768px) {
+    margin-left: -10px;
+    margin-right: -10px;
+    border-radius: 0;
   }
 `;
 

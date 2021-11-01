@@ -43,6 +43,10 @@ const Heading = styled.h2`
   margin-top: 40px;
 `;
 
+const Description = styled.p`
+  white-space: pre-line;
+`;
+
 interface Split {
   averageGradeAdjustedSpeed: number;
   averageHeartrate: number;
@@ -177,7 +181,7 @@ const ActivityDetailsPage: React.FC = () => {
       {loadingStatus === LoadingStatus.None && activity && (
         <Container>
           <Heading>{activity.name}</Heading>
-          <p>{activity.description}</p>
+          <Description>{activity.description}</Description>
           <ul>
             <li>
               <strong>Type:</strong> {activity.type} {activity.workoutType && `(${WorkoutType[activity.workoutType]})`}

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Hint, LabelSeries, VerticalBarSeries } from 'react-vis';
+import React, { useState, useMemo } from 'react';
+import { Hint, LabelSeries, VerticalRectSeries } from 'react-vis';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
-import Chart, { getChartData, AxisTypes } from '../charts/Chart';
+import Chart, { AxisTypes } from '../charts/Chart';
 
 export interface Lap {
   averageCadence: number;
@@ -27,97 +27,97 @@ export interface Lap {
   totalElevationGain: number;
 }
 
+const isPauseLap = (lap: Lap) => {
+  if (lap.movingTime < 60 && (100 / lap.elapsedTime * lap.movingTime) < 50) {
+    return true;
+  }
+
+  if (lap.movingTime < 30 && (100 / lap.elapsedTime * lap.movingTime) < 30) {
+    return true;
+  }
+
+  return false;
+};
+
 const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
-  const padding = 0.5;
-  const [intervalLaps, setIntervalLaps] = useState<any[]>();
-  const [breakLaps, setBreakLaps] = useState<any[]>();
-  const [labels, setLabels] = useState<any[]>();
   const [hint, setHint] = useState<{ value: any; owner: string } | null>();
-  const [slowSpeed, setSlowSpeed] = useState(0.5);
-  const [fastSpeed, setFastSpeed] = useState(5);
-  const hasIntervalLaps = intervalLaps && intervalLaps.length > 0;
+  const speedPadding = 0.1;
 
-  useEffect(() => {
-    if (breakLaps !== undefined) {
-      return;
-    }
+  const sortedBySpeed = [...laps]
+    .filter((lap) => isPauseLap(lap) === false)
+    .sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
+  const slowSpeed = sortedBySpeed[0].averageSpeed - speedPadding;
+  const fastSpeed = sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + speedPadding;
+  const minChartHeight = (fastSpeed - slowSpeed) * 0.05;
 
-    setIntervalLaps(
-      getChartData<Lap>(
-        laps.filter((l) => l.isInterval),
-        (item) => item.lapIndex,
-        (item) => item.averageSpeed,
-        (item) => `Distance: ${getKmString(item.distance)}
-                        Moving time: ${getTimeString(item.movingTime)}
-                        Pace: ${getPaceString(item.averageSpeed, true)}
-                        ${item.lactate ? `Lactate: ${item.lactate}` : ''}`,
-      ),
-    );
+  const chart: { laps: any[], totalMovingTime: Number } = useMemo(() => {
+    const totalMovingTime = laps.map((lap) => lap.elapsedTime).reduce((l1, l2) => l1 + l2);
+    const barPadding = totalMovingTime * 0.01;
+    let currentMovingTime = barPadding;
 
-    setBreakLaps(
-      getChartData<Lap>(
-        laps.filter((l) => !l.isInterval),
-        (item) => item.lapIndex,
-        (item) => item.averageSpeed,
-        (item) => `Distance: ${getKmString(item.distance)}\nMoving time: ${getTimeString(
-          item.movingTime,
-        )}\nPace: ${getPaceString(item.averageSpeed, true)}`,
-      ),
-    );
+    const chartLaps: any[] = laps.map((lap) => {
+      const averageLapSpeed = isPauseLap(lap) ? slowSpeed + minChartHeight : lap.averageSpeed;
+      const x0 = currentMovingTime;
+      const x = x0 + lap.elapsedTime;
+      currentMovingTime = x + barPadding;
 
-    setLabels(
-      getChartData<Lap>(
-        laps,
-        (item) => item.lapIndex,
-        (item) => item.averageSpeed,
-        (item) => (item.isInterval
-          ? `${getPaceString(item.averageSpeed, true)} ${item.lactate ? '💉' : ''}`
-          : getTimeString(item.elapsedTime)),
-      ),
-    );
+      return {
+        x0,
+        x,
+        y: averageLapSpeed,
+        label: isPauseLap(lap) ? '' : getPaceString(averageLapSpeed),
+        hint: `Distance: ${getKmString(lap.distance)}
+      Moving time: ${getTimeString(lap.movingTime)}
+      Pace: ${getPaceString(lap.averageSpeed, true)}
+      ${lap.lactate ? `Lactate: ${lap.lactate}` : ''}`,
+        color: lap.isInterval ? 1 : 0,
+      };
+    });
 
-    const sortedBySpeed = laps.sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
-    setSlowSpeed(sortedBySpeed[0].averageSpeed - padding);
-    setFastSpeed(sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + padding);
-  }, [laps]);
+    return {
+      laps: chartLaps,
+      totalMovingTime: currentMovingTime,
+    };
+  }, [laps, slowSpeed]);
+
+  const labelData: any[] = useMemo(() => chart.laps.map((lap) => ({
+    x: lap.x0 + ((lap.x - lap.x0) / 2),
+    y: lap.y,
+    yOffset: -8,
+    label: lap.label,
+  })), [chart.laps]);
 
   return (
     <div>
-      {labels && labels.length > 1 && (
+      {chart.laps?.length > 1 && (
         <Chart
           stack
           height={400}
-          xDomain={hasIntervalLaps ? [1.5, laps.length - 0.5] : [1, laps.length]}
-          xAxisType={AxisTypes.Integer}
+          xDomain={[0, chart.totalMovingTime]}
+          xAxisType={AxisTypes.None}
           yDomain={[slowSpeed, fastSpeed]}
           yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
         >
-          <VerticalBarSeries
-            animation
-            barWidth={hasIntervalLaps ? 0.5 : 1}
-            data={breakLaps}
-            fill="#bdc9ce"
-            stroke="#fff"
+          <VerticalRectSeries
+            data={chart.laps}
             onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
             onValueMouseOut={() => setHint(null)}
             onValueClick={(value) => {
               window.location.hash = value.x.toString();
             }}
+            colorRange={[
+              '#d6d6d6',
+              '#92b7f8',
+            ]}
+            style={{ shapeRendering: 'crispEdges' }}
           />
-          <VerticalBarSeries
-            animation
-            barWidth={0.5}
-            data={intervalLaps}
-            fill="#4c8eff"
-            stroke="#fff"
-            onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
-            onValueMouseOut={() => setHint(null)}
-            onValueClick={(value) => {
-              window.location.hash = value.x.toString();
-            }}
+          <LabelSeries
+            data={labelData}
+            labelAnchorX="middle"
+            labelAnchorY="top"
+            style={{ fontSize: 12, textShadow: '0 0 1px white, 0 0 2px white, 0 0 3px white' }}
           />
-          <LabelSeries animation data={labels} labelAnchorX="middle" labelAnchorY="top" style={{ fontSize: 15 }} />
-          {hint?.value.label != null && hint?.owner === 'pace' && (
+          {hint?.value.hint != null && hint?.owner === 'pace' && (
             <Hint value={hint.value}>
               <div
                 style={{
@@ -129,7 +129,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
                   whiteSpace: 'pre-line',
                 }}
               >
-                {hint.value.label}
+                {hint.value.hint}
               </div>
             </Hint>
           )}

@@ -22,6 +22,16 @@ const ActionButton = styled.a`
   line-height: 1;
 `;
 
+const ScrollableBox = styled(Box)`
+  @media (max-width: 768px) {
+    overflow-x: auto;
+
+    > * {
+      min-width: 700px;
+    }
+  }
+`;
+
 const ActionButtonNav = styled(Link)`
   padding: 13px 15px;
   background-color: #005dff;
@@ -41,6 +51,11 @@ const Heading = styled.h2`
   line-height: 1.2;
   margin: 0;
   margin-top: 40px;
+
+  @media (max-width: 768px) {   
+    margin-top: 20px;
+    font-size: 30px;
+  }
 `;
 
 const Description = styled.p`
@@ -219,9 +234,9 @@ const ActivityDetailsPage: React.FC = () => {
           {activity.laps && activity.laps.length > 1 && (
             <>
               <h3>Laps</h3>
-              <Box>
+              <ScrollableBox>
                 <LapsChart laps={activity.laps} />
-              </Box>
+              </ScrollableBox>
             </>
           )}
 

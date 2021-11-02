@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Hint, LabelSeries, VerticalRectSeries } from 'react-vis';
+import {
+  CustomSVGSeries,
+  Hint, LabelSeries, VerticalRectSeries,
+} from 'react-vis';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import Chart, { AxisTypes } from '../charts/Chart';
 
@@ -52,7 +55,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
 
   const chart: { laps: any[], totalMovingTime: Number } = useMemo(() => {
     const totalMovingTime = laps.map((lap) => lap.elapsedTime).reduce((l1, l2) => l1 + l2);
-    const barPadding = totalMovingTime * 0.01;
+    const barPadding = totalMovingTime * 0.005;
     let currentMovingTime = barPadding;
 
     const chartLaps: any[] = laps.map((lap) => {
@@ -62,13 +65,14 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
       currentMovingTime = x + barPadding;
 
       return {
+        lap,
         x0,
         x,
         y: averageLapSpeed,
         label: isPauseLap(lap) ? '' : getPaceString(averageLapSpeed),
-        hint: `Distance: ${getKmString(lap.distance)}
-      Moving time: ${getTimeString(lap.movingTime)}
-      Pace: ${getPaceString(lap.averageSpeed, true)}
+        hint: `Pace: ${getPaceString(lap.averageSpeed, true)}
+        Distance: ${getKmString(lap.distance)}
+      Duration: ${getTimeString(lap.movingTime)}
       ${lap.lactate ? `Lactate: ${lap.lactate}` : ''}`,
         color: lap.isInterval ? 1 : 0,
       };
@@ -83,8 +87,16 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
   const labelData: any[] = useMemo(() => chart.laps.map((lap) => ({
     x: lap.x0 + ((lap.x - lap.x0) / 2),
     y: lap.y,
-    yOffset: -8,
+    yOffset: -4,
     label: lap.label,
+  })), [chart.laps]);
+
+  const labelTicks: any[] = useMemo(() => chart.laps.map((lap) => ({
+    x: lap.x0 + ((lap.x - lap.x0) / 2),
+    y: slowSpeed,
+    customComponent: () => (isPauseLap(lap.lap) ? null : (
+      <text x={0} y={15} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
+    )),
   })), [chart.laps]);
 
   return (
@@ -92,11 +104,13 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
       {chart.laps?.length > 1 && (
         <Chart
           stack
-          height={300}
+          height={250}
           xDomain={[0, chart.totalMovingTime]}
           xAxisType={AxisTypes.None}
           yDomain={[slowSpeed, fastSpeed]}
           yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
+          margin={{ bottom: 15 }}
+          hideYAxis
         >
           <VerticalRectSeries
             data={chart.laps}
@@ -105,27 +119,30 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
             onValueClick={(value) => {
               window.location.hash = value.x.toString();
             }}
+            stroke="0"
             colorRange={[
               '#d6d6d6',
               '#92b7f8',
             ]}
-            style={{ shapeRendering: 'crispEdges' }}
           />
           <LabelSeries
             data={labelData}
             labelAnchorX="middle"
             labelAnchorY="top"
-            style={{ fontSize: 12, textShadow: '0 0 1px white, 0 0 2px white, 0 0 3px white' }}
+            style={{ fontSize: 10, textShadow: '0 0 1px white, 0 0 2px white, 0 0 3px white' }}
           />
+          <CustomSVGSeries data={labelTicks} />
           {hint?.value.hint != null && hint?.owner === 'pace' && (
             <Hint value={hint.value}>
               <div
                 style={{
-                  background: 'black',
-                  padding: '3px 5px',
-                  color: 'white',
-                  borderRadius: '5px',
+                  background: 'white',
+                  boxShadow: '1px 1px 6px rgba(0,0,0, 0.5), 1px 1px 4px rgba(0,0,0, 0.3)',
+                  padding: '7px 10px',
+                  color: 'black',
+                  borderRadius: '2px',
                   fontSize: '12px',
+                  lineHeight: 1.5,
                   whiteSpace: 'pre-line',
                 }}
               >

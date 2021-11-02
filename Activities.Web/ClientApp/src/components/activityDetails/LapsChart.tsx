@@ -30,12 +30,15 @@ export interface Lap {
   totalElevationGain: number;
 }
 
-const isPauseLap = (lap: Lap) => {
-  if (lap.movingTime < 60 && (100 / lap.elapsedTime * lap.movingTime) < 50) {
+const isPauseLap = (index: number, laps: Lap[]) => {
+  if (index > 0
+    && index < laps.length - 1
+    && laps[index - 1].isInterval
+    && laps[index + 1].isInterval) {
     return true;
   }
 
-  if (lap.movingTime < 30 && (100 / lap.elapsedTime * lap.movingTime) < 30) {
+  if (laps[index].movingTime < 30 && (100 / laps[index].elapsedTime * laps[index].movingTime) < 50) {
     return true;
   }
 
@@ -47,7 +50,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
   const speedPadding = 0.1;
 
   const sortedBySpeed = [...laps]
-    .filter((lap) => isPauseLap(lap) === false)
+    .filter((lap, lapIndex) => isPauseLap(lapIndex, laps) === false)
     .sort((l1, l2) => l1.averageSpeed - l2.averageSpeed);
   const slowSpeed = sortedBySpeed[0].averageSpeed - speedPadding;
   const fastSpeed = sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + speedPadding;
@@ -58,8 +61,8 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
     const barPadding = totalMovingTime * 0.005;
     let currentMovingTime = barPadding;
 
-    const chartLaps: any[] = laps.map((lap) => {
-      const averageLapSpeed = isPauseLap(lap) ? slowSpeed + minChartHeight : lap.averageSpeed;
+    const chartLaps: any[] = laps.map((lap, lapIndex) => {
+      const averageLapSpeed = isPauseLap(lapIndex, laps) ? slowSpeed + minChartHeight : lap.averageSpeed;
       const x0 = currentMovingTime;
       const x = x0 + lap.elapsedTime;
       currentMovingTime = x + barPadding;
@@ -69,10 +72,10 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
         x0,
         x,
         y: averageLapSpeed,
-        label: isPauseLap(lap) ? '' : getPaceString(averageLapSpeed),
+        label: isPauseLap(lapIndex, laps) ? '' : getPaceString(averageLapSpeed),
         hint: `Pace: ${getPaceString(lap.averageSpeed, true)}
         Distance: ${getKmString(lap.distance)}
-      Duration: ${getTimeString(lap.movingTime)}
+      Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(lap.movingTime)})
       ${lap.lactate ? `Lactate: ${lap.lactate}` : ''}`,
         color: lap.isInterval ? 1 : 0,
       };
@@ -91,12 +94,21 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
     label: lap.label,
   })), [chart.laps]);
 
-  const labelTicks: any[] = useMemo(() => chart.laps.map((lap) => ({
+  const labelTicks: any[] = useMemo(() => chart.laps.map((lap, lapIndex) => ({
     x: lap.x0 + ((lap.x - lap.x0) / 2),
     y: slowSpeed,
-    customComponent: () => (isPauseLap(lap.lap) ? null : (
-      <text x={0} y={15} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
-    )),
+    customComponent: () => {
+      if (lapIndex > 0
+        && lapIndex < chart.laps.length - 1
+        && chart.laps[lapIndex - 1].lap.isInterval
+        && chart.laps[lapIndex + 1].lap.isInterval) {
+        return null;
+      }
+
+      return (
+        <text x={0} y={15} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
+      );
+    },
   })), [chart.laps]);
 
   return (

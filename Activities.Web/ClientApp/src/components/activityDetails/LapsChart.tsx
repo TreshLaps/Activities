@@ -45,7 +45,7 @@ const isPauseLap = (index: number, laps: Lap[]) => {
   return false;
 };
 
-const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
+const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined }> = ({ laps, averageIntervalPace }) => {
   const [hint, setHint] = useState<{ value: any; owner: string } | null>();
   const speedPadding = 0.1;
 
@@ -56,7 +56,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
   const fastSpeed = sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + speedPadding;
   const minChartHeight = (fastSpeed - slowSpeed) * 0.05;
 
-  const chart: { laps: any[], totalMovingTime: Number } = useMemo(() => {
+  const chart: { laps: any[], totalMovingTime: number, barPadding: number } = useMemo(() => {
     const totalMovingTime = laps.map((lap) => lap.elapsedTime).reduce((l1, l2) => l1 + l2);
     const barPadding = totalMovingTime * 0.005;
     let currentMovingTime = barPadding;
@@ -84,6 +84,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
     return {
       laps: chartLaps,
       totalMovingTime: currentMovingTime,
+      barPadding,
     };
   }, [laps, slowSpeed]);
 
@@ -111,12 +112,30 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
     },
   })), [chart.laps]);
 
+  const averageIntervalPaceData: any[] = useMemo(() => [{
+    x: 0,
+    y: averageIntervalPace,
+    customComponent: () => (
+      <g>
+        <text
+          x={0}
+          y={3}
+          textAnchor="left"
+          fill="#668ecc"
+          style={{ fontSize: 10, letterSpacing: '-0.5px' }}
+        >{getPaceString(averageIntervalPace || 0)}
+        </text>
+        <line x1="22" y1="0" x2={chart.totalMovingTime} y2="0" stroke="#92b7f8" strokeDasharray="4" />
+      </g>
+    ),
+  }], [averageIntervalPace, chart]);
+
   return (
     <div>
       {chart.laps?.length > 1 && (
         <Chart
           stack
-          height={250}
+          height={300}
           xDomain={[0, chart.totalMovingTime]}
           xAxisType={AxisTypes.None}
           yDomain={[slowSpeed, fastSpeed]}
@@ -124,6 +143,7 @@ const LapsChart: React.FC<{ laps: Lap[] }> = ({ laps }) => {
           margin={{ bottom: 15 }}
           hideYAxis
         >
+          {averageIntervalPace && <CustomSVGSeries data={averageIntervalPaceData} />}
           <VerticalRectSeries
             data={chart.laps}
             onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}

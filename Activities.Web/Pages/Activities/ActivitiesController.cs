@@ -16,16 +16,32 @@ namespace Activities.Web.Pages.Activities
 {
     public class ActivitiesController : BaseActivitiesController
     {
-        public ActivitiesController(ActivitiesClient activitiesClient) : base(activitiesClient)
+        private readonly IntervalStatisticsService _intervalStatisticsService;
+
+        public ActivitiesController(
+            ActivitiesClient activitiesClient,
+            IntervalStatisticsService intervalStatisticsService) : base(activitiesClient)
         {
+            _intervalStatisticsService = intervalStatisticsService;
         }
 
         [HttpGet("{id}")]
-        public async Task<dynamic> GetActivity(long id)
+        public async Task<ActivityResult> GetActivity(long id)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, id);
-            return activity;
+            var averageIntervalPace = 0.0;
+
+            if (activity.Laps?.Any(lap => lap.IsInterval) == true)
+            {
+                averageIntervalPace = await _intervalStatisticsService.GetAveragePace(stravaAthlete, TimeSpan.FromDays(60), activity.Type);
+            }
+
+            return new ActivityResult
+            {
+                Activity = activity,
+                AverageIntervalPace = averageIntervalPace
+            };
         }
 
         [HttpPost("{id}/reimport")]

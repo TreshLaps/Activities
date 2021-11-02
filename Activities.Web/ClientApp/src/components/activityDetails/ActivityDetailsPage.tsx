@@ -144,6 +144,7 @@ interface DetailedActivity {
 const ActivityDetailsPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
   const [activity, setActivity] = useState<DetailedActivity>();
+  const [averageIntervalPace, setAverageIntervalPace] = useState<number>();
   const { id } = useParams<{ id: string | undefined }>();
   const hasIntervals = activity?.laps != null && activity.laps.filter((lap) => lap.isInterval).length > 0;
 
@@ -155,9 +156,10 @@ const ActivityDetailsPage: React.FC = () => {
     setLoadingStatus(LoadingStatus.Loading);
 
     fetch(`/api/activities/${id}`)
-      .then((response) => response.json() as Promise<DetailedActivity>)
+      .then((response) => response.json() as Promise<any>)
       .then((data) => {
-        setActivity(data);
+        setActivity(data.activity);
+        setAverageIntervalPace(data.averageIntervalPace);
         setLoadingStatus(LoadingStatus.None);
       })
       .catch(() => {
@@ -235,7 +237,7 @@ const ActivityDetailsPage: React.FC = () => {
             <>
               <h3>Laps</h3>
               <ScrollableBox>
-                <LapsChart laps={activity.laps} />
+                <LapsChart laps={activity.laps} averageIntervalPace={averageIntervalPace} />
               </ScrollableBox>
             </>
           )}

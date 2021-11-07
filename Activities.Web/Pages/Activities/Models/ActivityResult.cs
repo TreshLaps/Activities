@@ -6,5 +6,6 @@ namespace Activities.Web.Pages.Activities.Models
     {
         public DetailedActivity Activity { get; set; }
         public double AverageIntervalPace { get; set; }
+        public double Last60DaysIntervalPace { get; set; }
     }
 }

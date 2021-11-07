@@ -30,13 +30,28 @@ namespace Activities.Strava.Activities
                 .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
                 .ToList();
 
-            return intervalLaps.Average();
+            return intervalLaps.Average(lap => lap.AverageSpeed);
+        }
+
+        public async Task<double> GetMedianPace(StravaAthleteToken stravaAthleteToken, TimeSpan fromTime, string activityType)
+        {
+            var activities = (await _activitiesClient.GetActivities(stravaAthleteToken.AccessToken, stravaAthleteToken.AthleteId))
+                .Where(activity => activity.Type == activityType)
+                .Where(activity => activity.StartDate >= DateTime.Now - fromTime)
+                .ToList();
+
+            var intervalLaps = (await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthleteToken.AccessToken, activity.Id)))
+                .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval) == true)
+                .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
+                .ToList();
+
+            return intervalLaps.Select(lap => lap.AverageSpeed).Median();
         }
     }
 
     public static class LapExtensions
     {
-        public static double Average(this IEnumerable<Lap> laps)
+        public static double Average(this IEnumerable<Lap> laps, Func<Lap, double> getValue)
         {
             var totalTime = 0.0;
             var pace = 0.0;
@@ -44,7 +59,7 @@ namespace Activities.Strava.Activities
             foreach (var lap in laps)
             {
                 totalTime += lap.ElapsedTime;
-                pace += lap.AverageSpeed * lap.ElapsedTime;
+                pace += getValue(lap) * lap.ElapsedTime;
             }
 
             return pace / totalTime;

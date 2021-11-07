@@ -29,7 +29,7 @@ namespace Activities.Core.Extensions
             return showSuffix ? $"{paceString} /km" : paceString;
         }
 
-        public static double? AveragePace<T>(this IEnumerable<T> items, Func<T, double?> durationFunc, Func<T, double?> paceFunc)
+        public static double? AverageBy<T>(this IEnumerable<T> items, Func<T, double?> durationFunc, Func<T, double?> paceFunc)
         {
             var totalDuration = 0.0;
             var total = 0.0;
@@ -90,6 +90,14 @@ namespace Activities.Core.Extensions
         {
             var items = source.ToList();
 
+            if (items.Count == 0)
+            {
+                return 0.0;
+            }
+
+
+            items.Sort();
+
             if (items.Count % 2 == 0)
             {
                 var index = items.Count / 2;
@@ -97,12 +105,12 @@ namespace Activities.Core.Extensions
                 return (items[index - 1] + items[index]) / 2.0;
             }
 
-            return items[(int) Math.Floor(items.Count / 2.0)];
+            return items[(int)Math.Floor(items.Count / 2.0)];
         }
 
         public static DateTime GetStartOfWeek(this DateTime date)
         {
-            var dayOfWeek = (int) date.DayOfWeek - 1;
+            var dayOfWeek = (int)date.DayOfWeek - 1;
 
             if (dayOfWeek < 0)
             {

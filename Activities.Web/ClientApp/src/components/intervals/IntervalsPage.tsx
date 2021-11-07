@@ -259,15 +259,16 @@ const IntervalsPage: React.FC = () => {
                   <HexbinSeries
                     sizeHexagonsWithCount
                     data={lactateAll}
-                    style={{ opacity: 0.5, fill: '#ccc' }}
+                    style={{ opacity: 0.5, fill: '#ccc', shapeRendering: 'geometricPrecision' }}
                     stroke="gray"
                   />
-                  <LineSeries data={lactate} stroke="#2d76d8" />
+                  <LineSeries data={lactate} stroke="#2d76d8" style={{ shapeRendering: 'geometricPrecision' }} />
                   <MarkSeries
                     data={lactate}
                     fill="#2d76d8"
                     stroke="transparent"
                     sizeBaseValue={50}
+                    style={{ shapeRendering: 'geometricPrecision' }}
                     onValueMouseOver={(value) => setHint({ value, owner: 'lactate' })}
                     onValueMouseOut={() => setHint(null)}
                   />

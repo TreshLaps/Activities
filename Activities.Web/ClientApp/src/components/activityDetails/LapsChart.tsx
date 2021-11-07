@@ -1,10 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import {
   CustomSVGSeries,
-  Hint, LabelSeries, VerticalRectSeries,
+  Hint, LabelSeries, LineSeries, VerticalRectSeries,
 } from 'react-vis';
-import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
+import styled from 'styled-components';
+import {
+  getKmString, getMetersPerSecond, getPaceString, getTimeString,
+} from '../utils/Formatters';
 import Chart, { AxisTypes } from '../charts/Chart';
+
+const IntervalPaceContainer = styled.div`
+  margin-top: 20px;
+  font-size: 10px;
+  margin-bottom: -10px;
+`;
 
 export interface Lap {
   averageCadence: number;
@@ -45,7 +54,26 @@ const isPauseLap = (index: number, laps: Lap[]) => {
   return false;
 };
 
-const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined }> = ({ laps, averageIntervalPace }) => {
+const NormalizeChartData = (
+  data: any[],
+  minValue?: number | undefined,
+  maxValue?: number | undefined,
+) => {
+  const sortedData = [...data].sort((a, b) => a.y - b.y);
+  const min = minValue ? Math.min(minValue, sortedData[0].y) : sortedData[0].y;
+  const max = maxValue ? Math.max(maxValue, sortedData[sortedData.length - 1].y) : sortedData[sortedData.length - 1].y;
+
+  return data.map((item) => ({
+    ...item,
+    y: (item.y - min) / (max - min),
+  }));
+};
+
+const LapsChart: React.FC<{
+  laps: Lap[],
+  averageIntervalPace: number | undefined,
+  last60DaysIntervalPace: number | undefined
+}> = ({ laps, averageIntervalPace, last60DaysIntervalPace }) => {
   const [hint, setHint] = useState<{ value: any; owner: string } | null>();
   const speedPadding = 0.1;
 
@@ -56,10 +84,15 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
   const fastSpeed = sortedBySpeed[sortedBySpeed.length - 1].averageSpeed + speedPadding;
   const minChartHeight = (fastSpeed - slowSpeed) * 0.05;
 
-  const chart: { laps: any[], totalMovingTime: number, barPadding: number } = useMemo(() => {
+  const chart: {
+    laps: any[],
+    heartrateLaps: any[],
+    totalMovingTime: number,
+    barPadding: number
+  } = useMemo(() => {
     const totalMovingTime = laps.map((lap) => lap.elapsedTime).reduce((l1, l2) => l1 + l2);
     const barPadding = totalMovingTime * 0.005;
-    let currentMovingTime = barPadding;
+    let currentMovingTime = 0.0;
 
     const chartLaps: any[] = laps.map((lap, lapIndex) => {
       const averageLapSpeed = isPauseLap(lapIndex, laps) ? slowSpeed + minChartHeight : lap.averageSpeed;
@@ -72,8 +105,10 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
         x0,
         x,
         y: averageLapSpeed,
+        yHeartrate: lap.averageHeartrate,
         label: isPauseLap(lapIndex, laps) ? '' : getPaceString(averageLapSpeed),
         hint: `Pace: ${getPaceString(lap.averageSpeed, true)}
+        Heartrate: ${lap.averageHeartrate}
         Distance: ${getKmString(lap.distance)}
       Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(lap.movingTime)})
       ${lap.lactate ? `Lactate: ${lap.lactate}` : ''}`,
@@ -81,9 +116,19 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
       };
     });
 
+    const chartLapsHeartrate: any[] = chartLaps
+      .filter((lap) => lap.lap.isInterval)
+      .map((lap) => ({
+        x: lap.x0 + ((lap.x - lap.x0) / 2),
+        y: lap.yHeartrate,
+        yOffset: 8,
+        label: `${parseInt(lap.yHeartrate, 10)}`,
+      }));
+
     return {
-      laps: chartLaps,
-      totalMovingTime: currentMovingTime,
+      laps: NormalizeChartData(chartLaps),
+      heartrateLaps: NormalizeChartData(chartLapsHeartrate, 150, 190),
+      totalMovingTime: currentMovingTime - barPadding,
       barPadding,
     };
   }, [laps, slowSpeed]);
@@ -97,7 +142,7 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
 
   const labelTicks: any[] = useMemo(() => chart.laps.map((lap, lapIndex) => ({
     x: lap.x0 + ((lap.x - lap.x0) / 2),
-    y: slowSpeed,
+    y: 0,
     customComponent: () => {
       if (lapIndex > 0
         && lapIndex < chart.laps.length - 1
@@ -107,7 +152,7 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
       }
 
       return (
-        <text x={0} y={15} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
+        <text x={0} y={25} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
       );
     },
   })), [chart.laps]);
@@ -116,34 +161,29 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
     x: 0,
     y: averageIntervalPace,
     customComponent: () => (
-      <g>
-        <text
-          x={0}
-          y={3}
-          textAnchor="left"
-          fill="#668ecc"
-          style={{ fontSize: 10, letterSpacing: '-0.5px' }}
-        >{getPaceString(averageIntervalPace || 0)}
-        </text>
-        <line x1="22" y1="0" x2={chart.totalMovingTime} y2="0" stroke="#92b7f8" strokeDasharray="4" />
-      </g>
+      <line x1="0" y1="0" x2="100%" y2="0" stroke="#92b7f8" strokeDasharray="4" />
     ),
-  }], [averageIntervalPace, chart]);
+  },
+  {
+    x: 0,
+    y: last60DaysIntervalPace,
+    customComponent: () => (
+      <line x1="0" y1="0" x2="100%" y2="0" stroke="#d6d6d6" strokeDasharray="4" />
+    ),
+  }], [averageIntervalPace, last60DaysIntervalPace, chart]);
 
   return (
     <div>
       {chart.laps?.length > 1 && (
         <Chart
-          stack
           height={300}
           xDomain={[0, chart.totalMovingTime]}
           xAxisType={AxisTypes.None}
-          yDomain={[slowSpeed, fastSpeed]}
+          yDomain={[-0.05, 1.05]}
           yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
           margin={{ bottom: 15 }}
           hideYAxis
         >
-          {averageIntervalPace && <CustomSVGSeries data={averageIntervalPaceData} />}
           <VerticalRectSeries
             data={chart.laps}
             onValueMouseOver={(value) => setHint({ value, owner: 'pace' })}
@@ -163,6 +203,20 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
             labelAnchorY="top"
             style={{ fontSize: 10, textShadow: '0 0 1px white, 0 0 2px white, 0 0 3px white' }}
           />
+          <LineSeries
+            data={chart.heartrateLaps}
+            style={{
+              shapeRendering: 'geometricPrecision', strokeWidth: '1.5px', opacity: 0.66, strokeLinecap: 'round', strokeDasharray: '6px',
+            }}
+            stroke="red"
+          />
+          <LabelSeries
+            data={chart.heartrateLaps}
+            labelAnchorX="middle"
+            labelAnchorY="middle"
+            style={{ fontSize: 8, textShadow: '0 0 1px white' }}
+          />
+          {false && averageIntervalPace && <CustomSVGSeries data={averageIntervalPaceData} />}
           <CustomSVGSeries data={labelTicks} />
           {hint?.value.hint != null && hint?.owner === 'pace' && (
             <Hint value={hint.value}>
@@ -183,6 +237,12 @@ const LapsChart: React.FC<{ laps: Lap[], averageIntervalPace: number | undefined
             </Hint>
           )}
         </Chart>
+      )}
+      {averageIntervalPace && (
+        <IntervalPaceContainer>
+          <span>Average interval pace: <strong>{getPaceString(averageIntervalPace || 0)}</strong></span>
+          <span> - Last 60 days: <strong>{getPaceString(last60DaysIntervalPace || 0)}</strong></span>
+        </IntervalPaceContainer>
       )}
     </div>
   );

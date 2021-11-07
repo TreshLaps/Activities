@@ -39,7 +39,7 @@ namespace Activities.Strava.Activities
                                 distance = new ItemValue(intervalLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
                                 elapsedTime = new ItemValue(intervalLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
                                 pace = new ItemValue(
-                                    intervalLaps.AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed).Value,
+                                    intervalLaps.AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed).Value,
                                     ItemValueType.MetersPerSecond);
                                 heartrate = ItemValue.TryCreate(
                                     intervalLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate),
@@ -65,7 +65,7 @@ namespace Activities.Strava.Activities
                                     distance = new ItemValue(thresholdLaps.Sum(lap => lap.Distance), ItemValueType.DistanceInMeters);
                                     elapsedTime = new ItemValue(thresholdLaps.Sum(lap => lap.ElapsedTime), ItemValueType.TimeInSeconds);
                                     pace = new ItemValue(
-                                        thresholdLaps.AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed).Value,
+                                        thresholdLaps.AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed).Value,
                                         ItemValueType.MetersPerSecond);
                                     heartrate = ItemValue.TryCreate(
                                         thresholdLaps.Where(lap => lap.AverageHeartrate > 0).AverageOrNull(lap => lap.AverageHeartrate),

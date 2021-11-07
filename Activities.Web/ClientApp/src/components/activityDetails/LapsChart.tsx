@@ -142,7 +142,7 @@ const LapsChart: React.FC<{
 
   const labelTicks: any[] = useMemo(() => chart.laps.map((lap, lapIndex) => ({
     x: lap.x0 + ((lap.x - lap.x0) / 2),
-    y: slowSpeed,
+    y: 0,
     customComponent: () => {
       if (lapIndex > 0
         && lapIndex < chart.laps.length - 1
@@ -152,7 +152,7 @@ const LapsChart: React.FC<{
       }
 
       return (
-        <text x={0} y={15} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
+        <text x={0} y={25} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
       );
     },
   })), [chart.laps]);

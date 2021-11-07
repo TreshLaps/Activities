@@ -40,14 +40,11 @@ export interface Lap {
 }
 
 const isPauseLap = (index: number, laps: Lap[]) => {
-  if (index > 0
-    && index < laps.length - 1
-    && laps[index - 1].isInterval
-    && laps[index + 1].isInterval) {
-    return true;
-  }
-
-  if (laps[index].movingTime < 30 && (100 / laps[index].elapsedTime * laps[index].movingTime) < 50) {
+  // If we run less than 500m before or after an interval lap we define it as a pause lap.
+  if (
+    ((index > 0 && laps[index - 1].isInterval)
+    || (index < laps.length - 1 && laps[index + 1].isInterval))
+    && laps[index].distance < 500) {
     return true;
   }
 
@@ -140,22 +137,15 @@ const LapsChart: React.FC<{
     label: lap.label,
   })), [chart.laps]);
 
-  const labelTicks: any[] = useMemo(() => chart.laps.map((lap, lapIndex) => ({
-    x: lap.x0 + ((lap.x - lap.x0) / 2),
-    y: 0,
-    customComponent: () => {
-      if (lapIndex > 0
-        && lapIndex < chart.laps.length - 1
-        && chart.laps[lapIndex - 1].lap.isInterval
-        && chart.laps[lapIndex + 1].lap.isInterval) {
-        return null;
-      }
-
-      return (
+  const labelTicks: any[] = useMemo(() => chart.laps
+    .filter((_, index) => !isPauseLap(index, chart.laps.map((chartLap) => chartLap.lap)))
+    .map((lap) => ({
+      x: lap.x0 + ((lap.x - lap.x0) / 2),
+      y: 0,
+      customComponent: () => (
         <text x={0} y={25} textAnchor="middle" style={{ fontSize: 10, letterSpacing: '-0.5px' }}>{getKmString(lap.lap.distance)}</text>
-      );
-    },
-  })), [chart.laps]);
+      ),
+    })), [chart.laps]);
 
   const averageIntervalPaceData: any[] = useMemo(() => [{
     x: 0,

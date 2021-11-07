@@ -27,7 +27,8 @@ module.exports = {
     'react/destructuring-assignment': 'off',
     'implicit-arrow-linebreak': 'off',
     'no-mixed-operators': 'off',
-    'no-console': 'off',
+    'no-console': 'warn',
     'max-len': ['error', { code: 140 }],
+    '@typescript-eslint/no-unused-vars': 'warn',
   },
 };

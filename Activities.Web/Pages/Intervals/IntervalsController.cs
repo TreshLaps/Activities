@@ -75,7 +75,7 @@ namespace Activities.Web.Pages.Intervals
                                         Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
                                         activity.Activity.Name,
                                         activity.Activity.Description,
-                                        Interval_AveragePace = activity.IntervalLaps.AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        Interval_AveragePace = activity.IntervalLaps.AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
                                             .Value.ToPaceString(),
                                         Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                         Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
@@ -96,7 +96,7 @@ namespace Activities.Web.Pages.Intervals
                             return new
                             {
                                 Date = string.Empty,
-                                Lactate = (double?) null
+                                Lactate = (double?)null
                             };
                         }
 
@@ -106,13 +106,13 @@ namespace Activities.Web.Pages.Intervals
                             .Select(activity => activity.Average())
                             .ToList();
 
-                        var averageFileTime = (long) month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
+                        var averageFileTime = (long)month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
                         var averageDate = DateTime.FromFileTime(averageFileTime);
 
                         return new
                         {
                             Date = averageDate.ToString("yyyy-MM-dd"),
-                            Lactate = measures.Any() ? (double?) Math.Round(measures.Median(), 1) : null
+                            Lactate = measures.Any() ? (double?)Math.Round(measures.Median(), 1) : null
                         };
                     })
                 .Where(item => item.Lactate.HasValue)
@@ -173,7 +173,7 @@ namespace Activities.Web.Pages.Intervals
                             {
                                 shortPaces.Add(
                                     activity.IntervalLaps.Where(lap => lap.ElapsedTime < shortPaceMaxThreshold)
-                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
                                         .Value);
                             }
 
@@ -181,7 +181,7 @@ namespace Activities.Web.Pages.Intervals
                             {
                                 mediumPaces.Add(
                                     activity.IntervalLaps.Where(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold)
-                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
                                         .Value);
                             }
 
@@ -189,7 +189,7 @@ namespace Activities.Web.Pages.Intervals
                             {
                                 longPaces.Add(
                                     activity.IntervalLaps.Where(lap => lap.ElapsedTime >= mediumPaceMaxThreshold)
-                                        .AveragePace(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        .AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
                                         .Value);
                             }
                         }
@@ -286,7 +286,7 @@ namespace Activities.Web.Pages.Intervals
             IsInterval = lap.IsInterval;
             Distance = lap.Distance;
             AverageSpeed = lap.AverageSpeed;
-            AverageHeartrate = (int) lap.AverageHeartrate;
+            AverageHeartrate = (int)lap.AverageHeartrate;
             ElapsedTime = lap.ElapsedTime;
             Lactate = lap.Lactate;
 

@@ -30,14 +30,14 @@ namespace Activities.Tests
         {
             var date = DateTime.Parse(dateString);
             var expectedResult = DateTime.Parse(startOfWeekDateString);
-            
+
             Assert.AreEqual(expectedResult, date.GetStartOfWeek(), $"{date:yyyy-MM-dd}: got {date.GetStartOfWeek():yyyy-MM-dd}");
         }
-        
-        [TestCase(2, new double[]{1, 2, 3})]
-        [TestCase(2.5, new double[]{1, 2, 3, 4})]
-        [TestCase(3, new double[]{1, 2, 3, 4, 5})]
-        [TestCase(3.5, new double[]{1, 2, 3, 4, 5, 6})]
+
+        [TestCase(2, new double[] { 1, 2, 3 })]
+        [TestCase(2.5, new double[] { 1, 2, 3, 4 })]
+        [TestCase(3, new double[] { 1, 2, 3, 4, 5 })]
+        [TestCase(3.5, new double[] { 6, 2, 3, 4, 5, 1 })]
         public void MedianTests(double expectedResult, double[] values)
         {
             Assert.AreEqual(expectedResult, values.Median());

@@ -31,16 +31,19 @@ namespace Activities.Web.Pages.Activities
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, id);
             var averageIntervalPace = 0.0;
+            var last60DaysIntervalPace = 0.0;
 
             if (activity.Laps?.Any(lap => lap.IsInterval) == true)
             {
-                averageIntervalPace = await _intervalStatisticsService.GetAveragePace(stravaAthlete, TimeSpan.FromDays(60), activity.Type);
+                averageIntervalPace = activity.Laps.Where(lap => lap.IsInterval).Average(lap => lap.AverageSpeed);
+                last60DaysIntervalPace = await _intervalStatisticsService.GetAveragePace(stravaAthlete, TimeSpan.FromDays(60), activity.Type);
             }
 
             return new ActivityResult
             {
                 Activity = activity,
-                AverageIntervalPace = averageIntervalPace
+                AverageIntervalPace = averageIntervalPace,
+                Last60DaysIntervalPace = last60DaysIntervalPace
             };
         }
 

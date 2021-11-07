@@ -25,9 +25,11 @@ const ActionButton = styled.a`
 const ScrollableBox = styled(Box)`
   @media (max-width: 768px) {
     overflow-x: auto;
+    padding: 0;
 
     > * {
       min-width: 700px;
+      padding: 20px;
     }
   }
 `;
@@ -145,6 +147,7 @@ const ActivityDetailsPage: React.FC = () => {
   const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
   const [activity, setActivity] = useState<DetailedActivity>();
   const [averageIntervalPace, setAverageIntervalPace] = useState<number>();
+  const [last60DaysIntervalPace, setLast60DaysIntervalPace] = useState<number>();
   const { id } = useParams<{ id: string | undefined }>();
   const hasIntervals = activity?.laps != null && activity.laps.filter((lap) => lap.isInterval).length > 0;
 
@@ -160,6 +163,7 @@ const ActivityDetailsPage: React.FC = () => {
       .then((data) => {
         setActivity(data.activity);
         setAverageIntervalPace(data.averageIntervalPace);
+        setLast60DaysIntervalPace(data.last60DaysIntervalPace);
         setLoadingStatus(LoadingStatus.None);
       })
       .catch(() => {
@@ -234,12 +238,9 @@ const ActivityDetailsPage: React.FC = () => {
           </ul>
 
           {activity.laps && activity.laps.length > 1 && (
-            <>
-              <h3>Laps</h3>
-              <ScrollableBox>
-                <LapsChart laps={activity.laps} averageIntervalPace={averageIntervalPace} />
-              </ScrollableBox>
-            </>
+          <ScrollableBox>
+            <LapsChart laps={activity.laps} averageIntervalPace={averageIntervalPace} last60DaysIntervalPace={last60DaysIntervalPace} />
+          </ScrollableBox>
           )}
 
           <h3>Random info</h3>

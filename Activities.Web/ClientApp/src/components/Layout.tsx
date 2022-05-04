@@ -154,7 +154,7 @@ const Layout: React.FC<{ children: any }> = ({ children }) => {
                   </NavLink>
                 </li>
                 <li>
-                  <a href="https://wiki.osi.run/" target="_blank" rel="noreferrer">Wiki/FAQ</a>
+                  <a href="https://wiki.skvidar.run/" target="_blank" rel="noreferrer">Wiki/FAQ</a>
                 </li>
               </>
             )}

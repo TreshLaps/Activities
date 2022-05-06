@@ -30,6 +30,11 @@ namespace Activities.Strava.Activities
                 .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
                 .ToList();
 
+            if (!intervalLaps.Any())
+            {
+                return 0.0;
+            }
+
             return intervalLaps.Average(lap => lap.AverageSpeed);
         }
 

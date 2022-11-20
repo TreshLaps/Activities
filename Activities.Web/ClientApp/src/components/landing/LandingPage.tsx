@@ -94,13 +94,13 @@ const LandingPage: React.FC<{ children?: any }> = () => (
       <BoxWrapper>
         <Droplet />
         <BoxText>
-          Treningen kvalitetsikres ved å måle laktat, det mest direkte målet på aerob og anaerob energiforbruk
+          Treningen intensitetsstyres med å måle laktat, et direkte mål på anaerob energiforbruk
         </BoxText>
       </BoxWrapper>
       <BoxWrapper>
         <Run />
         <BoxText>
-          Terskelintervaller gir mulighet for et stort volum med aerob trening da det krever mindre restitusjon enn anaerob trening
+          Terskelintervaller gir mulighet for et stort volum på relativt høy intensitet, og stimulerer effektivt den aerobe kapasiteten
         </BoxText>
       </BoxWrapper>
     </ContentWrapper>

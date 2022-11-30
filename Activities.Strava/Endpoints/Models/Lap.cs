@@ -71,5 +71,7 @@ namespace Activities.Strava.Endpoints.Models
         public int PaceZone { get; set; }
 
         public bool IsInterval { get; set; }
+        public double OriginalDistance { get; set; }
+        public double OriginalAverageSpeed { get; set; }
     }
 }

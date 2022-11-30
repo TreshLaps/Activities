@@ -2,15 +2,13 @@ using Activities.Strava.Endpoints.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Activities.Strava.Activities;
 
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-03-20";
+    private const string Version = "2022-11-30";
     private const int BislettLap = 546;
 
     public static bool TryAdjustBislettLaps(this DetailedActivity activity)
@@ -66,7 +64,7 @@ public static class BislettService
                 lap.OriginalAverageSpeed = lap.AverageSpeed;
 
                 lap.Distance = BislettLap * Math.Round(laps);
-                lap.AverageSpeed = lap.Distance / lap.MovingTime;
+                lap.AverageSpeed = lap.Distance / lap.ElapsedTime;
             }
         }
         else if (activity.IsBislettInterval)

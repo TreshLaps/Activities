@@ -8,10 +8,10 @@ namespace Activities.Strava.Activities;
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-12-09_v6";
+    private const string Version = "2022-12-09_v7";
     private const double BislettLapDistance = 546.5;
 
-    private const double MaxWholeMinuteFactor = 0.05;
+    private const double MaxWholeMinuteFactor = 0.03;
     private const double MaxWholeHundredMeterFactor = 0.1; // 0.1 == 10 meters
     private const double Max500MeterFactor = 0.1;
     private const double MaxDistanceFactor = 0.2;

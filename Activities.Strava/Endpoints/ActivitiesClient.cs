@@ -36,7 +36,7 @@ namespace Activities.Strava.Endpoints
                     TimeSpan.MaxValue,
                     () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
 
-                if (activity.TryTagIntervalLaps() | activity.TryParseLactatMeasurements() | activity.TryParseFeelingParameter() | activity.TryAdjustBislettLaps())
+                if (activity.TryTagIntervalLaps() | activity.TryParseLactatMeasurements() | activity.TryParseFeelingParameter() | activity.TryAdjustBislettLaps() | activity.TryParseThreadmillSpeedMeasurements())
                 {
                     await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
                 }

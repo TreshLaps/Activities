@@ -11,6 +11,7 @@ public class Activity
     public string Description { get; set; }
     public bool IsRace { get; set; }
     public bool IsBislettInterval { get; set; }
+    public bool IsThreadmillInterval { get; set; }
     public ItemValue Distance { get; set; }
     public ItemValue ElapsedTime { get; set; }
     public ItemValue Pace { get; set; }

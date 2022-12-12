@@ -25,9 +25,28 @@ namespace Activities.Strava.Activities
 
             var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
 
+            // Reset activity if it was wrongly detected before
+            if (activity.IsThreadmillInterval)
+            {
+                activity.IsThreadmillInterval = false;
+
+                foreach (var lap in intervalLaps)
+                {
+                    if (lap.OriginalDistance > 0)
+                    {
+                        lap.Distance = lap.OriginalDistance;
+                    }
+
+                    if (lap.OriginalAverageSpeed > 0)
+                    {
+                        lap.AverageSpeed = lap.OriginalAverageSpeed;
+                    }
+                }
+            }
+
             if (intervalLaps.Any(i => i.TotalElevationGain > 0))
             {
-                return false;
+                return true;
             }
 
             var measurements = GetSpeedsFromDescription(activity.Description);
@@ -36,12 +55,14 @@ namespace Activities.Strava.Activities
             // Avoid intervals where user types "XXkm/t" once
             if (measurements.Count < 2)
             {
-                return false;
+                return true;
             }
+
+            activity.IsThreadmillInterval = true;
 
             if (measurements.Count != intervalLaps.Count)
             {
-                return false;
+                return true;
             }
 
             foreach (var measurement in measurements)
@@ -52,6 +73,8 @@ namespace Activities.Strava.Activities
                     intervalLaps[measurement.Lap - 1].Distance = measurement.Value * intervalLaps[measurement.Lap - 1].ElapsedTime / 3.6;
                 }
             }
+
+            activity.IsThreadmillInterval = true;
 
             return true;
         }
@@ -67,7 +90,7 @@ namespace Activities.Strava.Activities
 
             var regexes = new[]
             {
-                @"(\d+-)(\d+-+d+)*(-\d+)km/t"
+                @"((\d{1,})+)(\.\d)?-(((\d{1,})+)(\.\d)?-)*((\d{1,})+)(\.\d)?km\/t"
             };
 
             foreach (var regex in regexes)
@@ -76,7 +99,7 @@ namespace Activities.Strava.Activities
 
                 foreach (Match match in matches)
                 {
-                    result = match.Groups[1].Value.Replace("km/t", "").Split('-').Select((i, index) => (Convert.ToDouble(i.Replace(",", "."), CultureInfo.InvariantCulture), index + 1)).ToList();
+                    result = match.Value.Replace("km/t", "").Replace(",", ".").Split('-').Select((i, index) => (Convert.ToDouble(i, CultureInfo.InvariantCulture), index + 1)).ToList();
                 }
             }
 

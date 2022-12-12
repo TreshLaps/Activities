@@ -14,7 +14,7 @@ public class ThreadmillIntervalsServiceTests
     [TestCase(8234509877, true)]
     public async Task Detect_interval_laps(long stravaId, bool isThreadmillIntervals)
     {
-        var json = await File.ReadAllTextAsync(Path.Combine("BislettActivities", $"{stravaId}.json"));
+        var json = await File.ReadAllTextAsync(Path.Combine("ThreadmillActivities", $"{stravaId}.json"));
         var activity = JsonConvert.DeserializeObject<DetailedActivity>(json);
         activity._IntervalVersion = null;
         activity._BislettVersion = null;

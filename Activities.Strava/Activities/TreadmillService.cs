@@ -86,6 +86,9 @@ namespace Activities.Strava.Activities
                 return result;
             }
 
+            // TODO: Legg til mulighet til å skrive <hastighet>: <dragnummer>, og <hastighet>: <nedre dragnummer>-<øvre dragnummer>
+            // TODO: Legg til mulighet til å droppe km/t for forslaget over
+
             var regexes = new[]
             {
                 @"((\d{1,})+)(\.\d)?-(((\d{1,})+)(\.\d)?-)*((\d{1,})+)(\.\d)?km\/t"

@@ -44,19 +44,13 @@ namespace Activities.Strava.Activities
                 }
             }
 
-            if (intervalLaps.Any(i => i.TotalElevationGain > 0))
+            if (intervalLaps.Count <= 2 || intervalLaps.Sum(lap => lap.TotalElevationGain / lap.Distance) > 0.005)
             {
                 return true;
             }
 
             var measurements = GetSpeedsFromDescription(activity.Description);
             measurements.AddRange(GetSpeedsFromDescription(activity.PrivateNote));
-
-            // Avoid intervals where user types "XXkm/t" once
-            if (measurements.Count < 2)
-            {
-                return true;
-            }
 
             if (measurements.Count != intervalLaps.Count)
             {
@@ -67,7 +61,7 @@ namespace Activities.Strava.Activities
             {
                 if (intervalLaps.Count >= measurement.Lap)
                 {
-                    // km/h and seconds -> meter
+                    // speed * time = distance
                     intervalLaps[measurement.Lap - 1].Distance = measurement.Value * intervalLaps[measurement.Lap - 1].ElapsedTime / 3.6;
                 }
             }

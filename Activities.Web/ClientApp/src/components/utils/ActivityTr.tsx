@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import ValueTd from './ValueTd';
 import { ItemValue, ResultItem } from '../models/ResultItem';
-import { getActivityEmoji } from '../../styles/TypeEmoji';
+import { getActivityEmoji, getActivityTitle } from '../../styles/TypeEmoji';
 import { getFeelingEmoji, getFeelingTitle } from './Formatters';
 
 export interface Activity extends ResultItem {
@@ -12,6 +12,7 @@ export interface Activity extends ResultItem {
   name: string;
   type: string;
   isBislettInterval?: boolean;
+  isTreadmillInterval?: boolean;
   isRace?: boolean;
   description: string;
   distance: ItemValue;
@@ -83,8 +84,8 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeli
     <tr key={activity.id} style={activity.isRace ? { background: 'linear-gradient(to right, #cfa652, #FCF6BA, #B38728)' } : undefined}>
       <td>
         <div>
-          <TypeEmoji title={(activity.isBislettInterval ? 'Bislett' : activity.type)}>
-            {getActivityEmoji(activity.type, activity.isBislettInterval)}
+          <TypeEmoji title={getActivityTitle(activity.type, activity.isBislettInterval, activity.isTreadmillInterval)}>
+            {getActivityEmoji(activity.type, activity.isBislettInterval, activity.isTreadmillInterval)}
           </TypeEmoji>
           <ActivityDate>{activity.date}</ActivityDate>
         </div>

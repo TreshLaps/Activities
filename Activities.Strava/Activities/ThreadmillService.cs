@@ -12,7 +12,7 @@ namespace Activities.Strava.Activities
     public static class ThreadmillService
     {
         // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-12-05";
+        private const string Version = "2022-12-12";
 
         public static bool TryParseThreadmillSpeedMeasurements(this DetailedActivity activity)
         {
@@ -32,6 +32,11 @@ namespace Activities.Strava.Activities
 
             var measurements = GetSpeedsFromDescription(activity.Description);
             measurements.AddRange(GetSpeedsFromDescription(activity.PrivateNote));
+
+            if (measurements.Count == 0)
+            {
+                return false;
+            }
 
             foreach (var measurement in measurements)
             {

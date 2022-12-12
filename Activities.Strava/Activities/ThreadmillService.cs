@@ -16,12 +16,12 @@ namespace Activities.Strava.Activities
 
         public static bool TryParseThreadmillSpeedMeasurements(this DetailedActivity activity)
         {
-            if (activity._LactateVersion == Version)
+            if (activity._ThreadmillVersion == Version)
             {
                 return false;
             }
 
-            activity._LactateVersion = Version;
+            activity._ThreadmillVersion = Version;
 
             var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
 

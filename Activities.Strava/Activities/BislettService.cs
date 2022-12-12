@@ -8,8 +8,15 @@ namespace Activities.Strava.Activities;
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-11-30";
-    private const int BislettLap = 546;
+    private const string Version = "2022-12-09_v7";
+    private const double BislettLapDistance = 546.5;
+
+    private const double MaxWholeMinuteFactor = 0.03;
+    private const double MaxWholeHundredMeterFactor = 0.1; // 0.1 == 10 meters
+    private const double Max500MeterFactor = 0.1;
+    private const double MaxDistanceFactor = 0.2;
+    private const double MaxAverageDistanceFactor = 0.2;
+
 
     public static bool TryAdjustBislettLaps(this DetailedActivity activity)
     {
@@ -23,51 +30,8 @@ public static class BislettService
         var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
         var distanceFactors = new List<double>();
 
-        if (intervalLaps.Any(lap => lap.TotalElevationGain > 0))
-        {
-            return true;
-        }
-
-        foreach (var lap in intervalLaps)
-        {
-            var laps = lap.Distance / BislettLap;
-            var distanceFactor = laps % 1;
-
-            if (distanceFactor > 0.5)
-            {
-                distanceFactor = 1.0 - distanceFactor;
-            }
-
-            distanceFactor = distanceFactor / Math.Round(laps);
-            distanceFactors.Add(distanceFactor);
-        }
-
-        if (!distanceFactors.Any())
-        {
-            return true;
-        }
-
-        var name = activity.Name;
-        var averageFactor = distanceFactors.Average();
-        var maxFactor = distanceFactors.Max();
-
-        // Is Bislett lap
-        if (maxFactor < 0.1 && averageFactor < 0.08)
-        {
-            activity.IsBislettInterval = true;
-
-            foreach (var lap in intervalLaps)
-            {
-                var laps = lap.Distance / BislettLap;
-
-                lap.OriginalDistance = lap.Distance;
-                lap.OriginalAverageSpeed = lap.AverageSpeed;
-
-                lap.Distance = BislettLap * Math.Round(laps);
-                lap.AverageSpeed = lap.Distance / lap.ElapsedTime;
-            }
-        }
-        else if (activity.IsBislettInterval)
+        // Reset activity if it was wrongly detected before
+        if (activity.IsBislettInterval)
         {
             activity.IsBislettInterval = false;
 
@@ -85,6 +49,67 @@ public static class BislettService
             }
         }
 
+        if (intervalLaps.Count <= 2 || intervalLaps.Sum(lap => lap.TotalElevationGain / lap.Distance) > 0.005)
+        {
+            return true;
+        }
+
+        foreach (var lap in intervalLaps)
+        {
+            var laps = lap.Distance / BislettLapDistance;
+            var distanceFactor = FlipOverFifty(laps % 1);
+            distanceFactor /= Math.Round(laps);
+            distanceFactors.Add(distanceFactor);
+        }
+
+        if (!distanceFactors.Any())
+        {
+            return true;
+        }
+
+        var name = activity.Name;
+        var averageFactor = distanceFactors.Average();
+        var maxFactor = distanceFactors.Max();
+
+        var averageElapsedTime = intervalLaps.Average(lap => FlipOverFifty((double) lap.ElapsedTime / 60 % 1));
+        var isTooCloseToAWholeMinute = averageElapsedTime < MaxWholeMinuteFactor;
+
+        var averageDistance = intervalLaps.Average(lap => FlipOverFifty(lap.Distance / 100 % 1));
+        var isTooCloseToWhole100Meter = averageDistance < MaxWholeHundredMeterFactor;
+
+        var isTooCloseTo500Meters = intervalLaps.All(lap => FlipOverFifty(lap.Distance / 500 % 1) < Max500MeterFactor);
+
+        if (isTooCloseToAWholeMinute || isTooCloseToWhole100Meter || isTooCloseTo500Meters)
+        {
+        }
+        else if (maxFactor < MaxDistanceFactor && averageFactor < MaxAverageDistanceFactor)
+        {
+            activity.IsBislettInterval = true;
+
+            foreach (var lap in intervalLaps)
+            {
+                var laps = lap.Distance / BislettLapDistance;
+
+                lap.OriginalDistance = lap.Distance;
+                lap.OriginalAverageSpeed = lap.AverageSpeed;
+
+                lap.Distance = BislettLapDistance * Math.Round(laps);
+                lap.AverageSpeed = lap.Distance / lap.ElapsedTime;
+            }
+
+            return true;
+        }
+
         return true;
+    }
+
+    private static double FlipOverFifty(double value)
+    {
+        if (value > 0.5)
+        {
+            return 1.0 - value;
+        }
+
+        return value;
     }
 }

@@ -12,6 +12,7 @@ public class TreadmillIntervalsServiceTests
 {
     [TestCase(8224273058, true)]
     [TestCase(8234509877, true)]
+    [TestCase(8224195215, false)]
     public async Task Detect_interval_laps(long stravaId, bool isTreadmillIntervals)
     {
         var json = await File.ReadAllTextAsync(Path.Combine("TreadmillActivities", $"{stravaId}.json"));

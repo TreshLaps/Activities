@@ -28,7 +28,7 @@
     </ItemGroup>
 
 	<ItemGroup>
-		<None Update="ThreadmillActivities\**">
+		<None Update="TreadmillActivities\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

@@ -12,8 +12,8 @@ namespace Activities.Strava.Endpoints.Models
         public string _BislettVersion { get; set; }
         public bool IsBislettInterval { get; set; }
         public string _FeelingVersion { get; set; }
-        public string _ThreadmillVersion { get; set; }
-        public bool IsThreadmillInterval { get; set; }
+        public string _TreadmillVersion { get; set; }
+        public bool IsTreadmillInterval { get; set; }
 
         public int? Feeling { get; set; }
 

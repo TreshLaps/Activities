@@ -9,26 +9,26 @@ using System.Threading.Tasks;
 
 namespace Activities.Strava.Activities
 {
-    public static class ThreadmillService
+    public static class TreadmillService
     {
         // Update when logic is modified to trigger recalculation.
         private const string Version = "2022-12-12";
 
-        public static bool TryParseThreadmillSpeedMeasurements(this DetailedActivity activity)
+        public static bool TryAdjustTreadmillSpeedMeasurements(this DetailedActivity activity)
         {
-            if (activity._ThreadmillVersion == Version)
+            if (activity._TreadmillVersion == Version)
             {
                 return false;
             }
 
-            activity._ThreadmillVersion = Version;
+            activity._TreadmillVersion = Version;
 
             var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
 
             // Reset activity if it was wrongly detected before
-            if (activity.IsThreadmillInterval)
+            if (activity.IsTreadmillInterval)
             {
-                activity.IsThreadmillInterval = false;
+                activity.IsTreadmillInterval = false;
 
                 foreach (var lap in intervalLaps)
                 {
@@ -58,7 +58,7 @@ namespace Activities.Strava.Activities
                 return true;
             }
 
-            activity.IsThreadmillInterval = true;
+            activity.IsTreadmillInterval = true;
 
             if (measurements.Count != intervalLaps.Count)
             {
@@ -74,7 +74,7 @@ namespace Activities.Strava.Activities
                 }
             }
 
-            activity.IsThreadmillInterval = true;
+            activity.IsTreadmillInterval = true;
 
             return true;
         }

@@ -58,8 +58,6 @@ namespace Activities.Strava.Activities
                 return true;
             }
 
-            activity.IsTreadmillInterval = true;
-
             if (measurements.Count != intervalLaps.Count)
             {
                 return true;

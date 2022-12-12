@@ -33,7 +33,13 @@ namespace Activities.Strava.Activities
             var measurements = GetSpeedsFromDescription(activity.Description);
             measurements.AddRange(GetSpeedsFromDescription(activity.PrivateNote));
 
-            if (measurements.Count == 0)
+            // Avoid intervals where user types "XXkm/t" once
+            if (measurements.Count < 2)
+            {
+                return false;
+            }
+
+            if (measurements.Count != intervalLaps.Count)
             {
                 return false;
             }

@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities;
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-12-19";
+    private const string Version = "2022-12-19_2";
     private const double BislettLapDistance = 546.5;
 
     private const double MaxWholeMinuteFactor = 0.03;
@@ -47,6 +47,11 @@ public static class BislettService
                     lap.AverageSpeed = lap.OriginalAverageSpeed;
                 }
             }
+        }
+
+        if (HasIntervalLapsWithSegments(activity))
+        {
+            return true;
         }
 
         if (intervalLaps.Count <= 2)
@@ -116,5 +121,22 @@ public static class BislettService
         }
 
         return value;
+    }
+
+    private static bool HasIntervalLapsWithSegments(DetailedActivity activity)
+    {
+        var intervalLaps = activity.Laps
+            .Where(lap => lap.IsInterval)
+            .Select(
+                lap => new
+                {
+                    lap.StartDate,
+                    EndDate = lap.StartDate.AddSeconds(lap.ElapsedTime)
+                })
+            .ToList();
+
+        return activity.SegmentEfforts
+            .Any(segment =>
+                intervalLaps.Any(lap => segment.StartDate >= lap.StartDate && segment.StartDate < lap.EndDate));
     }
 }

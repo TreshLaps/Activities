@@ -28,6 +28,7 @@ public class BislettIntervalsServiceTests
     [TestCase(8085782747, false)]
     [TestCase(6371150381, false)]
     [TestCase(3117056036, false)]
+    [TestCase(8236989700, false)]
     //[TestCase(3057102438, false)]
     public async Task Detect_interval_laps(long stravaId, bool isBislettInterval)
     {

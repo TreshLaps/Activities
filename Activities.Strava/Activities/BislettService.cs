@@ -8,7 +8,7 @@ namespace Activities.Strava.Activities;
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-12-19_2";
+    private const string Version = "2022-12-19_3";
     private const double BislettLapDistance = 546.5;
 
     private const double MaxWholeMinuteFactor = 0.03;
@@ -59,7 +59,12 @@ public static class BislettService
             return true;
         }
 
-        if (intervalLaps.Average(lap => lap.TotalElevationGain) > 5 && intervalLaps.All(lap => lap.PaceZone > 0))
+        if (intervalLaps.All(lap => lap.PaceZone > 0) && intervalLaps.Sum(lap => lap.TotalElevationGain) > 5)
+        {
+            return true;
+        }
+
+        if (intervalLaps.Sum(lap => lap.TotalElevationGain) / intervalLaps.Sum(lap => lap.Distance) > 0.01)
         {
             return true;
         }

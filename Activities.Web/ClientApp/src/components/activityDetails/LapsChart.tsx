@@ -56,6 +56,10 @@ const NormalizeChartData = (
   minValue?: number | undefined,
   maxValue?: number | undefined,
 ) => {
+  if (data.length === 0) {
+    return [];
+  }
+
   const sortedData = [...data].sort((a, b) => a.y - b.y);
   const min = minValue ? Math.min(minValue, sortedData[0].y) : sortedData[0].y;
   const max = maxValue ? Math.max(maxValue, sortedData[sortedData.length - 1].y) : sortedData[sortedData.length - 1].y;
@@ -114,7 +118,7 @@ const LapsChart: React.FC<{
     });
 
     const chartLapsHeartrate: any[] = chartLaps
-      .filter((lap) => lap.lap.isInterval)
+      .filter((lap) => lap.lap.isInterval && lap.yHeartrate > 0)
       .map((lap) => ({
         x: lap.x0 + ((lap.x - lap.x0) / 2),
         y: lap.yHeartrate,

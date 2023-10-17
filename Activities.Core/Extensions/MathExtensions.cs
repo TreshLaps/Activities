@@ -8,25 +8,23 @@ namespace Activities.Core.Extensions
 {
     public static class MathExtensions
     {
-        public static string ToPaceString(this double metersPerSecond, bool showSuffix = false)
+        public static string ToPaceString(this double metersPerSecond, String activityType, bool showSuffix = false)
         {
             if (double.IsNaN(metersPerSecond) || metersPerSecond == 0.0)
             {
                 return string.Empty;
             }
 
-            var averageSpeed = 1000 / metersPerSecond / 60;
-            var averageSpeedMin = Math.Floor(averageSpeed);
-            var averageSpeedSeconds = Math.Round(averageSpeed % 1 * 60);
+            var isRowing = activityType == "Rowing";
+            var lapDistance = isRowing ? 500 : 1000;
+            var suffix = isRowing ? " /500m" : " /km";
 
-            if (averageSpeedSeconds == 60)
-            {
-                averageSpeedMin += 1;
-                averageSpeedSeconds = 0;
-            }
+            var averageSpeed = Math.Round(lapDistance / metersPerSecond);
+            var averageSpeedMin = Math.Floor(averageSpeed / 60);
+            var averageSpeedSeconds = averageSpeed % 60;
 
             var paceString = $"{averageSpeedMin}:{(averageSpeedSeconds < 10 ? "0" : "")}{averageSpeedSeconds}";
-            return showSuffix ? $"{paceString} /km" : paceString;
+            return showSuffix ? $"{paceString}{suffix}" : paceString;
         }
 
         public static double? AverageBy<T>(this IEnumerable<T> items, Func<T, double?> durationFunc, Func<T, double?> paceFunc)

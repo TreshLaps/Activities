@@ -41,6 +41,11 @@ const ActivitiesPage: React.FC = () => {
       });
   }, [filters]);
 
+  // Average pace will show min/500m if showing only rowing activities, and min/km
+  // otherwise (including if filter is set to “all”, no matter what kinds of
+  // activities are actually visible).
+  const activityType = (filters === undefined) ? '' : ((filters.get('type') ?? 'All') as string);
+
   const showLactate = (activities
     && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
 
@@ -65,7 +70,7 @@ const ActivitiesPage: React.FC = () => {
                         <th colSpan={2} id={group.name}>{group.name}</th>
                         <ValueTh items={group.items} valueFunc={(item) => item.distance} title="Distance" />
                         <ValueTh items={group.items} valueFunc={(item) => item.elapsedTime} title="Time" />
-                        <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
+                        <ValueTh items={group.items} valueFunc={(item) => item.pace} activityType={activityType} title="Pace" />
                         <ValueTh items={group.items} valueFunc={(item) => item.heartrate} title="Heartrate" />
                         {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} title="Lactate" />}
                         {showFeeling && <th title="Feeling">&nbsp;&nbsp;&nbsp;</th>}

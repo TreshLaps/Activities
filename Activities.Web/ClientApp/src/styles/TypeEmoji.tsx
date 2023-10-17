@@ -14,6 +14,8 @@ export const getActivityEmoji = (type: string, isBislettInterval?: boolean | und
       return '⛷';
     case 'Swim':
       return '🏊‍♂️';
+    case 'Rowing':
+      return '🚣‍♂️';
     default:
       return '';
   }

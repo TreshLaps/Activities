@@ -96,7 +96,7 @@ const ActivityTr: React.FC<{ activity: Activity, showLactate: boolean, showFeeli
       {activity.laps && <ValueTd item={activity.laps} title="Laps" />}
       <ValueTd item={activity.distance} title="Distance" />
       <ValueTd item={activity.elapsedTime} title="Time" />
-      <ValueTd item={activity.pace} title="Pace" />
+      <ValueTd item={activity.pace} activityType={activity.type} title="Pace" />
       <ValueTd item={activity.heartrate} title="Heartrate" />
       {showLactate && <ValueTd item={activity.lactate} title="Lactate" />}
       {(showFeeling && activity.feeling)

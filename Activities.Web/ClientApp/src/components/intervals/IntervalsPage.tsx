@@ -34,6 +34,7 @@ interface Activity {
   id: number;
   date: string;
   name: string;
+  type: string;
   description: string;
   interval_AveragePace: string;
   interval_AverageHeartrate: number;
@@ -192,10 +193,13 @@ const IntervalsPage: React.FC = () => {
             <Box>
               <SubHeader>Pace</SubHeader>
               {shortPaces && shortPaces.length > 0 && (
+                // y-axis will show min/500m if showing only rowing activities, and min/km
+                // otherwise (including if filter is set to “all”, no matter what kinds of
+                // activities are actually visible).
                 <Chart
                   xType="ordinal"
                   yDomain={[3, 6]}
-                  yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
+                  yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond, (filters!.get('type') ?? 'All') as string)}
                 >
                   <VerticalBarSeries
                     getY={(d) => (d.y < 3 ? 3 : d.y)}
@@ -345,7 +349,7 @@ const IntervalsPage: React.FC = () => {
                                     activity.interval_Laps,
                                     (item) => item.elapsedTime,
                                     (item) => item.averageSpeed,
-                                  ) || 0)}
+                                  ) || 0, activity.type)}
                                 </th>
                                 <th title="Average heartrate">
                                   {Math.round(
@@ -377,7 +381,7 @@ const IntervalsPage: React.FC = () => {
                                     />
                                   </NoWrapTd>
                                   <NoWrapTd title="Pace">
-                                    <LapLabel>{getPaceString(lap.averageSpeed)}</LapLabel>
+                                    <LapLabel>{getPaceString(lap.averageSpeed, activity.type)}</LapLabel>
                                     <LapFactor
                                       style={{
                                         width: `${lap.averageSpeedFactor * 100}%`,

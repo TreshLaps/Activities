@@ -72,9 +72,15 @@ const NormalizeChartData = (
 
 const LapsChart: React.FC<{
   laps: Lap[],
+  activityType: String,
   averageIntervalPace: number | undefined,
   last60DaysIntervalPace: number | undefined
-}> = ({ laps, averageIntervalPace, last60DaysIntervalPace }) => {
+}> = ({
+  laps,
+  activityType,
+  averageIntervalPace,
+  last60DaysIntervalPace,
+}) => {
   const [hint, setHint] = useState<{ value: any; owner: string } | null>();
   const speedPadding = 0.1;
 
@@ -107,8 +113,8 @@ const LapsChart: React.FC<{
         x,
         y: averageLapSpeed,
         yHeartrate: lap.averageHeartrate,
-        label: isPauseLap(lapIndex, laps) ? '' : getPaceString(averageLapSpeed),
-        hint: `Pace: ${getPaceString(lap.averageSpeed, true)}
+        label: isPauseLap(lapIndex, laps) ? '' : getPaceString(averageLapSpeed, activityType),
+        hint: `Pace: ${getPaceString(lap.averageSpeed, activityType, true)}
         Heartrate: ${lap.averageHeartrate}
         Distance: ${getKmString(lap.distance)}
       Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(lap.movingTime)})
@@ -174,7 +180,7 @@ const LapsChart: React.FC<{
           xDomain={[0, chart.totalMovingTime]}
           xAxisType={AxisTypes.None}
           yDomain={[-0.05, 1.05]}
-          yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond)}
+          yTickFormat={(distancePerSecond) => getPaceString(distancePerSecond, activityType)}
           margin={{ bottom: 15 }}
           hideYAxis
         >
@@ -234,8 +240,8 @@ const LapsChart: React.FC<{
       )}
       {averageIntervalPace && (
         <IntervalPaceContainer>
-          <span>Average interval pace: <strong>{getPaceString(averageIntervalPace || 0)}</strong></span>
-          <span> - Last 60 days: <strong>{getPaceString(last60DaysIntervalPace || 0)}</strong></span>
+          <span>Average interval pace: <strong>{getPaceString(averageIntervalPace || 0, activityType)}</strong></span>
+          <span> - Last 60 days: <strong>{getPaceString(last60DaysIntervalPace || 0, activityType)}</strong></span>
         </IntervalPaceContainer>
       )}
     </div>

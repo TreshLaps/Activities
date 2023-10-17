@@ -38,8 +38,8 @@ const ValueContainer = styled.div`
   position: relative;
 `;
 
-const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (props) => {
-  const { item, title } = props;
+const ValueTd: React.FC<{ item: ItemValue, activityType?: string | undefined, title?: string | undefined }> = (props) => {
+  const { item, activityType, title } = props;
 
   if (item == null) {
     return <td><ValueTdLabel>-</ValueTdLabel></td>;
@@ -54,7 +54,7 @@ const ValueTd: React.FC<{ item: ItemValue, title?: string | undefined }> = (prop
       color = '#005dff';
       break;
     case ItemValueType.MetersPerSecond:
-      value = getPaceString(item.value);
+      value = getPaceString(item.value, activityType ?? '');
       color = '#00a000';
       break;
     case ItemValueType.TimeInSeconds:

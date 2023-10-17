@@ -18,7 +18,7 @@ namespace Activities.Tests
         public void Speed(double pace)
         {
             var metersPerSecond = pace.ToMetersPerSecond();
-            var paceString = metersPerSecond.ToPaceString().Replace(":", ".");
+            var paceString = metersPerSecond.ToPaceString("Run").Replace(":", ".");
             Assert.AreEqual(pace.ToString("0.00", CultureInfo.InvariantCulture), paceString);
         }
 

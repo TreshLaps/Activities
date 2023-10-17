@@ -2,21 +2,20 @@
 
 export const round = (value: number, decimals: number) => value.toFixed(decimals);
 
-export const getPaceString = (metersPerSecond: number, showSuffix: boolean = false) => {
+export const getPaceString = (metersPerSecond: number, activityType: String, showSuffix: boolean = false) => {
   if (Number.isNaN(metersPerSecond) || metersPerSecond === 0) {
     return '';
   }
 
-  const averageSpeed = 1000 / metersPerSecond / 60;
-  let averageSpeedMin = Math.floor(averageSpeed);
-  let averageSpeedSeconds = Math.round((averageSpeed % 1) * 60);
+  const isRowing = (activityType === 'Rowing');
+  const lapDistance = isRowing ? 500 : 1000;
+  const suffix = isRowing ? ' /500m' : ' /km';
 
-  if (averageSpeedSeconds === 60) {
-    averageSpeedMin += 1;
-    averageSpeedSeconds = 0;
-  }
+  const averageSpeed = Math.round(lapDistance / metersPerSecond);
+  const averageSpeedMin = Math.floor(averageSpeed / 60);
+  const averageSpeedSeconds = averageSpeed % 60;
 
-  return `${averageSpeedMin}:${averageSpeedSeconds < 10 ? '0' : ''}${averageSpeedSeconds}${showSuffix ? ' /km' : ''}`;
+  return `${averageSpeedMin}:${averageSpeedSeconds < 10 ? '0' : ''}${averageSpeedSeconds}${showSuffix ? suffix : ''}`;
 };
 
 export const getMetersPerSecond = (minPerKm: number) => {

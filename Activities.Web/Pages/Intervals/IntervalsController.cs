@@ -75,8 +75,9 @@ namespace Activities.Web.Pages.Intervals
                                         Date = activity.Activity.StartDate.ToString("ddd dd. MMM"),
                                         activity.Activity.Name,
                                         activity.Activity.Description,
+                                        activity.Activity.Type,
                                         Interval_AveragePace = activity.IntervalLaps.AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
-                                            .Value.ToPaceString(),
+                                            .Value.ToPaceString(activity.Activity.Type),
                                         Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
                                         Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
                                         Laktat = GetLactate(activity.Activity),
@@ -198,9 +199,9 @@ namespace Activities.Web.Pages.Intervals
                         var averageMediumPace = mediumPaces.Any() ? mediumPaces.Average() : 0;
                         var averageLongPace = longPaces.Any() ? longPaces.Average() : 0;
 
-                        var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString()} (< 2 min)" : null;
-                        var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString()}" : null;
-                        var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString()} (> 10 min)" : null;
+                        var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString(filterRequest.Type)} (< 2 min)" : null;
+                        var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString(filterRequest.Type)}" : null;
+                        var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString(filterRequest.Type)} (> 10 min)" : null;
 
                         return new
                         {

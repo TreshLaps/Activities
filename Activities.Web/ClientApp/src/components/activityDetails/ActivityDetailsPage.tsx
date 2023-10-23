@@ -221,7 +221,8 @@ const ActivityDetailsPage: React.FC = () => {
             </li>
             {activity.averageSpeed > 0 && (
               <li>
-                <strong>Pace:</strong> {getPaceString(activity.averageSpeed)} (avg), {getPaceString(activity.maxSpeed)}{' '}
+                <strong>Pace:</strong> {getPaceString(activity.averageSpeed, activity.type)} (avg),
+                  {getPaceString(activity.maxSpeed, activity.type)}{' '}
                 (max)
               </li>
             )}
@@ -239,7 +240,12 @@ const ActivityDetailsPage: React.FC = () => {
 
           {activity.laps && activity.laps.length > 1 && (
           <ScrollableBox>
-            <LapsChart laps={activity.laps} averageIntervalPace={averageIntervalPace} last60DaysIntervalPace={last60DaysIntervalPace} />
+            <LapsChart
+              laps={activity.laps}
+              activityType={activity.type}
+              averageIntervalPace={averageIntervalPace}
+              last60DaysIntervalPace={last60DaysIntervalPace}
+            />
           </ScrollableBox>
           )}
 

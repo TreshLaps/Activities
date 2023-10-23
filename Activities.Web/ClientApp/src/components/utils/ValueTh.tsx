@@ -13,8 +13,14 @@ const Th = styled.th`
 const ValueTh: React.FC<{
   items: ResultItem[],
   valueFunc: (item:ResultItem) => ItemValue,
+  activityType?: string | undefined,
   title?: string | undefined }> = (props) => {
-  const { items, valueFunc, title } = props;
+  const {
+    items,
+    valueFunc,
+    activityType,
+    title,
+  } = props;
 
   if (items == null || items.length === 0) {
     return <Th>&nbsp;</Th>;
@@ -36,7 +42,8 @@ const ValueTh: React.FC<{
       value = getKmString(summedValue);
       break;
     case ItemValueType.MetersPerSecond:
-      value = getPaceString(AveragePace(items, (item) => item.elapsedTime?.value, (item) => item.pace?.value) || 0, true);
+      value = getPaceString(AveragePace(items, (item) => item.elapsedTime?.value, (item) => item.pace?.value) || 0,
+        activityType ?? '', true);
       break;
     case ItemValueType.TimeInSeconds:
       value = getTimeString(summedValue);

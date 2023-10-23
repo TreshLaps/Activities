@@ -131,6 +131,7 @@ namespace Activities.Strava.Endpoints
                 case "VirtualRide":
                 case "Swim":
                 case "NordicSki":
+                case "Rowing":
                     return true;
                 default:
                     return false;

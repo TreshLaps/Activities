@@ -27,8 +27,10 @@ interface Axis {
 
 const getAxisSettings = (key: string, lockAxisFilter: boolean): Axis => {
   if (key === 'pace') {
+    // TODO: If this page is ever made public, apply the same logic with
+    // propagating the activity type from the filter as in the other pages.
     return {
-      format: (value: number) => getPaceString(value),
+      format: (value: number) => getPaceString(value, ''),
       min: lockAxisFilter ? 3.7 : undefined,
       max: lockAxisFilter ? 5.5 : undefined,
     };

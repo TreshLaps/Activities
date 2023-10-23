@@ -9,6 +9,7 @@ import Loader, { LoadingStatus } from '../utils/Loader';
 interface Activity {
   id: number;
   name: string;
+  type: string;
   movingTime: number;
   startDate: string;
   distance: number;
@@ -62,7 +63,7 @@ const RacesPage: React.FC = () => {
                     </div>
                   </td>
                   <NoWrapTd>{getKmString(activity.distance)}</NoWrapTd>
-                  <NoWrapTd>{getPaceString(activity.averageSpeed)}</NoWrapTd>
+                  <NoWrapTd>{getPaceString(activity.averageSpeed, activity.type)}</NoWrapTd>
                   <NoWrapTd>{getTimeString(activity.movingTime)}</NoWrapTd>
                   <NoWrapTd>{getDateString(activity.startDate)}</NoWrapTd>
                 </tr>

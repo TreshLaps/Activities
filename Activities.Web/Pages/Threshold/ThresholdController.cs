@@ -40,11 +40,16 @@ namespace Activities.Web.Pages.Threshold
 
             var medianPace = laps.Select(lap => lap.AverageSpeed).Median();
 
+            // Average pace will show min/500m if showing only rowing activities, and min/km
+            // otherwise (including if filter is set to “all”, no matter what kinds of
+            // activities are actually visible).
+            var activityType = filterRequest.Type;
+
             return new
             {
-                MedianPace = medianPace.ToPaceString(),
-                MinPace = (medianPace - 0.4).ToPaceString(),
-                MaxPace = (medianPace + 0.4).ToPaceString()
+                MedianPace = medianPace.ToPaceString(activityType),
+                MinPace = (medianPace - 0.4).ToPaceString(activityType),
+                MaxPace = (medianPace + 0.4).ToPaceString(activityType)
             };
         }
     }

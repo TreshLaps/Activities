@@ -17,13 +17,13 @@ const ValueTh: React.FC<{
   const { items, valueFunc, title } = props;
 
   if (items == null || items.length === 0) {
-    return <Th>&nbps;</Th>;
+    return <Th>&nbsp;</Th>;
   }
 
   const values = items.filter((item) => valueFunc(item)).map((item) => valueFunc(item).value);
 
   if (values.length === 0) {
-    return <Th>&nbps;</Th>;
+    return <Th>&nbsp;</Th>;
   }
 
   const { type } = valueFunc(items.filter((item) => valueFunc(item))[0]);

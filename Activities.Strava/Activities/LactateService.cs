@@ -12,7 +12,7 @@ namespace Activities.Strava.Activities
         // Update when logic is modified to trigger recalculation.
         private const string Version = "2021-08-16";
 
-        public static bool TryParseLactatMeasurements(this DetailedActivity activity)
+        public static bool TryParseLactateMeasurements(this DetailedActivity activity)
         {
             if (activity._LactateVersion == Version)
             {

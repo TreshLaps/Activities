@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Activities
@@ -16,25 +16,15 @@ namespace Activities.Strava.Activities
             }
 
             activity._FeelingVersion = Version;
-
-            var parameter = GetFeelingFromDescription(activity.Description) ?? GetFeelingFromDescription(activity.PrivateNote);
-
-            if (parameter == null)
-            {
-                return false;
-            }
-
-            activity.Feeling = parameter;
+            activity.Feeling = GetFeelingFromDescription(activity.Description) ?? GetFeelingFromDescription(activity.PrivateNote);
             return true;
         }
 
         private static int? GetFeelingFromDescription(string description)
         {
-            int? result = null;
-
             if (string.IsNullOrWhiteSpace(description))
             {
-                return result;
+                return null;
             }
 
             var match = Regex.Match(description.ToLower(), @"følelse([: ]*)(lett|vanlig|tung)");
@@ -46,20 +36,15 @@ namespace Activities.Strava.Activities
                 switch (feeling)
                 {
                     case "lett":
-                        result = 3;
-                        break;
+                        return 3;
                     case "vanlig":
-                        result = 2;
-                        break;
+                        return 2;
                     case "tung":
-                        result = 1;
-                        break;
-                    default:
-                        break;
+                        return 1;
                 }
             }
 
-            return result;
+            return null;
         }
     }
 }

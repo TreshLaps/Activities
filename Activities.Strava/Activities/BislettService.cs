@@ -111,8 +111,6 @@ public static class BislettService
                 lap.Distance = BislettLapDistance * Math.Round(laps);
                 lap.AverageSpeed = lap.Distance / lap.ElapsedTime;
             }
-
-            return true;
         }
 
         return true;

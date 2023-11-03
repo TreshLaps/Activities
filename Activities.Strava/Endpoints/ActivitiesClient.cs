@@ -1,7 +1,9 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Activities.Core.Caching;
 using Activities.Strava.Activities;
@@ -11,10 +13,14 @@ namespace Activities.Strava.Endpoints
 {
     public class ActivitiesClient : BaseStravaClient
     {
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> AsyncLocks = new();
         private readonly ICachingService _cachingService;
         private readonly IPermanentStorageService _permanentStorageService;
 
-        public ActivitiesClient(IHttpClientFactory httpClientFactory, ICachingService cachingService, IPermanentStorageService permanentStorageService) : base(
+        public ActivitiesClient(
+            IHttpClientFactory httpClientFactory,
+            ICachingService cachingService,
+            IPermanentStorageService permanentStorageService) : base(
             httpClientFactory)
         {
             _cachingService = cachingService;
@@ -22,13 +28,17 @@ namespace Activities.Strava.Endpoints
         }
 
         /// <summary>
-        /// Returns a specific activity
+        ///     Returns a specific activity
         /// </summary>
         /// <param name="accessToken">Strava access token</param>
         /// <param name="id">Activity Id</param>
         /// <param name="throwExceptions">If true method will throw exceptions instead of return null when there is an error.</param>
         public async Task<DetailedActivity> GetActivity(string accessToken, long id, bool throwExceptions = false)
         {
+            // Ensures only one request is made at a time for the same activity
+            var semaphoreSlim = AsyncLocks.GetOrAdd(id.ToString(), new SemaphoreSlim(1, 1));
+            await semaphoreSlim.WaitAsync();
+
             try
             {
                 var activity = await _cachingService.GetOrAdd(
@@ -54,9 +64,13 @@ namespace Activities.Strava.Endpoints
                 {
                     throw;
                 }
-
-                return null;
             }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
+
+            return null;
         }
 
         public async Task ToggleIgnoreIntervals(long id)
@@ -65,6 +79,7 @@ namespace Activities.Strava.Endpoints
                 $"DetailedActivity:{id}",
                 TimeSpan.MaxValue,
                 () => throw new InvalidOperationException());
+
             activity.IgnoreIntervals = !activity.IgnoreIntervals;
             await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
         }
@@ -80,7 +95,7 @@ namespace Activities.Strava.Endpoints
         }
 
         /// <summary>
-        /// Returns all activities for the logged in user
+        ///     Returns all activities for the logged in user
         /// </summary>
         /// <param name="accessToken">Strava access token</param>
         /// <param name="athleteId">Strava athlete Id</param>
@@ -114,6 +129,7 @@ namespace Activities.Strava.Endpoints
                 activities = await Get<IReadOnlyList<SummaryActivity>>(
                     accessToken,
                     $"https://www.strava.com/api/v3/athlete/activities?page={page}&per_page=200&after={activitiesCache.LastSyncDate.ToUnixTimeSeconds()}");
+
                 result.AddRange(activities);
                 page++;
             } while (activities.Any());
@@ -121,9 +137,13 @@ namespace Activities.Strava.Endpoints
             activitiesCache.Activities.RemoveAll(activity => result.Any(a => a.Id == activity.Id));
             activitiesCache.Activities.AddRange(result);
 
-            activitiesCache.Activities = activitiesCache.Activities.OrderByDescending(activity => activity.StartDate).ToList();
+            activitiesCache.Activities =
+                activitiesCache.Activities.OrderByDescending(activity => activity.StartDate).ToList();
+
             activitiesCache.LastSyncDate = DateTimeOffset.UtcNow.AddMonths(-1);
-            await _permanentStorageService.AddOrUpdate($"ActivitiesCache:{athleteId}", TimeSpan.MaxValue, activitiesCache);
+            await _permanentStorageService.AddOrUpdate($"ActivitiesCache:{athleteId}", TimeSpan.MaxValue,
+                activitiesCache);
+
             return activitiesCache.Activities.Where(IsValidActivityType).ToList();
         }
 

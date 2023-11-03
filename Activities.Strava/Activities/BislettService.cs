@@ -1,14 +1,14 @@
-using Activities.Strava.Endpoints.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Activities.Strava.Endpoints.Models;
 
 namespace Activities.Strava.Activities;
 
 public static class BislettService
 {
     // Update when logic is modified to trigger recalculation.
-    private const string Version = "2022-12-19_3";
+    private const string Version = "2023-11-03";
     private const double BislettLapDistance = 546.5;
 
     private const double MaxWholeMinuteFactor = 0.03;
@@ -59,12 +59,18 @@ public static class BislettService
             return true;
         }
 
-        if (intervalLaps.All(lap => lap.PaceZone > 0) && intervalLaps.Sum(lap => lap.TotalElevationGain) > 5)
+        var activityContainsBislett = activity.Description?.ToLower().Contains("bislett") == true ||
+                                      activity.Name?.ToLower().Contains("bislett") == true ||
+                                      activity.PrivateNote?.ToLower().Contains("bislett") == true;
+
+        if (intervalLaps.All(lap => lap.PaceZone > 0) &&
+            intervalLaps.Sum(lap => lap.TotalElevationGain) > (activityContainsBislett ? 50 : 5))
         {
             return true;
         }
 
-        if (intervalLaps.Sum(lap => lap.TotalElevationGain) / intervalLaps.Sum(lap => lap.Distance) > 0.01)
+        if (intervalLaps.Sum(lap => lap.TotalElevationGain) / intervalLaps.Sum(lap => lap.Distance) >
+            (activityContainsBislett ? 0.1 : 0.01))
         {
             return true;
         }

@@ -7,92 +7,158 @@ import { EmptyThead, Table } from '../utils/Table';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 import ValueTh from '../utils/ValueTh';
 
+interface SimilarResponse {
+    activities: ActivityGroup[];
+}
+
 interface ActivityGroup {
-  name: string;
-  items: Activity[];
+    name: string;
+    items: Activity[];
 }
 
 const SimiliarActivitiesPage: React.FC = () => {
-  const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
-  const [activities, setActivities] = useState<ActivityGroup[]>();
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+    const [activities, setActivities] = useState<ActivityGroup[]>();
 
-  const { id } = useParams<{ id: string | undefined }>();
+    const { id } = useParams<{ id: string | undefined }>();
 
-  useEffect(() => {
-    if (activities !== undefined) {
-      return;
-    }
-
-    setLoadingStatus(LoadingStatus.Loading);
-
-    fetch(`/api/activities/${id}/similar`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error();
+    useEffect(() => {
+        if (activities !== undefined) {
+            return;
         }
-        return response.json() as Promise<any>;
-      })
-      .then((data) => {
-        setActivities(data.activities);
-        setLoadingStatus(LoadingStatus.None);
-      })
-      .catch(() => {
-        setActivities([]);
-        setLoadingStatus(LoadingStatus.Error);
-      });
-  }, [activities]);
 
-  const showLactate = (activities
-    && activities.filter((group) => group.items?.filter((activity) => activity.lactate).length > 0 || false).length > 0) === true;
+        setLoadingStatus(LoadingStatus.Loading);
 
-  const showFeeling = (activities
-    && activities.filter((group) => group.items?.filter((activity) => activity.feeling != null)).length > 0) === true;
+        fetch(`/api/activities/${id}/similar`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error();
+                }
+                return response.json() as Promise<SimilarResponse>;
+            })
+            .then((data) => {
+                setActivities(data.activities);
+                setLoadingStatus(LoadingStatus.None);
+            })
+            .catch(() => {
+                setActivities([]);
+                setLoadingStatus(LoadingStatus.Error);
+            });
+    }, [activities, id]);
 
-  const numberOfColumns = 7 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
+    const showLactate =
+        (activities &&
+            activities.filter(
+                (group) =>
+                    group.items?.filter((activity) => activity.lactate).length >
+                        0 || false
+            ).length > 0) === true;
 
-  return (
-    <div>
-      <Loader status={loadingStatus} />
-      {loadingStatus === LoadingStatus.None && activities && (
+    const showFeeling =
+        (activities &&
+            activities.filter((group) =>
+                group.items?.filter((activity) => activity.feeling != null)
+            ).length > 0) === true;
+
+    const numberOfColumns = 7 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
+
+    return (
         <div>
-          <TableContainer>
-            <Table>
-              {activities?.map((group) => (
-                <React.Fragment key={group.name}>
-                  {group.items.length > 0 && (
-                    <thead>
-                      <tr>
-                        <th colSpan={2} id={group.name}>{group.name}</th>
-                        <ValueTh items={group.items} valueFunc={(item) => item.laps} title="Laps" />
-                        <ValueTh items={group.items} valueFunc={(item) => item.distance} title="Distance" />
-                        <ValueTh items={group.items} valueFunc={(item) => item.elapsedTime} title="Time" />
-                        <ValueTh items={group.items} valueFunc={(item) => item.pace} title="Pace" />
-                        <ValueTh items={group.items} valueFunc={(item) => item.heartrate} title="Heartrate" />
-                        {showLactate && <ValueTh items={group.items} valueFunc={(item) => item.lactate} title="Lactate" />}
-                        {showFeeling && <th title="Feeling">&nbsp;&nbsp;&nbsp;</th>}
-                      </tr>
-                    </thead>
-                  )}
-                  {group.items.length === 0 && (
-                    <EmptyThead>
-                      <tr>
-                        <th colSpan={numberOfColumns} id={group.name}>{group.name}</th>
-                      </tr>
-                    </EmptyThead>
-                  )}
-                  <tbody>
-                    {group.items.map((activity) => (
-                      <ActivityTr key={activity.id} activity={activity} showLactate={showLactate} showFeeling={showFeeling} />
-                    ))}
-                  </tbody>
-                </React.Fragment>
-              ))}
-            </Table>
-          </TableContainer>
+            <Loader status={loadingStatus} />
+            {loadingStatus === LoadingStatus.None && activities && (
+                <div>
+                    <TableContainer>
+                        <Table>
+                            {activities?.map((group) => (
+                                <React.Fragment key={group.name}>
+                                    {group.items.length > 0 && (
+                                        <thead>
+                                            <tr>
+                                                <th colSpan={2} id={group.name}>
+                                                    {group.name}
+                                                </th>
+                                                <ValueTh
+                                                    items={group.items}
+                                                    valueFunc={(item) =>
+                                                        item.laps
+                                                    }
+                                                    title="Laps"
+                                                />
+                                                <ValueTh
+                                                    items={group.items}
+                                                    valueFunc={(item) =>
+                                                        item.distance
+                                                    }
+                                                    title="Distance"
+                                                />
+                                                <ValueTh
+                                                    items={group.items}
+                                                    valueFunc={(item) =>
+                                                        item.elapsedTime
+                                                    }
+                                                    title="Time"
+                                                />
+                                                <ValueTh
+                                                    items={group.items}
+                                                    valueFunc={(item) =>
+                                                        item.pace
+                                                    }
+                                                    title="Pace"
+                                                />
+                                                <ValueTh
+                                                    items={group.items}
+                                                    valueFunc={(item) =>
+                                                        item.heartrate
+                                                    }
+                                                    title="Heartrate"
+                                                />
+                                                {showLactate && (
+                                                    <ValueTh
+                                                        items={group.items}
+                                                        valueFunc={(item) =>
+                                                            item.lactate
+                                                        }
+                                                        title="Lactate"
+                                                    />
+                                                )}
+                                                {showFeeling && (
+                                                    <th title="Feeling">
+                                                        &nbsp;&nbsp;&nbsp;
+                                                    </th>
+                                                )}
+                                            </tr>
+                                        </thead>
+                                    )}
+                                    {group.items.length === 0 && (
+                                        <EmptyThead>
+                                            <tr>
+                                                <th
+                                                    colSpan={numberOfColumns}
+                                                    id={group.name}
+                                                >
+                                                    {group.name}
+                                                </th>
+                                            </tr>
+                                        </EmptyThead>
+                                    )}
+                                    <tbody>
+                                        {group.items.map((activity) => (
+                                            <ActivityTr
+                                                key={activity.id}
+                                                activity={activity}
+                                                showLactate={showLactate}
+                                                showFeeling={showFeeling}
+                                            />
+                                        ))}
+                                    </tbody>
+                                </React.Fragment>
+                            ))}
+                        </Table>
+                    </TableContainer>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default SimiliarActivitiesPage;

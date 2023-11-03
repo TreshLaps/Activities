@@ -1,34 +1,86 @@
 module.exports = {
-  root: true,
-  env: {
-    browser: true,
-  },
-  parser: '@typescript-eslint/parser', // Specifies the ESLint parser
-  parserOptions: {
-    project: './tsconfig.json',
-    ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
-    ecmaFeatures: {
-      jsx: true, // Allows for the parsing of JSX
+    root: true,
+    settings: {
+        react: {
+            version: 'detect',
+            linkComponents: [
+                {
+                    name: 'Link',
+                    linkAttribute: 'to',
+                },
+            ],
+        },
     },
-  },
-  settings: {
-    react: {
-      version: 'detect', // Tells eslint-plugin-react to automatically detect the version of React to use
+    extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:react/jsx-runtime',
+        'plugin:react-hooks/recommended',
+        'plugin:jsx-a11y/recommended',
+        // "prettier", // disabled until we upgrade prettier
+        // "plugin:import/recommended",
+    ],
+    rules: {
+        'jsx-a11y/no-autofocus': 'off',
+        'jsx-a11y/no-onchange': 'off',
     },
-  },
-  extends: ['airbnb-typescript'],
-  rules: {
-    'linebreak-style': 'off',
-    'react/jsx-one-expression-per-line': 'off',
-    'react/prop-types': 'off',
-    'no-bitwise': 'off',
-    'no-param-reassign': 'off',
-    'react/destructuring-assignment': 'off',
-    'implicit-arrow-linebreak': 'off',
-    'no-mixed-operators': 'off',
-    'no-console': 'warn',
-    'max-len': ['error', { code: 140 }],
-    '@typescript-eslint/no-unused-vars': 'warn',
-  },
+    env: {
+        es6: true,
+        browser: true,
+    },
+    overrides: [
+        {
+            files: ['*.ts', '*.tsx'],
+            settings: {
+                'import/parsers': {
+                    '@typescript-eslint/parser': ['.ts', '.tsx'],
+                },
+                'import/resolver': {
+                    typescript: {
+                        project: [
+                            './tsconfig.json',
+                            './tests/tsconfig.json',
+                            './tsconfig.build.json',
+                        ],
+                    },
+                },
+            },
+            parser: '@typescript-eslint/parser',
+            parserOptions: {
+                tsconfigRootDir: __dirname,
+                project: [
+                    './tsconfig.json',
+                    './tests/tsconfig.json',
+                    './tsconfig.build.json',
+                ],
+                ecmaVersion: 2018,
+                ecmaFeatures: {
+                    jsx: true,
+                },
+                sourceType: 'module',
+            },
+            plugins: ['@typescript-eslint'],
+            extends: [
+                'plugin:@typescript-eslint/recommended',
+                'plugin:@typescript-eslint/recommended-requiring-type-checking',
+                // "plugin:import/typescript",
+            ],
+            rules: {
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
+                '@typescript-eslint/no-unused-vars': [
+                    'error',
+                    { argsIgnorePattern: '^_', varsIgnorePattern: '^_T' },
+                ],
+                'react/prop-types': 'off',
+                'react/display-name': 'off',
+                '@typescript-eslint/restrict-template-expressions': 'off',
+                '@typescript-eslint/no-inferrable-types': 'off',
+                '@typescript-eslint/no-empty-function': 'off',
+            },
+        },
+        {
+            files: ['./.eslintrc.js', './*.config.js'],
+            env: { browser: false, node: true },
+        },
+    ],
 };

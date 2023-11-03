@@ -20,35 +20,35 @@ const BannerWrapper = styled.div`
     overflow: hidden;
 
     span {
-      font-size: 50px;
-      color: #c90000;
-      padding-left: 50px;
+        font-size: 50px;
+        color: #c90000;
+        padding-left: 50px;
     }
 
     img {
-      display: block;
-      height: 200px;
-      object-fit: contain;
+        display: block;
+        height: 200px;
+        object-fit: contain;
     }
 
     @media (max-width: 768px) {
-      display: block;
-      margin: 0;
-      border-radius: 0;
-      margin-bottom: 50px;
-
-      span {
         display: block;
-        font-size: 30px;
-        line-height: 1.5;
-        padding-left: 0;
-        padding: 20px;
-        text-align: center;
-      }
+        margin: 0;
+        border-radius: 0;
+        margin-bottom: 50px;
 
-      img {
-        width: 100%;
-      }
+        span {
+            display: block;
+            font-size: 30px;
+            line-height: 1.5;
+            padding-left: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        img {
+            width: 100%;
+        }
     }
 `;
 
@@ -59,52 +59,56 @@ const ContentWrapper = styled.div`
     justify-content: space-evenly;
 
     svg {
-      width: 100px;
-      margin: 0 auto;
-      display: block;
+        width: 100px;
+        margin: 0 auto;
+        display: block;
     }
 `;
 
 const BoxWrapper = styled.div`
-  padding: 10px;
-  max-width: 400px;
-  font-size: 20px;
-  line-height: 1.5;
+    padding: 10px;
+    max-width: 400px;
+    font-size: 20px;
+    line-height: 1.5;
 `;
 
 const BoxText = styled.p`
-  text-align: center;
-  margin-bottom: 20px;
-  margin-top: 5px;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 5px;
 `;
 
-const LandingPage: React.FC<{ children?: any }> = () => (
-  <LandingContainer>
-    <BannerWrapper>
-      <span>“All you need is red cells”</span>
-      <img src={foto} alt="Markus ser viktig ut" />
-    </BannerWrapper>
-    <ContentWrapper>
-      <BoxWrapper>
-        <Pulse />
-        <BoxText>
-          Prinsippet bak vår trening er å bygge aerob kapasitet, som er den viktigste faktoren i langdistanseløping
-        </BoxText>
-      </BoxWrapper>
-      <BoxWrapper>
-        <Droplet />
-        <BoxText>
-          Treningen intensitetsstyres med å måle laktat, et direkte mål på anaerob energiforbruk
-        </BoxText>
-      </BoxWrapper>
-      <BoxWrapper>
-        <Run />
-        <BoxText>
-          Terskelintervaller gir mulighet for et stort volum på relativt høy intensitet, og stimulerer effektivt den aerobe kapasiteten
-        </BoxText>
-      </BoxWrapper>
-    </ContentWrapper>
-  </LandingContainer>
+const LandingPage: React.FC<{ children?: React.ReactNode }> = () => (
+    <LandingContainer>
+        <BannerWrapper>
+            <span>“All you need is red cells”</span>
+            <img src={foto} alt="Markus ser viktig ut" />
+        </BannerWrapper>
+        <ContentWrapper>
+            <BoxWrapper>
+                <Pulse />
+                <BoxText>
+                    Prinsippet bak vår trening er å bygge aerob kapasitet, som
+                    er den viktigste faktoren i langdistanseløping
+                </BoxText>
+            </BoxWrapper>
+            <BoxWrapper>
+                <Droplet />
+                <BoxText>
+                    Treningen intensitetsstyres med å måle laktat, et direkte
+                    mål på anaerob energiforbruk
+                </BoxText>
+            </BoxWrapper>
+            <BoxWrapper>
+                <Run />
+                <BoxText>
+                    Terskelintervaller gir mulighet for et stort volum på
+                    relativt høy intensitet, og stimulerer effektivt den aerobe
+                    kapasiteten
+                </BoxText>
+            </BoxWrapper>
+        </ContentWrapper>
+    </LandingContainer>
 );
 
 export default LandingPage;

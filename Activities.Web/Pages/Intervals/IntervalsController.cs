@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +34,9 @@ namespace Activities.Web.Pages.Intervals
             var groupKey = filterRequest.Duration == FilterDuration.LastMonths ? GroupKey.Week : GroupKey.Month;
             var (startDate, endDate) = filterRequest.GetDateRange();
 
-            var detailedActivities = (await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
+            var detailedActivities = (await activities.ForEachAsync(4,
+                    activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId,
+                        activity.Id)))
                 .Where(activity => activity != null);
 
             var intervalActivities = detailedActivities
@@ -76,12 +78,15 @@ namespace Activities.Web.Pages.Intervals
                                         activity.Activity.Name,
                                         activity.Activity.Description,
                                         activity.Activity.Type,
-                                        Interval_AveragePace = activity.IntervalLaps.AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
+                                        Interval_AveragePace = activity.IntervalLaps.AverageBy(lap => lap.ElapsedTime,
+                                                lap => lap.AverageSpeed)
                                             .Value.ToPaceString(activity.Activity.Type),
-                                        Interval_AverageHeartrate = $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
-                                        Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed, maxHeartrate, maxDuration),
+                                        Interval_AverageHeartrate =
+                                            $"{activity.IntervalLaps.Average(lap => lap.AverageHeartrate):0} bpm",
+                                        Interval_Laps = GetLapsResult(activity.IntervalLaps, maxDistance, maxSpeed,
+                                            maxHeartrate, maxDuration),
                                         Laktat = GetLactate(activity.Activity),
-                                        Feeling = activity.Activity.Feeling
+                                        activity.Activity.Feeling
                                     };
                                 })
                             .ToList()
@@ -97,7 +102,7 @@ namespace Activities.Web.Pages.Intervals
                             return new
                             {
                                 Date = string.Empty,
-                                Lactate = (double?)null
+                                Lactate = (double?) null
                             };
                         }
 
@@ -107,13 +112,15 @@ namespace Activities.Web.Pages.Intervals
                             .Select(activity => activity.Average())
                             .ToList();
 
-                        var averageFileTime = (long)month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
+                        var averageFileTime =
+                            (long) month.Value.Average(activity => activity.Activity.StartDate.ToFileTime());
+
                         var averageDate = DateTime.FromFileTime(averageFileTime);
 
                         return new
                         {
                             Date = averageDate.ToString("yyyy-MM-dd"),
-                            Lactate = measures.Any() ? (double?)Math.Round(measures.Median(), 1) : null
+                            Lactate = measures.Any() ? (double?) Math.Round(measures.Median(), 1) : null
                         };
                     })
                 .Where(item => item.Lactate.HasValue)
@@ -130,7 +137,7 @@ namespace Activities.Web.Pages.Intervals
                     activity => activity.Lactate.Select(
                         lactate => new
                         {
-                            Date = activity.Date,
+                            activity.Date,
                             Lactate = lactate
                         }))
                 .ToList();
@@ -152,7 +159,8 @@ namespace Activities.Web.Pages.Intervals
                         return new
                         {
                             Date = month.Key,
-                            NonIntervalDistance = Math.Round((month.Value.Sum(activity => activity.Distance) / 1000) - intervalDistance, 2),
+                            NonIntervalDistance =
+                                Math.Round(month.Value.Sum(activity => activity.Distance) / 1000 - intervalDistance, 2),
                             IntervalDistance = intervalDistance
                         };
                     })
@@ -178,10 +186,14 @@ namespace Activities.Web.Pages.Intervals
                                         .Value);
                             }
 
-                            if (activity.IntervalLaps.Any(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold))
+                            if (activity.IntervalLaps.Any(lap =>
+                                    lap.ElapsedTime >= shortPaceMaxThreshold &&
+                                    lap.ElapsedTime < mediumPaceMaxThreshold))
                             {
                                 mediumPaces.Add(
-                                    activity.IntervalLaps.Where(lap => lap.ElapsedTime >= shortPaceMaxThreshold && lap.ElapsedTime < mediumPaceMaxThreshold)
+                                    activity.IntervalLaps.Where(lap =>
+                                            lap.ElapsedTime >= shortPaceMaxThreshold &&
+                                            lap.ElapsedTime < mediumPaceMaxThreshold)
                                         .AverageBy(lap => lap.ElapsedTime, lap => lap.AverageSpeed)
                                         .Value);
                             }
@@ -199,9 +211,17 @@ namespace Activities.Web.Pages.Intervals
                         var averageMediumPace = mediumPaces.Any() ? mediumPaces.Average() : 0;
                         var averageLongPace = longPaces.Any() ? longPaces.Average() : 0;
 
-                        var shortString = averageShortPace > 0 ? $"\r\n- Short: {averageShortPace.ToPaceString(filterRequest.Type)} (< 2 min)" : null;
-                        var mediumString = averageMediumPace > 0 ? $"\r\n- Medium: {averageMediumPace.ToPaceString(filterRequest.Type)}" : null;
-                        var longString = averageLongPace > 0 ? $"\r\n- Long: {averageLongPace.ToPaceString(filterRequest.Type)} (> 10 min)" : null;
+                        var shortString = averageShortPace > 0
+                            ? $"\r\n- Short: {averageShortPace.ToPaceString(filterRequest.Type)} (< 2 min)"
+                            : null;
+
+                        var mediumString = averageMediumPace > 0
+                            ? $"\r\n- Medium: {averageMediumPace.ToPaceString(filterRequest.Type)}"
+                            : null;
+
+                        var longString = averageLongPace > 0
+                            ? $"\r\n- Long: {averageLongPace.ToPaceString(filterRequest.Type)} (> 10 min)"
+                            : null;
 
                         return new
                         {
@@ -209,7 +229,8 @@ namespace Activities.Web.Pages.Intervals
                             AverageShortPace = averageShortPace,
                             AverageMediumPace = averageMediumPace,
                             AverageLongPace = averageLongPace,
-                            Label = $"{month.Key}{shortString}{mediumString}{longString}\r\n\r\nActivities: {month.Value.Count()}"
+                            Label =
+                                $"{month.Key}{shortString}{mediumString}{longString}\r\n\r\nActivities: {month.Value.Count()}"
                         };
                     })
                 .ToList();
@@ -287,7 +308,7 @@ namespace Activities.Web.Pages.Intervals
             IsInterval = lap.IsInterval;
             Distance = lap.Distance;
             AverageSpeed = lap.AverageSpeed;
-            AverageHeartrate = (int)lap.AverageHeartrate;
+            AverageHeartrate = (int) lap.AverageHeartrate;
             ElapsedTime = lap.ElapsedTime;
             Lactate = lap.Lactate;
 

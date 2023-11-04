@@ -33,7 +33,11 @@ namespace Activities.Strava.Endpoints
         /// <param name="accessToken">Strava access token</param>
         /// <param name="id">Activity Id</param>
         /// <param name="throwExceptions">If true method will throw exceptions instead of return null when there is an error.</param>
-        public async Task<DetailedActivity> GetActivity(string accessToken, long id, bool throwExceptions = false)
+        public async Task<DetailedActivity> GetActivity(
+            string accessToken,
+            long athleteId,
+            long id,
+            bool throwExceptions = false)
         {
             // Ensures only one request is made at a time for the same activity
             var semaphoreSlim = AsyncLocks.GetOrAdd(id.ToString(), new SemaphoreSlim(1, 1));
@@ -56,7 +60,7 @@ namespace Activities.Strava.Endpoints
                     await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
                 }
 
-                return activity;
+                return StripPrivateData(activity, athleteId);
             }
             catch
             {
@@ -71,6 +75,40 @@ namespace Activities.Strava.Endpoints
             }
 
             return null;
+        }
+
+        private DetailedActivity StripPrivateData(DetailedActivity activity, long athleteId)
+        {
+            if (activity.Athlete.Id == athleteId || athleteId == 0)
+            {
+                return activity;
+            }
+
+            if (activity.Private || activity.Visibility != "everyone")
+            {
+                throw new InvalidOperationException("Activity is private");
+            }
+
+            var result = activity with
+            {
+                PrivateNote = string.Empty
+            };
+
+            if (activity.HeartrateOptOut)
+            {
+                result = result with
+                {
+                    AverageHeartrate = 0,
+                    MaxHeartrate = 0,
+                    Laps = result.Laps?.Select(lap => lap with
+                    {
+                        AverageHeartrate = 0,
+                        MaxHeartrate = 0
+                    }).ToList()
+                };
+            }
+
+            return result;
         }
 
         public async Task ToggleIgnoreIntervals(long id)

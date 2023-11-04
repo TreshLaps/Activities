@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints.Models
 {
-    public class Lap
+    public record Lap
     {
         public double? Lactate { get; set; }
-        
+
         [JsonProperty("id")]
         public long Id { get; set; }
 

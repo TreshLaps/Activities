@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
@@ -25,11 +25,14 @@ namespace Activities.Web.Pages
         protected async Task<List<DetailedActivity>> GetDetailedActivities(FilterRequest filterRequest)
         {
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-            var activityList = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
+            var activityList =
+                (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
                 .Where(filterRequest.Keep)
                 .ToList();
-            
-            return (await activityList.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
+
+            return (await activityList.ForEachAsync(4,
+                    activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId,
+                        activity.Id)))
                 .Where(activity => activity != null)
                 .ToList();
         }
@@ -40,7 +43,8 @@ namespace Activities.Web.Pages
                 .ToActivitySummary(filterRequest);
         }
 
-        protected async Task<Dictionary<string, List<ActivityDataSummary>>> GetActivitiesGroupByDate(FilterRequest filterRequest)
+        protected async Task<Dictionary<string, List<ActivityDataSummary>>> GetActivitiesGroupByDate(
+            FilterRequest filterRequest)
         {
             var result = await GetActivitySummaries(filterRequest);
             var (startDate, endDate) = filterRequest.GetDateRange();

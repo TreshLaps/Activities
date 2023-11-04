@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +14,13 @@ namespace Activities.Strava.Syncing
 {
     public class ActivitiesSyncService
     {
+        private static readonly ConcurrentDictionary<long, BatchJob> SyncJobs = new();
+
+        private static long timeSlot;
+        private static int _processedCount;
+        private static readonly int _maxCount = 500;
         private readonly ActivitiesClient _activitiesClient;
         private readonly StravaOAuthService _stravaOAuthService;
-        private static readonly ConcurrentDictionary<long, BatchJob> SyncJobs = new();
 
         public ActivitiesSyncService(
             ActivitiesClient activitiesClient,
@@ -43,7 +47,7 @@ namespace Activities.Strava.Syncing
 
             var job = SyncJobs.GetOrAdd(
                 athleteId,
-                (key) => new BatchJob
+                key => new BatchJob
                 {
                     Created = DateTime.UtcNow,
                     StravaToken = token,
@@ -91,21 +95,20 @@ namespace Activities.Strava.Syncing
                 try
                 {
                     job.StravaToken = await _stravaOAuthService.GetOrRefreshToken(job.StravaToken);
-                    await _activitiesClient.GetActivity(job.StravaToken.AccessToken, activity.Id, true);
+                    await _activitiesClient.GetActivity(job.StravaToken.AccessToken, 0, activity.Id, true);
                 }
                 catch (RequestFailedException requestFailedException)
                 {
-                    if (requestFailedException.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable)
+                    if (requestFailedException.StatusCode is HttpStatusCode.TooManyRequests
+                        or HttpStatusCode.ServiceUnavailable)
                     {
                         await Task.Delay(30000, cancellationToken);
                         i--;
                         continue;
                     }
-                    else
-                    {
-                        // Something failed. Abort
-                        return;
-                    }
+
+                    // Something failed. Abort
+                    return;
                 }
                 catch
                 {
@@ -144,9 +147,5 @@ namespace Activities.Strava.Syncing
 
             return 0;
         }
-
-        private static long timeSlot;
-        private static int _processedCount;
-        private static int _maxCount = 500;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Activities.Core.Caching;
 using Activities.Strava.Authentication;
 using Activities.Strava.Endpoints;
@@ -17,7 +17,10 @@ namespace Activities.Web.Pages.Debug
         private readonly ICachingService _cachingService;
         private readonly IPermanentStorageService _permanentStorageService;
 
-        public DebugController(ActivitiesClient activitiesClient, ICachingService cachingService, IPermanentStorageService permanentStorageService)
+        public DebugController(
+            ActivitiesClient activitiesClient,
+            ICachingService cachingService,
+            IPermanentStorageService permanentStorageService)
         {
             _activitiesClient = activitiesClient;
             _cachingService = cachingService;
@@ -35,14 +38,21 @@ namespace Activities.Web.Pages.Debug
             {
                 _cachingService.Remove($"DetailedActivity:{activity.Id}");
             }
-            
+
             return Ok();
         }
-        
+
         [HttpGet("Save/{activityId}")]
         public async Task<IActionResult> Save(long activityId)
         {
+            var stravaAthlete = await HttpContext.TryGetStravaAthlete();
             var activity = await _permanentStorageService.Get<DetailedActivity>($"DetailedActivity:{activityId}");
+
+            if (activity == null || activity.Athlete.Id != stravaAthlete?.AthleteId)
+            {
+                return NotFound();
+            }
+
             return Content(JsonConvert.SerializeObject(activity), "application/json");
         }
     }

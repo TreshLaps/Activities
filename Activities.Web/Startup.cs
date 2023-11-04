@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Activities.Strava.Endpoints;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -73,6 +75,8 @@ public class Startup
                 options.Events.OnCreatingTicket = OnCreatingTicket;
             });
 
+        services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo("storage/DataProtectionKeys"));
+
         services.AddControllersWithViews();
         services.AddHttpClient();
         services.AddMemoryCache();
@@ -99,7 +103,7 @@ public class Startup
     {
         services.Scan(scan => scan
             .FromAssemblyOf<T>()
-            .AddClasses((x) => x.Where(type => type.Name.EndsWith("Service") || type.Name.EndsWith("Client")))
+            .AddClasses(x => x.Where(type => type.Name.EndsWith("Service") || type.Name.EndsWith("Client")))
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsSelf()
             .WithTransientLifetime()

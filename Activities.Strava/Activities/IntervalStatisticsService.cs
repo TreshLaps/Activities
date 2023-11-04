@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,14 +18,20 @@ namespace Activities.Strava.Activities
             _activitiesClient = activitiesClient;
         }
 
-        public async Task<double> GetAveragePace(StravaAthleteToken stravaAthleteToken, TimeSpan fromTime, string activityType)
+        public async Task<double> GetAveragePace(
+            StravaAthleteToken stravaAthleteToken,
+            TimeSpan fromTime,
+            string activityType)
         {
-            var activities = (await _activitiesClient.GetActivities(stravaAthleteToken.AccessToken, stravaAthleteToken.AthleteId))
+            var activities =
+                (await _activitiesClient.GetActivities(stravaAthleteToken.AccessToken, stravaAthleteToken.AthleteId))
                 .Where(activity => activity.Type == activityType)
                 .Where(activity => activity.StartDate >= DateTime.Now - fromTime)
                 .ToList();
 
-            var intervalLaps = (await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthleteToken.AccessToken, activity.Id)))
+            var intervalLaps = (await activities.ForEachAsync(4,
+                    activity => _activitiesClient.GetActivity(stravaAthleteToken.AccessToken,
+                        stravaAthleteToken.AthleteId, activity.Id)))
                 .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval) == true)
                 .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
                 .ToList();
@@ -38,14 +44,20 @@ namespace Activities.Strava.Activities
             return intervalLaps.Average(lap => lap.AverageSpeed);
         }
 
-        public async Task<double> GetMedianPace(StravaAthleteToken stravaAthleteToken, TimeSpan fromTime, string activityType)
+        public async Task<double> GetMedianPace(
+            StravaAthleteToken stravaAthleteToken,
+            TimeSpan fromTime,
+            string activityType)
         {
-            var activities = (await _activitiesClient.GetActivities(stravaAthleteToken.AccessToken, stravaAthleteToken.AthleteId))
+            var activities =
+                (await _activitiesClient.GetActivities(stravaAthleteToken.AccessToken, stravaAthleteToken.AthleteId))
                 .Where(activity => activity.Type == activityType)
                 .Where(activity => activity.StartDate >= DateTime.Now - fromTime)
                 .ToList();
 
-            var intervalLaps = (await activities.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthleteToken.AccessToken, activity.Id)))
+            var intervalLaps = (await activities.ForEachAsync(4,
+                    activity => _activitiesClient.GetActivity(stravaAthleteToken.AccessToken,
+                        stravaAthleteToken.AthleteId, activity.Id)))
                 .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval) == true)
                 .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval))
                 .ToList();

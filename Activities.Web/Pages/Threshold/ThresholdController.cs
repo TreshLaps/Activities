@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using Activities.Core.Extensions;
 using Activities.Strava.Activities;
@@ -25,15 +25,18 @@ namespace Activities.Web.Pages.Threshold
         {
             if (filterRequest.Duration == FilterDuration.LastMonths)
             {
-                filterRequest = filterRequest with { Duration = FilterDuration.LastYear };
+                filterRequest = filterRequest with {Duration = FilterDuration.LastYear};
             }
-            
+
             var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-            var activityList = (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
+            var activityList =
+                (await _activitiesClient.GetActivities(stravaAthlete.AccessToken, stravaAthlete.AthleteId))
                 .Where(filterRequest.Keep)
                 .ToList();
 
-            var laps = (await activityList.ForEachAsync(4, activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, activity.Id)))
+            var laps = (await activityList.ForEachAsync(4,
+                    activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId,
+                        activity.Id)))
                 .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval && lap.ElapsedTime > 120) == true)
                 .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval && lap.ElapsedTime > 120))
                 .ToList();

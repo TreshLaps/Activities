@@ -29,7 +29,7 @@ public class ActivitiesController : BaseActivitiesController
     public async Task<ActivityResult> GetActivity(long id)
     {
         var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-        var activity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, id);
+        var activity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId, id);
         var averageIntervalPace = 0.0;
         var last60DaysIntervalPace = 0.0;
 
@@ -130,7 +130,7 @@ public class ActivitiesController : BaseActivitiesController
     public async Task<dynamic> GetSimilarActivity(long id)
     {
         var stravaAthlete = await HttpContext.TryGetStravaAthlete();
-        var mainActivity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, id);
+        var mainActivity = await _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId, id);
 
         if (mainActivity.Laps?.Any(lap => lap.IsInterval) != true)
         {

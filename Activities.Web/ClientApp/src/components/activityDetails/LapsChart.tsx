@@ -139,7 +139,7 @@ const LapsChart: React.FC<{
             return {
                 lap,
                 x0,
-                y0: 0,
+                y0: -1,
                 x,
                 y: averageLapSpeed,
                 yHeartrate: lap.averageHeartrate,

@@ -7,32 +7,16 @@ namespace Activities.Strava.Activities;
 
 public static class IntervalService
 {
-    // Update when logic is modified to trigger recalculation.
-    private const string Version = "2021-08-25";
-
-    public static bool TryTagIntervalLaps(this DetailedActivity activity)
+    public static DetailedActivity TryTagIntervalLaps(this DetailedActivity activity)
     {
-        if (activity._IntervalVersion == Version)
-        {
-            return false;
-        }
-
-        activity._IntervalVersion = Version;
-        activity._LactateVersion = null;
-
         if (activity.Laps == null)
         {
-            return true;
-        }
-
-        foreach (var lap in activity.Laps)
-        {
-            lap.IsInterval = false;
+            return activity;
         }
 
         for (var i = 1; i < activity.Laps.Count - 1; i++)
         {
-            if (!IsIntervalLap(i, activity.Laps, true))
+            if (!IsIntervalLap(i, activity.Laps))
             {
                 continue;
             }
@@ -44,54 +28,78 @@ public static class IntervalService
                 continue;
             }
 
-            foreach (var similarLap in similarLaps)
+
+            activity = activity with
             {
-                similarLap.Lap.IsInterval = true;
-            }
+                Laps = activity.Laps
+                    .Select((lap, index) => similarLaps.Contains(index) ? lap with {IsInterval = true} : lap)
+                    .ToList()
+            };
         }
 
         // Remove short interval laps that has no similar interval laps based on distance.
-        foreach (var lap in activity.Laps.Where(lap => lap.IsInterval))
+        activity = activity with
         {
-            if (lap.Distance < 500 &&
-                activity.Laps.Count(lap2 => lap2.IsInterval && Math.Abs(lap.Distance - lap2.Distance) < 200) <= 1)
-            {
-                lap.IsInterval = false;
-            }
-        }
+            Laps = activity.Laps
+                .Select(lap =>
+                {
+                    if (lap.IsInterval && lap.Distance < 500 &&
+                        activity.Laps.Count(lap2 => lap2.IsInterval && Math.Abs(lap.Distance - lap2.Distance) < 200) <=
+                        1)
+                    {
+                        return lap with {IsInterval = false};
+                    }
+
+                    return lap;
+                })
+                .ToList()
+        };
 
         // Remove first lap if it's slower than the rest of the intervals by a given margin.
-        if (activity.Laps.Count > 1 && activity.Laps[0].IsInterval)
+        activity = activity with
         {
-            var isSlowestLapByMargin =
-                activity.Laps[0].AverageSpeed <
-                activity.Laps.Skip(1).Where(lap => lap.IsInterval).Min(lap => lap.AverageSpeed) * 0.99;
+            Laps = activity.Laps
+                .Select((lap, index) =>
+                {
+                    if (index == 0 && lap.IsInterval &&
+                        lap.AverageSpeed <
+                        activity.Laps.Skip(1).Where(lap2 => lap2.IsInterval).Min(lap2 => lap2.AverageSpeed) *
+                        0.99)
+                    {
+                        return lap with {IsInterval = false};
+                    }
 
-            if (isSlowestLapByMargin)
-            {
-                activity.Laps[0].IsInterval = false;
-            }
-        }
+                    return lap;
+                })
+                .ToList()
+        };
 
         if (IsAutoLapOrSimilar(activity.Laps))
         {
-            foreach (var lap in activity.Laps)
+            return activity with
             {
-                lap.IsInterval = false;
-            }
+                Laps = activity.Laps.Select(lap => lap with {IsInterval = false}).ToList()
+            };
         }
 
-        for (var i = 0; i < activity.Laps.Count; i++)
+        activity = activity with
         {
-            var matchingLap = GetClosestMatchingLap(i, activity.Laps);
+            Laps = activity.Laps
+                .Select((lap, lapIndex) =>
+                {
+                    var matchingLap = GetClosestMatchingLap(lapIndex, activity.Laps);
 
-            if (matchingLap != null && matchingLap.IsInterval && CheckIfLapIsInterval(activity, i))
-            {
-                activity.Laps[i].IsInterval = true;
-            }
-        }
+                    if (matchingLap != null && matchingLap.IsInterval && CheckIfLapIsInterval(activity, lapIndex))
+                    {
+                        return lap with {IsInterval = true};
+                    }
 
-        return true;
+                    return lap;
+                })
+                .ToList()
+        };
+
+        return activity;
     }
 
     private static bool CheckIfLapIsInterval(DetailedActivity activity, int i)
@@ -168,10 +176,10 @@ public static class IntervalService
         return lapsOrderedByDistance.Sum(lap => Math.Abs(lap.Distance - averageDistance)) < 20 * laps.Count;
     }
 
-    public static List<(Lap Lap, int LapIndex)> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)
+    private static List<int> GetSimilarLaps(int lapIndex, List<Lap> laps, double threshold)
     {
         var compareLap = laps[lapIndex];
-        var result = new List<(Lap Lap, int LapIndex)>();
+        var result = new List<int>();
 
         for (var i = 0; i < laps.Count; i++)
         {
@@ -190,7 +198,7 @@ public static class IntervalService
 
             if ((isCloseInSpeed || isFasterThan) && isCloseInDuration)
             {
-                result.Add((laps[i], i));
+                result.Add(i);
             }
         }
 

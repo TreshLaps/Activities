@@ -1,6 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
-using Activities.Strava.Activities;
+using Activities.Strava.Endpoints;
 using Activities.Strava.Endpoints.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -36,12 +36,8 @@ public class BislettIntervalsServiceTests
     {
         var json = await File.ReadAllTextAsync(Path.Combine("BislettActivities", $"{stravaId}.json"));
         var activity = JsonConvert.DeserializeObject<DetailedActivity>(json);
-        activity._IntervalVersion = null;
-        activity._BislettVersion = null;
+        activity = ActivitiesClient.ProcessActivity(activity);
 
-        activity.TryTagIntervalLaps();
-        activity.TryAdjustBislettLaps();
-
-        Assert.AreEqual(isBislettInterval, activity.IsBislettInterval, stravaId.ToString());
+        Assert.AreEqual(isBislettInterval, activity.IsBislettInterval, $"https://www.strava.com/activities/{stravaId}");
     }
 }

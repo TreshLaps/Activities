@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints.Models
 {
     public class Photos
     {
         [JsonProperty("primary")]
-        public object Primary { get; set; }
+        public object Primary { get; init; }
 
         [JsonProperty("count")]
-        public int Count { get; set; }
+        public int Count { get; init; }
     }
 }

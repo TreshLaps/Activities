@@ -7,62 +7,26 @@ namespace Activities.Strava.Activities;
 
 public static class BislettService
 {
-    // Update when logic is modified to trigger recalculation.
-    private const string Version = "2023-11-03";
     private const double BislettLapDistance = 546.5;
-
     private const double MaxWholeMinuteFactor = 0.03;
     private const double MaxWholeHundredMeterFactor = 0.1; // 0.1 == 10 meters
     private const double Max500MeterFactor = 0.1;
     private const double MaxDistanceFactor = 0.2;
     private const double MaxAverageDistanceFactor = 0.2;
 
-    // Reset activity if it was wrongly detected before
-    public static void ResetBislettLaps(this DetailedActivity activity)
+    public static DetailedActivity TryAdjustBislettLaps(this DetailedActivity activity)
     {
-        var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
-
-        if (activity.IsBislettInterval)
-        {
-            activity.IsBislettInterval = false;
-
-            foreach (var lap in intervalLaps)
-            {
-                if (lap.OriginalDistance > 0)
-                {
-                    lap.Distance = lap.OriginalDistance;
-                }
-
-                if (lap.OriginalAverageSpeed > 0)
-                {
-                    lap.AverageSpeed = lap.OriginalAverageSpeed;
-                }
-            }
-        }
-    }
-
-    public static bool TryAdjustBislettLaps(this DetailedActivity activity)
-    {
-        if (activity._BislettVersion == Version)
-        {
-            return false;
-        }
-
-        activity._BislettVersion = Version;
-
         var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
         var distanceFactors = new List<double>();
 
-        activity.ResetBislettLaps();
-
         if (HasIntervalLapsWithSegments(activity))
         {
-            return true;
+            return activity;
         }
 
         if (intervalLaps.Count <= 2)
         {
-            return true;
+            return activity;
         }
 
         var activityContainsBislett = activity.Description?.ToLower().Contains("bislett") == true ||
@@ -72,13 +36,13 @@ public static class BislettService
         if (intervalLaps.All(lap => lap.PaceZone > 0) &&
             intervalLaps.Sum(lap => lap.TotalElevationGain) > (activityContainsBislett ? 50 : 5))
         {
-            return true;
+            return activity;
         }
 
         if (intervalLaps.Sum(lap => lap.TotalElevationGain) / intervalLaps.Sum(lap => lap.Distance) >
             (activityContainsBislett ? 0.1 : 0.01))
         {
-            return true;
+            return activity;
         }
 
         foreach (var lap in intervalLaps)
@@ -91,10 +55,9 @@ public static class BislettService
 
         if (!distanceFactors.Any())
         {
-            return true;
+            return activity;
         }
 
-        var name = activity.Name;
         var averageFactor = distanceFactors.Average();
         var maxFactor = distanceFactors.Max();
 
@@ -111,21 +74,23 @@ public static class BislettService
         }
         else if (maxFactor < MaxDistanceFactor && averageFactor < MaxAverageDistanceFactor)
         {
-            activity.IsBislettInterval = true;
-
-            foreach (var lap in intervalLaps)
+            return activity with
             {
-                var laps = lap.Distance / BislettLapDistance;
+                IsBislettInterval = true,
+                Laps = activity.Laps?.Select(lap =>
+                {
+                    var laps = lap.Distance / BislettLapDistance;
 
-                lap.OriginalDistance = lap.Distance;
-                lap.OriginalAverageSpeed = lap.AverageSpeed;
-
-                lap.Distance = BislettLapDistance * Math.Round(laps);
-                lap.AverageSpeed = lap.Distance / lap.ElapsedTime;
-            }
+                    return lap with
+                    {
+                        Distance = BislettLapDistance * Math.Round(laps),
+                        AverageSpeed = lap.Distance / lap.ElapsedTime
+                    };
+                }).ToList()
+            };
         }
 
-        return true;
+        return activity;
     }
 
     private static double FlipOverFifty(double value)

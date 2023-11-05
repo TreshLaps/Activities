@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,40 +9,31 @@ namespace Activities.Strava.Activities
 {
     public static class LactateService
     {
-        // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-08-16";
-
-        public static bool TryParseLactateMeasurements(this DetailedActivity activity)
+        public static DetailedActivity TryParseLactateMeasurements(this DetailedActivity activity)
         {
-            if (activity._LactateVersion == Version)
-            {
-                return false;
-            }
-
-            activity._LactateVersion = Version;
-
             var measurements = GetLactateFromDescription(activity.Description);
             measurements.AddRange(GetLactateFromDescription(activity.PrivateNote));
             var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
-
-            foreach (var lap in intervalLaps)
-            {
-                lap.Lactate = null;
-            }
 
             foreach (var measurement in measurements)
             {
                 if (measurement.Lap == null)
                 {
-                    activity.Lactate = measurement.Value;
+                    activity = activity with {Lactate = measurement.Value};
                 }
-                else if (intervalLaps.Count >= measurement.Lap.Value)
+                else if ((activity.Laps != null) & (intervalLaps.Count >= measurement.Lap.Value))
                 {
-                    intervalLaps[measurement.Lap.Value - 1].Lactate = measurement.Value;
+                    var lapIndex = activity.Laps.IndexOf(intervalLaps[measurement.Lap.Value - 1]);
+                    activity = activity with
+                    {
+                        Laps = activity.Laps
+                            .Select((lap, index) => index == lapIndex ? lap with {Lactate = measurement.Value} : lap)
+                            .ToList()
+                    };
                 }
             }
 
-            return true;
+            return activity;
         }
 
         public static List<(double Value, int? Lap)> GetLactateFromDescription(string description)
@@ -68,7 +59,9 @@ namespace Activities.Strava.Activities
 
                 foreach (Match match in matches)
                 {
-                    double lactate = Convert.ToDouble(match.Groups[1].Value.Replace(",", "."), CultureInfo.InvariantCulture);
+                    var lactate = Convert.ToDouble(match.Groups[1].Value.Replace(",", "."),
+                        CultureInfo.InvariantCulture);
+
                     int? lap = match.Groups.Count == 3 ? Convert.ToInt32(match.Groups[2].Value) : null;
 
                     if (lap != null || result.Any(r => r.Value == lactate && r.Lap != null) == false)

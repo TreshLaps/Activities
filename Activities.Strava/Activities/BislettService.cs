@@ -17,20 +17,11 @@ public static class BislettService
     private const double MaxDistanceFactor = 0.2;
     private const double MaxAverageDistanceFactor = 0.2;
 
-
-    public static bool TryAdjustBislettLaps(this DetailedActivity activity)
+    // Reset activity if it was wrongly detected before
+    public static void ResetBislettLaps(this DetailedActivity activity)
     {
-        if (activity._BislettVersion == Version)
-        {
-            return false;
-        }
-
-        activity._BislettVersion = Version;
-
         var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
-        var distanceFactors = new List<double>();
 
-        // Reset activity if it was wrongly detected before
         if (activity.IsBislettInterval)
         {
             activity.IsBislettInterval = false;
@@ -48,6 +39,21 @@ public static class BislettService
                 }
             }
         }
+    }
+
+    public static bool TryAdjustBislettLaps(this DetailedActivity activity)
+    {
+        if (activity._BislettVersion == Version)
+        {
+            return false;
+        }
+
+        activity._BislettVersion = Version;
+
+        var intervalLaps = activity.Laps?.Where(lap => lap.IsInterval).ToList() ?? new List<Lap>();
+        var distanceFactors = new List<double>();
+
+        activity.ResetBislettLaps();
 
         if (HasIntervalLapsWithSegments(activity))
         {

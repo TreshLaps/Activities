@@ -12,6 +12,7 @@ namespace Activities.Strava.Endpoints.Models
         public string _BislettVersion { get; set; }
         public bool IsBislettInterval { get; set; }
         public string _FeelingVersion { get; set; }
+        public string _MergeLapsVersion { get; set; }
 
         public int? Feeling { get; set; }
 
@@ -189,6 +190,9 @@ namespace Activities.Strava.Endpoints.Models
 
         [JsonProperty("laps")]
         public List<Lap> Laps { get; set; }
+
+        [JsonProperty("unmerged_laps")]
+        public List<Lap> UnmergedLaps { get; set; }
 
         [JsonProperty("best_efforts")]
         public List<BestEffort> BestEfforts { get; set; }

@@ -50,12 +50,13 @@ namespace Activities.Strava.Endpoints
                     TimeSpan.MaxValue,
                     () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
 
+                var hasMerges = activity.TryMergeAutoLaps();
                 var hasIntervals = activity.TryTagIntervalLaps();
                 var hasLactateMeasurements = activity.TryParseLactateMeasurements();
                 var hasFeelingParameter = activity.TryParseFeelingParameter();
                 var hasBislettLaps = activity.TryAdjustBislettLaps();
 
-                if (hasIntervals || hasLactateMeasurements || hasFeelingParameter || hasBislettLaps)
+                if (hasMerges || hasIntervals || hasLactateMeasurements || hasFeelingParameter || hasBislettLaps)
                 {
                     await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
                 }

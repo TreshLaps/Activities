@@ -39,13 +39,16 @@ public class Startup
     {
         services.AddApplicationInsightsTelemetry();
 
-        services.AddResponseCompression(
-            options =>
-            {
-                options.Providers.Add<GzipCompressionProvider>();
-                options.Providers.Add<BrotliCompressionProvider>();
-                options.EnableForHttps = true;
-            });
+        if (!_env.IsDevelopment())
+        {
+            services.AddResponseCompression(
+                options =>
+                {
+                    options.Providers.Add<GzipCompressionProvider>();
+                    options.Providers.Add<BrotliCompressionProvider>();
+                    options.EnableForHttps = true;
+                });
+        }
 
         services
             .AddAuthentication(options =>

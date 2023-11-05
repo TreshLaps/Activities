@@ -7,213 +7,208 @@ namespace Activities.Strava.Endpoints.Models
 {
     public record DetailedActivity
     {
-        public string _IntervalVersion { get; set; }
-        public string _LactateVersion { get; set; }
-        public string _BislettVersion { get; set; }
-        public bool IsBislettInterval { get; set; }
-        public string _FeelingVersion { get; set; }
-        public string _MergeLapsVersion { get; set; }
+        public bool IsBislettInterval { get; init; }
 
-        public int? Feeling { get; set; }
+        public int? Feeling { get; init; }
 
-        public double? Lactate { get; set; }
+        public double? Lactate { get; init; }
 
-        public bool IgnoreIntervals { get; set; }
+        public bool IgnoreIntervals { get; init; }
 
         [JsonProperty("resource_state")]
-        public int ResourceState { get; set; }
+        public int ResourceState { get; init; }
 
         [JsonProperty("athlete")]
-        public Athlete Athlete { get; set; }
+        public Athlete Athlete { get; init; }
 
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; init; }
 
         [JsonProperty("distance")]
-        public double Distance { get; set; }
+        public double Distance { get; init; }
 
         [JsonProperty("moving_time")]
-        public int MovingTime { get; set; }
+        public int MovingTime { get; init; }
 
         [JsonProperty("elapsed_time")]
-        public int ElapsedTime { get; set; }
+        public int ElapsedTime { get; init; }
 
         [JsonProperty("total_elevation_gain")]
-        public double TotalElevationGain { get; set; }
+        public double TotalElevationGain { get; init; }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; init; }
 
         [JsonProperty("workout_type")]
-        public int? WorkoutType { get; set; }
+        public int? WorkoutType { get; init; }
 
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id { get; init; }
 
         [JsonProperty("external_id")]
-        public string ExternalId { get; set; }
+        public string ExternalId { get; init; }
 
         [JsonProperty("upload_id")]
-        public long? UploadId { get; set; }
+        public long? UploadId { get; init; }
 
         [JsonProperty("start_date")]
-        public DateTime StartDate { get; set; }
+        public DateTime StartDate { get; init; }
 
         [JsonProperty("start_date_local")]
-        public DateTime StartDateLocal { get; set; }
+        public DateTime StartDateLocal { get; init; }
 
         [JsonProperty("timezone")]
-        public string Timezone { get; set; }
+        public string Timezone { get; init; }
 
         [JsonProperty("utc_offset")]
-        public double UtcOffset { get; set; }
+        public double UtcOffset { get; init; }
 
         [JsonProperty("start_latlng")]
-        public List<double> StartLatlng { get; set; }
+        public List<double> StartLatlng { get; init; }
 
         [JsonProperty("end_latlng")]
-        public List<double> EndLatlng { get; set; }
+        public List<double> EndLatlng { get; init; }
 
         [JsonProperty("achievement_count")]
-        public int AchievementCount { get; set; }
+        public int AchievementCount { get; init; }
 
         [JsonProperty("kudos_count")]
-        public int KudosCount { get; set; }
+        public int KudosCount { get; init; }
 
         [JsonProperty("comment_count")]
-        public int CommentCount { get; set; }
+        public int CommentCount { get; init; }
 
         [JsonProperty("athlete_count")]
-        public int AthleteCount { get; set; }
+        public int AthleteCount { get; init; }
 
         [JsonProperty("photo_count")]
-        public int PhotoCount { get; set; }
+        public int PhotoCount { get; init; }
 
         [JsonProperty("map")]
-        public Map Map { get; set; }
+        public Map Map { get; init; }
 
         [JsonProperty("trainer")]
-        public bool Trainer { get; set; }
+        public bool Trainer { get; init; }
 
         [JsonProperty("commute")]
-        public bool Commute { get; set; }
+        public bool Commute { get; init; }
 
         [JsonProperty("manual")]
-        public bool Manual { get; set; }
+        public bool Manual { get; init; }
 
         [JsonProperty("private")]
-        public bool Private { get; set; }
+        public bool Private { get; init; }
 
         [JsonProperty("visibility")]
-        public string Visibility { get; set; }
+        public string Visibility { get; init; }
 
         [JsonProperty("flagged")]
-        public bool Flagged { get; set; }
+        public bool Flagged { get; init; }
 
         [JsonProperty("gear_id")]
-        public string GearId { get; set; }
+        public string GearId { get; init; }
 
         [JsonProperty("from_accepted_tag")]
-        public bool? FromAcceptedTag { get; set; }
+        public bool? FromAcceptedTag { get; init; }
 
         [JsonProperty("upload_id_str")]
-        public string UploadIdStr { get; set; }
+        public string UploadIdStr { get; init; }
 
         [JsonProperty("average_speed")]
-        public double AverageSpeed { get; set; }
+        public double AverageSpeed { get; init; }
 
         [JsonProperty("max_speed")]
-        public double MaxSpeed { get; set; }
+        public double MaxSpeed { get; init; }
 
         [JsonProperty("average_cadence")]
-        public double AverageCadence { get; set; }
+        public double AverageCadence { get; init; }
 
         [JsonProperty("has_heartrate")]
-        public bool HasHeartrate { get; set; }
+        public bool HasHeartrate { get; init; }
 
         [JsonProperty("average_heartrate")]
-        public double AverageHeartrate { get; set; }
+        public double AverageHeartrate { get; init; }
 
         [JsonProperty("max_heartrate")]
-        public double MaxHeartrate { get; set; }
+        public double MaxHeartrate { get; init; }
 
         [JsonProperty("heartrate_opt_out")]
-        public bool HeartrateOptOut { get; set; }
+        public bool HeartrateOptOut { get; init; }
 
         [JsonProperty("display_hide_heartrate_option")]
-        public bool DisplayHideHeartrateOption { get; set; }
+        public bool DisplayHideHeartrateOption { get; init; }
 
         [JsonProperty("max_watts")]
-        public int MaxWatts { get; set; }
+        public int MaxWatts { get; init; }
 
         [JsonProperty("elev_high")]
-        public double ElevHigh { get; set; }
+        public double ElevHigh { get; init; }
 
         [JsonProperty("elev_low")]
-        public double ElevLow { get; set; }
+        public double ElevLow { get; init; }
 
         [JsonProperty("pr_count")]
-        public int PrCount { get; set; }
+        public int PrCount { get; init; }
 
         [JsonProperty("total_photo_count")]
-        public int TotalPhotoCount { get; set; }
+        public int TotalPhotoCount { get; init; }
 
         [JsonProperty("has_kudoed")]
-        public bool HasKudoed { get; set; }
+        public bool HasKudoed { get; init; }
 
         [JsonProperty("suffer_score")]
-        public double? SufferScore { get; set; }
+        public double? SufferScore { get; init; }
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; init; }
 
         [JsonProperty("private_note")]
-        public string PrivateNote { get; set; }
+        public string PrivateNote { get; init; }
 
         [JsonProperty("calories")]
-        public double Calories { get; set; }
+        public double Calories { get; init; }
 
         [JsonProperty("perceived_exertion")]
-        public object PerceivedExertion { get; set; }
+        public object PerceivedExertion { get; init; }
 
         [JsonProperty("prefer_perceived_exertion")]
-        public bool? PreferPerceivedExertion { get; set; }
+        public bool? PreferPerceivedExertion { get; init; }
 
         [JsonProperty("segment_efforts")]
-        public List<SegmentEffort> SegmentEfforts { get; set; }
+        public List<SegmentEffort> SegmentEfforts { get; init; }
 
         [JsonProperty("splits_metric")]
-        public List<Splits> SplitsMetric { get; set; }
+        public List<Splits> SplitsMetric { get; init; }
 
         [JsonProperty("splits_standard")]
-        public List<Splits> SplitsStandard { get; set; }
+        public List<Splits> SplitsStandard { get; init; }
 
         [JsonProperty("laps")]
-        public List<Lap> Laps { get; set; }
+        public List<Lap> Laps { get; init; }
 
         [JsonProperty("unmerged_laps")]
-        public List<Lap> UnmergedLaps { get; set; }
+        public List<Lap> UnmergedLaps { get; init; }
 
         [JsonProperty("best_efforts")]
-        public List<BestEffort> BestEfforts { get; set; }
+        public List<BestEffort> BestEfforts { get; init; }
 
         [JsonProperty("gear")]
-        public Gear Gear { get; set; }
+        public Gear Gear { get; init; }
 
         [JsonProperty("photos")]
-        public Photos Photos { get; set; }
+        public Photos Photos { get; init; }
 
         [JsonProperty("device_name")]
-        public string DeviceName { get; set; }
+        public string DeviceName { get; init; }
 
         [JsonProperty("embed_token")]
-        public string EmbedToken { get; set; }
+        public string EmbedToken { get; init; }
 
         [JsonProperty("similar_activities")]
-        public SimilarActivities SimilarActivities { get; set; }
+        public SimilarActivities SimilarActivities { get; init; }
 
         [JsonProperty("available_zones")]
-        public List<string> AvailableZones { get; set; }
+        public List<string> AvailableZones { get; init; }
 
         public double? AverageLactate
         {

@@ -14,25 +14,19 @@ namespace Activities.Strava.Endpoints
     public class ActivitiesClient : BaseStravaClient
     {
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> AsyncLocks = new();
-        private readonly ICachingService _cachingService;
+        private readonly MemoryCacheService _memoryCacheService;
         private readonly IPermanentStorageService _permanentStorageService;
 
         public ActivitiesClient(
             IHttpClientFactory httpClientFactory,
-            ICachingService cachingService,
+            MemoryCacheService memoryCacheService,
             IPermanentStorageService permanentStorageService) : base(
             httpClientFactory)
         {
-            _cachingService = cachingService;
+            _memoryCacheService = memoryCacheService;
             _permanentStorageService = permanentStorageService;
         }
 
-        /// <summary>
-        ///     Returns a specific activity
-        /// </summary>
-        /// <param name="accessToken">Strava access token</param>
-        /// <param name="id">Activity Id</param>
-        /// <param name="throwExceptions">If true method will throw exceptions instead of return null when there is an error.</param>
         public async Task<DetailedActivity> GetActivity(
             string accessToken,
             long athleteId,
@@ -45,21 +39,11 @@ namespace Activities.Strava.Endpoints
 
             try
             {
-                var activity = await _cachingService.GetOrAdd(
+                var activity = await _memoryCacheService.GetOrAdd(
                     $"DetailedActivity:{id}",
-                    TimeSpan.MaxValue,
-                    () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
+                    TimeSpan.FromDays(3),
+                    () => _GetActivity(accessToken, athleteId, id));
 
-                var hasMerges = activity.TryMergeAutoLaps();
-                var hasIntervals = activity.TryTagIntervalLaps();
-                var hasLactateMeasurements = activity.TryParseLactateMeasurements();
-                var hasFeelingParameter = activity.TryParseFeelingParameter();
-                var hasBislettLaps = activity.TryAdjustBislettLaps();
-
-                if (hasMerges || hasIntervals || hasLactateMeasurements || hasFeelingParameter || hasBislettLaps)
-                {
-                    await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
-                }
 
                 return StripPrivateData(activity, athleteId);
             }
@@ -78,6 +62,29 @@ namespace Activities.Strava.Endpoints
             return null;
         }
 
+        private async Task<DetailedActivity> _GetActivity(
+            string accessToken,
+            long athleteId,
+            long id)
+        {
+            var activity = await _permanentStorageService.GetOrAdd(
+                $"DetailedActivity:{id}",
+                () => Get<DetailedActivity>(accessToken, $"https://www.strava.com/api/v3/activities/{id}"));
+
+            return ProcessActivity(activity);
+        }
+
+        public static DetailedActivity ProcessActivity(DetailedActivity activity)
+        {
+            activity = activity.ResetOldValues();
+            activity = activity.TryMergeAutoLaps();
+            activity = activity.TryTagIntervalLaps();
+            activity = activity.TryParseLactateMeasurements();
+            activity = activity.TryParseFeelingParameter();
+            activity = activity.TryAdjustBislettLaps();
+            return activity;
+        }
+
         private DetailedActivity StripPrivateData(DetailedActivity activity, long athleteId)
         {
             if (activity.Athlete.Id == athleteId || athleteId == 0)
@@ -90,18 +97,18 @@ namespace Activities.Strava.Endpoints
                 throw new InvalidOperationException("Activity is private");
             }
 
-            var result = activity with
+            activity = activity with
             {
                 PrivateNote = string.Empty
             };
 
             if (activity.HeartrateOptOut)
             {
-                result = result with
+                activity = activity with
                 {
                     AverageHeartrate = 0,
                     MaxHeartrate = 0,
-                    Laps = result.Laps?.Select(lap => lap with
+                    Laps = activity.Laps?.Select(lap => lap with
                     {
                         AverageHeartrate = 0,
                         MaxHeartrate = 0
@@ -109,28 +116,29 @@ namespace Activities.Strava.Endpoints
                 };
             }
 
-            return result;
+            return activity;
         }
 
         public async Task ToggleIgnoreIntervals(long id)
         {
-            var activity = await _cachingService.GetOrAdd<DetailedActivity>(
+            var activity = await _permanentStorageService.GetOrAdd<DetailedActivity>(
                 $"DetailedActivity:{id}",
-                TimeSpan.MaxValue,
                 () => throw new InvalidOperationException());
 
-            activity.IgnoreIntervals = !activity.IgnoreIntervals;
-            await _cachingService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+            activity = activity with {IgnoreIntervals = !activity.IgnoreIntervals};
+            await _permanentStorageService.AddOrUpdate($"DetailedActivity:{id}", TimeSpan.MaxValue, activity);
+            _memoryCacheService.Remove($"DetailedActivity:{id}");
         }
 
         public void RemoveActivity(long id)
         {
-            _cachingService.Remove($"DetailedActivity:{id}");
+            _permanentStorageService.Remove($"DetailedActivity:{id}");
+            _memoryCacheService.Remove($"DetailedActivity:{id}");
         }
 
         public bool HasActivity(long id)
         {
-            return _cachingService.ContainsKey($"DetailedActivity:{id}");
+            return _permanentStorageService.ContainsKey($"DetailedActivity:{id}");
         }
 
         /// <summary>
@@ -140,7 +148,7 @@ namespace Activities.Strava.Endpoints
         /// <param name="athleteId">Strava athlete Id</param>
         public Task<IReadOnlyList<SummaryActivity>> GetActivities(string accessToken, long athleteId)
         {
-            return _cachingService.GetOrAdd(
+            return _memoryCacheService.GetOrAdd(
                 $"GetActivities:{athleteId}",
                 TimeSpan.FromMinutes(10),
                 () => _GetActivities(accessToken, athleteId));

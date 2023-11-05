@@ -1,26 +1,34 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints.Models
 {
     public class Splits
     {
-        [JsonProperty("distance")] public double Distance { get; set; }
+        [JsonProperty("distance")]
+        public double Distance { get; init; }
 
-        [JsonProperty("elapsed_time")] public double ElapsedTime { get; set; }
+        [JsonProperty("elapsed_time")]
+        public double ElapsedTime { get; init; }
 
-        [JsonProperty("elevation_difference")] public double? ElevationDifference { get; set; }
+        [JsonProperty("elevation_difference")]
+        public double? ElevationDifference { get; init; }
 
-        [JsonProperty("moving_time")] public double MovingTime { get; set; }
+        [JsonProperty("moving_time")]
+        public double MovingTime { get; init; }
 
-        [JsonProperty("split")] public int Split { get; set; }
+        [JsonProperty("split")]
+        public int Split { get; init; }
 
-        [JsonProperty("average_speed")] public double AverageSpeed { get; set; }
+        [JsonProperty("average_speed")]
+        public double AverageSpeed { get; init; }
 
         [JsonProperty("average_grade_adjusted_speed")]
-        public double? AverageGradeAdjustedSpeed { get; set; }
+        public double? AverageGradeAdjustedSpeed { get; init; }
 
-        [JsonProperty("average_heartrate")] public double AverageHeartrate { get; set; }
+        [JsonProperty("average_heartrate")]
+        public double AverageHeartrate { get; init; }
 
-        [JsonProperty("pace_zone")] public int PaceZone { get; set; }
+        [JsonProperty("pace_zone")]
+        public int PaceZone { get; init; }
     }
 }

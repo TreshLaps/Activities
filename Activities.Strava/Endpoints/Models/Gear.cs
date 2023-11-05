@@ -1,17 +1,22 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Activities.Strava.Endpoints.Models
 {
     public class Gear
     {
-        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; init; }
 
-        [JsonProperty("primary")] public bool Primary { get; set; }
+        [JsonProperty("primary")]
+        public bool Primary { get; init; }
 
-        [JsonProperty("name")] public string Name { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; init; }
 
-        [JsonProperty("resource_state")] public int ResourceState { get; set; }
+        [JsonProperty("resource_state")]
+        public int ResourceState { get; init; }
 
-        [JsonProperty("distance")] public double Distance { get; set; }
+        [JsonProperty("distance")]
+        public double Distance { get; init; }
     }
 }

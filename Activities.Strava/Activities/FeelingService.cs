@@ -5,19 +5,12 @@ namespace Activities.Strava.Activities
 {
     public static class FeelingService
     {
-        // Update when logic is modified to trigger recalculation.
-        private const string Version = "2021-08-19_v2";
-
-        public static bool TryParseFeelingParameter(this DetailedActivity activity)
+        public static DetailedActivity TryParseFeelingParameter(this DetailedActivity activity)
         {
-            if (activity._FeelingVersion == Version)
-            {
-                return false;
-            }
+            var feeling = GetFeelingFromDescription(activity.Description) ??
+                          GetFeelingFromDescription(activity.PrivateNote);
 
-            activity._FeelingVersion = Version;
-            activity.Feeling = GetFeelingFromDescription(activity.Description) ?? GetFeelingFromDescription(activity.PrivateNote);
-            return true;
+            return activity with {Feeling = feeling};
         }
 
         private static int? GetFeelingFromDescription(string description)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -7,87 +7,87 @@ namespace Activities.Strava.Endpoints.Models
     public class SummaryActivity
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; init; }
 
         [JsonProperty("distance")]
-        public double Distance { get; set; }
+        public double Distance { get; init; }
 
         [JsonProperty("moving_time")]
-        public int MovingTime { get; set; }
+        public int MovingTime { get; init; }
 
         [JsonProperty("elapsed_time")]
-        public int ElapsedTime { get; set; }
+        public int ElapsedTime { get; init; }
 
         [JsonProperty("total_elevation_gain")]
-        public double TotalElevationGain { get; set; }
+        public double TotalElevationGain { get; init; }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; init; }
 
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public long Id { get; init; }
 
         [JsonProperty("start_date")]
-        public DateTime StartDate { get; set; }
+        public DateTime StartDate { get; init; }
 
         [JsonProperty("start_date_local")]
-        public DateTime StartDateLocal { get; set; }
+        public DateTime StartDateLocal { get; init; }
 
         [JsonProperty("timezone")]
-        public string Timezone { get; set; }
+        public string Timezone { get; init; }
 
         [JsonProperty("utc_offset")]
-        public double UtcOffset { get; set; }
+        public double UtcOffset { get; init; }
 
         [JsonProperty("start_latlng")]
-        public List<double> StartLatlng { get; set; }
+        public List<double> StartLatlng { get; init; }
 
         [JsonProperty("end_latlng")]
-        public List<double> EndLatlng { get; set; }
+        public List<double> EndLatlng { get; init; }
 
         [JsonProperty("gear_id")]
-        public string GearId { get; set; }
+        public string GearId { get; init; }
 
         [JsonProperty("average_speed")]
-        public double AverageSpeed { get; set; }
+        public double AverageSpeed { get; init; }
 
         [JsonProperty("max_speed")]
-        public double MaxSpeed { get; set; }
+        public double MaxSpeed { get; init; }
 
         [JsonProperty("average_heartrate")]
-        public double AverageHeartrate { get; set; }
+        public double AverageHeartrate { get; init; }
 
         [JsonProperty("max_heartrate")]
-        public double MaxHeartrate { get; set; }
+        public double MaxHeartrate { get; init; }
 
         [JsonProperty("elev_high")]
-        public double ElevHigh { get; set; }
+        public double ElevHigh { get; init; }
 
         [JsonProperty("elev_low")]
-        public double ElevLow { get; set; }
+        public double ElevLow { get; init; }
 
         [JsonProperty("suffer_score")]
-        public double? SufferScore { get; set; }
+        public double? SufferScore { get; init; }
 
         [JsonProperty("workout_type")]
-        public int? WorkoutType { get; set; }
+        public int? WorkoutType { get; init; }
 
         [JsonProperty("average_cadence")]
-        public double? AverageCadence { get; set; }
+        public double? AverageCadence { get; init; }
 
         [JsonProperty("max_watts")]
-        public int? MaxWatts { get; set; }
+        public int? MaxWatts { get; init; }
 
         [JsonProperty("average_watts")]
-        public double? AverageWatts { get; set; }
+        public double? AverageWatts { get; init; }
 
         [JsonProperty("weighted_average_watts")]
-        public int? WeightedAverageWatts { get; set; }
+        public int? WeightedAverageWatts { get; init; }
 
         [JsonProperty("kilojoules")]
-        public double? Kilojoules { get; set; }
+        public double? Kilojoules { get; init; }
 
         [JsonProperty("device_watts")]
-        public bool? DeviceWatts { get; set; }
+        public bool? DeviceWatts { get; init; }
     }
 }

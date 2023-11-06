@@ -80,11 +80,12 @@ public static class BislettService
                 Laps = activity.Laps?.Select(lap =>
                 {
                     var laps = lap.Distance / BislettLapDistance;
+                    var correctedDistance = BislettLapDistance * Math.Round(laps);
 
                     return lap with
                     {
-                        Distance = BislettLapDistance * Math.Round(laps),
-                        AverageSpeed = lap.Distance / lap.ElapsedTime
+                        Distance = correctedDistance,
+                        AverageSpeed = correctedDistance / lap.ElapsedTime
                     };
                 }).ToList()
             };

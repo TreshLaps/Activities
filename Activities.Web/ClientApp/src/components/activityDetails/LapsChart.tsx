@@ -31,6 +31,7 @@ export interface Lap {
     maxSpeed: number;
     movingTime: number;
     name: string;
+    originalDistance?: number;
     paceZone: number;
     resourceState: number;
     split: number;

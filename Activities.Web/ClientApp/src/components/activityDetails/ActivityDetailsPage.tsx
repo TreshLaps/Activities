@@ -122,6 +122,7 @@ interface DetailedActivity {
     gearId: string;
     hasHeartrate: boolean;
     id: number;
+    isBislettInterval: boolean;
     lactate?: number;
     laps: Lap[];
     manual: boolean;
@@ -176,6 +177,9 @@ const ActivityDetailsPage: React.FC = () => {
     const hasIntervals =
         activity?.laps != null &&
         activity.laps.filter((lap) => lap.isInterval).length > 0;
+    const bislettIntervals =
+        (activity?.laps === null || !activity?.isBislettInterval) ?
+           [] : activity.laps.filter((lap) => lap.isInterval).map((lap) => (lap.originalDistance ?? lap.distance));
 
     useEffect(() => {
         if (activity !== undefined) {
@@ -369,6 +373,14 @@ const ActivityDetailsPage: React.FC = () => {
                                     .toUpperCase()}
                             </ActionButton>
                         </>
+                    )}
+                    {bislettIntervals.length > 0 && (
+                         <ActionButton
+                             href={`https://info.skvidar.run/intro/kalibrer-footpod#` + bislettIntervals.join(',')}
+                             rel="noopener noreferrer"
+                         >
+                             Calibrate footpod
+                         </ActionButton>
                     )}
                     <ActionButton
                         href={`https://www.strava.com/activities/${activity.id}`}

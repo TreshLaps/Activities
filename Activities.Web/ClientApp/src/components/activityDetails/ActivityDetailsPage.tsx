@@ -362,12 +362,6 @@ const ActivityDetailsPage: React.FC = () => {
                             >
                                 View similar intervals
                             </ActionButtonNav>
-                            <ActionButton
-                                href={`https://www.strava.com/activities/${activity.id}`}
-                                rel="noopener noreferrer"
-                            >
-                                View on Strava
-                            </ActionButton>
                             <ActionButton onClick={toggleIgnoreIntervals}>
                                 Ignore in interval summaries:{' '}
                                 {activity.ignoreIntervals
@@ -376,6 +370,12 @@ const ActivityDetailsPage: React.FC = () => {
                             </ActionButton>
                         </>
                     )}
+                    <ActionButton
+                        href={`https://www.strava.com/activities/${activity.id}`}
+                        rel="noopener noreferrer"
+                    >
+                        View on Strava
+                    </ActionButton>
                     <ActionButton onClick={reimport}>Reimport</ActionButton>
                 </Container>
             )}

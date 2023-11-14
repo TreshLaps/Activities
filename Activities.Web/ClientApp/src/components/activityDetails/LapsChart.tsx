@@ -157,7 +157,7 @@ const LapsChart: React.FC<{
       Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(
                     lap.movingTime
                 )})
-      ${lap.lactate ? `Lactate: ${lap.lactate}` : ''}`,
+      ${lap.lactate ? `Lactate: ${lap.lactate.toFixed(1)}` : ''}`,
                 color: lap.isInterval ? 1 : 0,
             };
         });

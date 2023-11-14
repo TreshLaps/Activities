@@ -132,7 +132,7 @@ const IntervalsPage: React.FC = () => {
                         (item) =>
                             `${new Date(item.date)
                                 .toUTCString()
-                                .substr(8, 8)}: ${item.lactate}`
+                                .substr(8, 8)}: ${item.lactate.toFixed(1)}`
                     )
                 );
 
@@ -646,7 +646,7 @@ const IntervalsPage: React.FC = () => {
                                                                         >
                                                                             <LapLabel>
                                                                                 {lap.lactate &&
-                                                                                    `(${lap.lactate})`}{' '}
+                                                                                    `(${lap.lactate.toFixed(1)})`}{' '}
                                                                                 {getTimeString(
                                                                                     lap.elapsedTime
                                                                                 )}

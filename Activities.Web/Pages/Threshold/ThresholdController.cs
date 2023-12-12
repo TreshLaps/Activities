@@ -34,11 +34,13 @@ namespace Activities.Web.Pages.Threshold
                 .Where(filterRequest.Keep)
                 .ToList();
 
+            // Strides (100m up/down acceleration) are no more than 30 seconds
+            // Ingebrigtsen hill sprints (200 meters) and popular 45/15 workouts, considered threshold if within pace
             var laps = (await activityList.ForEachAsync(4,
                     activity => _activitiesClient.GetActivity(stravaAthlete.AccessToken, stravaAthlete.AthleteId,
                         activity.Id)))
-                .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval && lap.ElapsedTime > 120) == true)
-                .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval && lap.ElapsedTime > 120))
+                .Where(activity => activity?.Laps?.Any(lap => lap.IsInterval && lap.ElapsedTime > 30) == true)
+                .SelectMany(activity => activity.Laps.Where(lap => lap.IsInterval && lap.ElapsedTime > 30))
                 .ToList();
 
             var medianPace = laps.Select(lap => lap.AverageSpeed).Median();

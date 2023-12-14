@@ -55,7 +55,9 @@ namespace Activities.Strava.Activities
                             {
                                 var thresholdLaps = activity.Laps
                                     .Where(
-                                        lap => lap.ElapsedTime > 120 &&
+                                        // Strides (100m up/down acceleration) are no more than 30 seconds, include every lap above that
+                                        // Ingebrigtsen hill sprints (200 meters/40 seconds) and popular 45/15 workouts considered threshold if within pace
+                                        lap => lap.ElapsedTime > 30 &&
                                                lap.AverageSpeed >= filterRequest.MinPace.Value.ToMetersPerSecond() &&
                                                lap.AverageSpeed <= filterRequest.MaxPace.Value.ToMetersPerSecond())
                                     .ToList();

@@ -77,6 +77,7 @@ namespace Activities.Strava.Endpoints
         public static DetailedActivity ProcessActivity(DetailedActivity activity)
         {
             activity = activity.ResetOldValues();
+            activity = activity.TryParseManualSpeedOverrides();
             activity = activity.TryMergeAutoLaps();
             activity = activity.TryTagIntervalLaps();
             activity = activity.TryParseLactateMeasurements();

@@ -101,7 +101,8 @@ namespace Activities.Strava.Activities
                 {
                     endLap = Convert.ToInt32(match.Groups["endLap"].Value);
                 }
-                var speed = Convert.ToDouble(match.Groups["speed"].Value) / 3.6;
+                var speed = Convert.ToDouble(match.Groups["speed"].Value.Replace(",", "."),
+                    CultureInfo.InvariantCulture) / 3.6;
                 for (var lap = startLap; lap <= endLap; ++lap)
                 {
                     result.Add((speed, lap - 1));

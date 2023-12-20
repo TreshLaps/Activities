@@ -14,8 +14,9 @@ namespace Activities.Strava.Activities
     //   1-5: 15 km/t (or km/h)
     //   1-5: 15.3 km/t (or km/h)
     //   1-5: 15,3 km/t (or km/h)
+    //   1,3,5,7-9: 15,3 km/t (or km/h)
     //
-    // Where 1-5 can be a range or just a single number. If overlapping overrides
+    // Where e.g. 1-5 can be a range or just a single number. If overlapping overrides
     // exist, it is undefined which one wins.
     public static class ManualSpeedOverrideService
     {
@@ -68,46 +69,60 @@ namespace Activities.Strava.Activities
                 return result;
             }
 
+            var lapsRegex = @"(?<laps> \d+ (?: [-–] \d+ )? (?: \s* , \s* \d+ (?: [-–] \d+ )? )* )";
+
             var paceMatches = Regex.Matches(
                 description,
-                @"(?<startLap> \d+) (?:[-–] (?<endLap> \d+))? \s* : \s* (?<min> \d+) : (?<sec> \d+) \s* / \s* km",
-               RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
+                lapsRegex + @"\s* : \s* (?<min> \d+) : (?<sec> \d+) \s* / \s* km",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
             foreach (Match match in paceMatches)
             {
-                var startLap = Convert.ToInt32(match.Groups["startLap"].Value);
-                var endLap = startLap;
-                if (match.Groups["endLap"].Success)
-                {
-                    endLap = Convert.ToInt32(match.Groups["endLap"].Value);
-                }
                 var min = Convert.ToInt32(match.Groups["min"].Value);
                 var sec = Convert.ToInt32(match.Groups["sec"].Value);
                 var speed = 1000.0 / (min * 60 + sec);
-                for (var lap = startLap; lap <= endLap; ++lap)
+                foreach (var lap in ParseLapRanges(match.Groups["laps"].Value))
                 {
-                    result.Add((speed, lap - 1));
+                    result.Add((speed, lap));
                 }
             }
 
             var speedMatches = Regex.Matches(
                 description,
-                @"(?<startLap> \d+) (?:[-–] (?<endLap> \d+))? \s* : \s* (?<speed> \d+ (?: [.,] \d* )? ) \s* km \s* / \s* [th]",
-               RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
+                lapsRegex + @"\s* : \s* (?<speed> \d+ (?: [.,] \d* )? ) \s* km \s* / \s* [th]",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
             foreach (Match match in speedMatches)
             {
+                var speed = Convert.ToDouble(match.Groups["speed"].Value.Replace(",", "."),
+                    CultureInfo.InvariantCulture) / 3.6;
+                foreach (var lap in ParseLapRanges(match.Groups["laps"].Value))
+                {
+                    result.Add((speed, lap));
+                }
+            }
+
+            return result;
+        }
+
+        static List<int> ParseLapRanges(string description)
+        {
+            var result = new List<int>();
+            foreach (var range in description.Split(","))
+            {
+                var match = Regex.Match(
+                    range,
+                    @"(?<startLap> \d+) (?:[-–] (?<endLap> \d+))?",
+                    RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace);
                 var startLap = Convert.ToInt32(match.Groups["startLap"].Value);
                 var endLap = startLap;
                 if (match.Groups["endLap"].Success)
                 {
                     endLap = Convert.ToInt32(match.Groups["endLap"].Value);
                 }
-                var speed = Convert.ToDouble(match.Groups["speed"].Value) / 3.6;
                 for (var lap = startLap; lap <= endLap; ++lap)
                 {
-                    result.Add((speed, lap - 1));
+                    result.Add(lap - 1);
                 }
             }
-
             return result;
         }
     }

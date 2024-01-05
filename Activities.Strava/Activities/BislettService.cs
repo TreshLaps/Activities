@@ -61,13 +61,13 @@ public static class BislettService
         var averageFactor = distanceFactors.Average();
         var maxFactor = distanceFactors.Max();
 
-        var averageElapsedTime = intervalLaps.Average(lap => FlipOverFifty((double) lap.ElapsedTime / 60 % 1));
+        var averageElapsedTime = intervalLaps.Average(lap => GetDistanceFactor(lap.ElapsedTime, 60));
         var isTooCloseToAWholeMinute = averageElapsedTime < MaxWholeMinuteFactor;
 
-        var averageDistance = intervalLaps.Average(lap => FlipOverFifty(lap.Distance / 100 % 1));
+        var averageDistance = intervalLaps.Average(lap => GetDistanceFactor(lap.Distance, 100));
         var isTooCloseToWhole100Meter = averageDistance < MaxWholeHundredMeterFactor;
 
-        var isTooCloseTo500Meters = intervalLaps.All(lap => FlipOverFifty(lap.Distance / 500 % 1) < Max500MeterFactor);
+        var isTooCloseTo500Meters = intervalLaps.All(lap => GetDistanceFactor(lap.Distance, 500) < Max500MeterFactor);
 
         if (isTooCloseToAWholeMinute || isTooCloseToWhole100Meter || isTooCloseTo500Meters)
         {
@@ -93,6 +93,15 @@ public static class BislettService
         }
 
         return activity;
+    }
+
+    /// <summary>
+    /// Returns a value between 0 and 1, where 0 is the closest to the factor and 1 is the furthest away from the factor.
+    /// Example: GetDistanceFactor(50, 60) == 0.1666, GetDistanceFactor(60, 60) == 0, GetDistanceFactor(70, 60) == 0.1666
+    /// </summary>
+    private static double GetDistanceFactor(double value, double factor)
+    {
+        return FlipOverFifty(Math.Abs(value % factor - factor) / factor);
     }
 
     private static double FlipOverFifty(double value)

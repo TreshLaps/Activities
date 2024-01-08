@@ -31,8 +31,10 @@ public class BislettIntervalsServiceTests
     [TestCase(8236989700, false)]
     [TestCase(5651625314, false)]
     [TestCase(5056176334, false)]
+    [TestCase(10267604947, false)]
+    [TestCase(10240715098, false)]
     //[TestCase(3057102438, false)]
-    public async Task Detect_interval_laps(long stravaId, bool isBislettInterval)
+    public async Task Detect_bislett_intervals(long stravaId, bool isBislettInterval)
     {
         var json = await File.ReadAllTextAsync(Path.Combine("BislettActivities", $"{stravaId}.json"));
         var activity = JsonConvert.DeserializeObject<DetailedActivity>(json);

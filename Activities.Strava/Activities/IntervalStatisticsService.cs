@@ -81,5 +81,28 @@ namespace Activities.Strava.Activities
 
             return pace / totalTime;
         }
+
+        /// <summary>
+        /// Returns the average exlcuding the highest and lowest value (if there are more than 4 values).
+        /// </summary>
+        public static double WeightedAverage(this IEnumerable<Lap> laps, Func<Lap, double> getValue)
+        {
+            var items = laps
+            .Select(lap => new
+            {
+                lap,
+                value = getValue(lap)
+            })
+            .OrderBy(item => item.value)
+            .ToList();
+
+            if (items.Count > 4)
+            {
+                items.RemoveAt(0);
+                items.RemoveAt(items.Count - 1);
+            }
+
+            return items.Select(item => item.lap).Average(getValue);
+        }
     }
 }

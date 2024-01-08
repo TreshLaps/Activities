@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Activities.Strava.Endpoints.Models;
 
@@ -61,10 +62,10 @@ public static class BislettService
         var averageFactor = distanceFactors.Average();
         var maxFactor = distanceFactors.Max();
 
-        var averageElapsedTime = intervalLaps.Average(lap => GetDistanceFactor(lap.ElapsedTime, 60));
+        var averageElapsedTime = intervalLaps.WeightedAverage(lap => GetDistanceFactor(lap.ElapsedTime, 60));
         var isTooCloseToAWholeMinute = averageElapsedTime < MaxWholeMinuteFactor;
 
-        var averageDistance = intervalLaps.Average(lap => GetDistanceFactor(lap.Distance, 100));
+        var averageDistance = intervalLaps.WeightedAverage(lap => GetDistanceFactor(lap.Distance, 100));
         var isTooCloseToWhole100Meter = averageDistance < MaxWholeHundredMeterFactor;
 
         var isTooCloseTo500Meters = intervalLaps.All(lap => GetDistanceFactor(lap.Distance, 500) < Max500MeterFactor);
@@ -74,6 +75,8 @@ public static class BislettService
         }
         else if (maxFactor < MaxDistanceFactor && averageFactor < MaxAverageDistanceFactor)
         {
+            Debug.WriteLine($"Activity {activity.Id} is a Bislett interval");
+            Debug.WriteLine($"isTooCloseToAWholeMinute: {isTooCloseToAWholeMinute}|{averageElapsedTime}, isTooCloseToWhole100Meter: {isTooCloseToWhole100Meter}|{averageDistance}, isTooCloseTo500Meters: {isTooCloseTo500Meters}");
             return activity with
             {
                 IsBislettInterval = true,
@@ -101,6 +104,7 @@ public static class BislettService
     /// </summary>
     private static double GetDistanceFactor(double value, double factor)
     {
+        Debug.WriteLine($"GetDistanceFactor({value}, {factor}) = {FlipOverFifty(Math.Abs(value % factor - factor) / factor)}");
         return FlipOverFifty(Math.Abs(value % factor - factor) / factor);
     }
 

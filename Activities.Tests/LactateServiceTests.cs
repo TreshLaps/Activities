@@ -21,6 +21,13 @@ namespace Activities.Tests
             2.5, 
             6)]
         [TestCase(@"...
+                2,4 (4)
+                12.5 (6)
+                ...",
+            1,
+            12.5,
+            6)]
+        [TestCase(@"...
                 La: 3.3 (3) (171, 3:17)
                 ...", 
             0, 

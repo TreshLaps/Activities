@@ -70,7 +70,7 @@ public static class BislettService
 
         var isTooCloseTo500Meters = intervalLaps.All(lap => GetDistanceFactor(lap.Distance, 500) < Max500MeterFactor);
 
-        if (isTooCloseToAWholeMinute || isTooCloseToWhole100Meter || isTooCloseTo500Meters)
+        if ((isTooCloseToAWholeMinute || isTooCloseToWhole100Meter || isTooCloseTo500Meters) && !activityContainsBislett)
         {
         }
         else if (maxFactor < MaxDistanceFactor && averageFactor < MaxAverageDistanceFactor)

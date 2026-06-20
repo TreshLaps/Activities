@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import 'react-vis/dist/style.css';
 import { useParams } from 'react-router-dom';
 import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';

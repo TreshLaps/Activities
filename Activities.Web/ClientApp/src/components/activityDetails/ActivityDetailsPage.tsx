@@ -169,10 +169,8 @@ const ActivityDetailsPage: React.FC = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activity, setActivity] = useState<DetailedActivity>();
     const [averageIntervalPace, setAverageIntervalPace] = useState<number>();
-    const [
-        last60DaysIntervalPace,
-        setLast60DaysIntervalPace,
-    ] = useState<number>();
+    const [last60DaysIntervalPace, setLast60DaysIntervalPace] =
+        useState<number>();
     const { id } = useParams<{ id: string | undefined }>();
     const hasIntervals =
         activity?.laps != null &&
@@ -262,12 +260,12 @@ const ActivityDetailsPage: React.FC = () => {
                                 <strong>Pace:</strong>{' '}
                                 {getPaceString(
                                     activity.averageSpeed,
-                                    activity.type
+                                    activity.type,
                                 )}{' '}
                                 (avg),
                                 {getPaceString(
                                     activity.maxSpeed,
-                                    activity.type
+                                    activity.type,
                                 )}{' '}
                                 (max)
                             </li>

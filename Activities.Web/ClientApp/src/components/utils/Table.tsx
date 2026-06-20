@@ -9,7 +9,8 @@ export const Table = styled.table`
     border-radius: 5px;
     margin-bottom: 20px;
     background: #fff;
-    box-shadow: rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px,
+    box-shadow:
+        rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px,
         rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
     overflow: hidden;
 

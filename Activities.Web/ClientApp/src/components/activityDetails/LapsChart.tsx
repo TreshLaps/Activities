@@ -57,7 +57,7 @@ const isPauseLap = (index: number, laps: Lap[]) => {
 function NormalizeChartData<T extends BasicChart>(
     data: T[],
     minValue?: number,
-    maxValue?: number
+    maxValue?: number,
 ) {
     if (data.length === 0) {
         return [];
@@ -150,13 +150,13 @@ const LapsChart: React.FC<{
                 hint: `Pace: ${getPaceString(
                     lap.averageSpeed,
                     activityType,
-                    true
+                    true,
                 )}
         Heartrate: ${lap.averageHeartrate}
         Distance: ${getKmString(lap.distance)}
       Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(
-                    lap.movingTime
-                )})
+          lap.movingTime,
+      )})
       ${lap.lactate ? `Lactate: ${lap.lactate.toFixed(1)}` : ''}`,
                 color: lap.isInterval ? 1 : 0,
             };
@@ -187,7 +187,7 @@ const LapsChart: React.FC<{
                 yOffset: -4,
                 label: lap.label,
             })),
-        [chart.laps]
+        [chart.laps],
     );
 
     const labelTicksComponent = (lap: ChartLap) => (
@@ -208,49 +208,15 @@ const LapsChart: React.FC<{
                     (_, index) =>
                         !isPauseLap(
                             index,
-                            chart.laps.map((chartLap) => chartLap.lap)
-                        )
+                            chart.laps.map((chartLap) => chartLap.lap),
+                        ),
                 )
                 .map((lap) => ({
                     x: lap.x0 + (lap.x - lap.x0) / 2,
                     y: 0,
                     customComponent: () => labelTicksComponent(lap),
                 })),
-        [chart.laps]
-    );
-
-    const averageIntervalPaceData = useMemo(
-        () => [
-            {
-                x: 0,
-                y: averageIntervalPace ?? 0,
-                customComponent: () => (
-                    <line
-                        x1="0"
-                        y1="0"
-                        x2="100%"
-                        y2="0"
-                        stroke="#92b7f8"
-                        strokeDasharray="4"
-                    />
-                ),
-            },
-            {
-                x: 0,
-                y: last60DaysIntervalPace ?? 0,
-                customComponent: () => (
-                    <line
-                        x1="0"
-                        y1="0"
-                        x2="100%"
-                        y2="0"
-                        stroke="#d6d6d6"
-                        strokeDasharray="4"
-                    />
-                ),
-            },
-        ],
-        [averageIntervalPace, last60DaysIntervalPace]
+        [chart.laps],
     );
 
     return (
@@ -306,9 +272,6 @@ const LapsChart: React.FC<{
                         labelAnchorY="middle"
                         style={{ fontSize: 8, textShadow: '0 0 1px white' }}
                     />
-                    {false && averageIntervalPace && (
-                        <CustomSVGSeries data={averageIntervalPaceData} />
-                    )}
                     <CustomSVGSeries data={labelTicks} />
                     {hint?.value.label != null && hint?.owner === 'pace' && (
                         <Hint value={hint.value}>
@@ -338,7 +301,7 @@ const LapsChart: React.FC<{
                         <strong>
                             {getPaceString(
                                 averageIntervalPace || 0,
-                                activityType
+                                activityType,
                             )}
                         </strong>
                     </span>
@@ -348,7 +311,7 @@ const LapsChart: React.FC<{
                         <strong>
                             {getPaceString(
                                 last60DaysIntervalPace || 0,
-                                activityType
+                                activityType,
                             )}
                         </strong>
                     </span>

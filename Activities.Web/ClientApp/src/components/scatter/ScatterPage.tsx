@@ -74,10 +74,10 @@ const ScatterPage: React.FC = () => {
     const [filters, setFilters] = useState<Filters>();
     const [items, setItems] = useState<Item[]>();
     const [yAxisFilter, setYAxisFilter] = useState<keyof Item>(
-        typeof yAxis === 'string' ? yAxis : defaultYAxis
+        typeof yAxis === 'string' ? yAxis : defaultYAxis,
     );
     const [xAxisFilter, setXAxisFilter] = useState<keyof Item>(
-        typeof xAxis === 'string' ? xAxis : defaultXAxis
+        typeof xAxis === 'string' ? xAxis : defaultXAxis,
     );
     const [lockAxisFilter] = useState(false);
 
@@ -123,10 +123,10 @@ const ScatterPage: React.FC = () => {
                         <Dropdown
                             defaultValue={yAxisFilter}
                             onChange={(
-                                v: React.ChangeEvent<HTMLSelectElement>
+                                v: React.ChangeEvent<HTMLSelectElement>,
                             ) => {
                                 setYAxisFilter(
-                                    v.currentTarget.value as keyof Item
+                                    v.currentTarget.value as keyof Item,
                                 );
                             }}
                         >
@@ -142,10 +142,10 @@ const ScatterPage: React.FC = () => {
                         <Dropdown
                             defaultValue={xAxisFilter}
                             onChange={(
-                                v: React.ChangeEvent<HTMLSelectElement>
+                                v: React.ChangeEvent<HTMLSelectElement>,
                             ) => {
                                 setXAxisFilter(
-                                    v.currentTarget.value as keyof Item
+                                    v.currentTarget.value as keyof Item,
                                 );
                             }}
                         >

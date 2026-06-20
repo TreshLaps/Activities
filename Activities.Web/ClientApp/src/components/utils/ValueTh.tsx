@@ -47,10 +47,10 @@ const ValueTh: React.FC<{
                 AveragePace(
                     items,
                     (item) => item.elapsedTime?.value,
-                    (item) => item.pace?.value
+                    (item) => item.pace?.value,
                 ) || 0,
                 activityType ?? '',
-                true
+                true,
             );
             break;
         case ItemValueType.TimeInSeconds:

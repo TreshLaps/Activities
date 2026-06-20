@@ -6,7 +6,7 @@ export const round = (value: number, decimals: number) =>
 export const getPaceString = (
     metersPerSecond: number,
     activityType: string,
-    showSuffix: boolean = false
+    showSuffix: boolean = false,
 ) => {
     if (Number.isNaN(metersPerSecond) || metersPerSecond === 0) {
         return '';
@@ -51,7 +51,7 @@ export const getTimeString = (seconds: number) => {
 export const getDateString = (dateTimeString: string) =>
     `${dateTimeString.substr(8, 2)}.${dateTimeString.substr(
         5,
-        2
+        2,
     )}.${dateTimeString.substr(0, 4)}`;
 
 export const getUrlDateString = (date: Date) => {
@@ -89,7 +89,7 @@ export const getFeelingTitle = (feeling: number) => {
 export function AveragePace<T>(
     items: T[],
     durationFunc: (item: T) => number | null,
-    paceFunc: (item: T) => number | null
+    paceFunc: (item: T) => number | null,
 ) {
     let totalDuration = 0.0;
     let total = 0.0;

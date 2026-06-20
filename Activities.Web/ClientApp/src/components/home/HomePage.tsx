@@ -91,7 +91,7 @@ const ProgressSummary: React.FC = () => {
                     <SubHeader>Progress overview</SubHeader>
                     <Grid columns={3}>
                         {progress.map((item) =>
-                            progressTable(item.name, item.summary)
+                            progressTable(item.name, item.summary),
                         )}
                     </Grid>
                     <PageLink to="/progress">View all progress</PageLink>

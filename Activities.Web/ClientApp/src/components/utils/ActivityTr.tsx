@@ -106,7 +106,7 @@ const ActivityTr: React.FC<{
                     >
                         {getActivityEmoji(
                             activity.type,
-                            activity.isBislettInterval
+                            activity.isBislettInterval,
                         )}
                     </TypeEmoji>
                     <ActivityDate>{activity.date}</ActivityDate>

@@ -88,7 +88,7 @@ const ProfileImage = styled.img`
 
 const checkProgress = (
     setSyncProgress: (value: number) => void,
-    setUser: (value: User | null | undefined) => void
+    setUser: (value: User | null | undefined) => void,
 ) => {
     fetch('/api/Sync/')
         .then((response) => {
@@ -106,13 +106,13 @@ const checkProgress = (
                 if (data.progress < 1) {
                     setTimeout(
                         () => checkProgress(setSyncProgress, setUser),
-                        10000
+                        10000,
                     );
                 }
             }
         })
         .catch(() =>
-            setTimeout(() => checkProgress(setSyncProgress, setUser), 10000)
+            setTimeout(() => checkProgress(setSyncProgress, setUser), 10000),
         );
 };
 

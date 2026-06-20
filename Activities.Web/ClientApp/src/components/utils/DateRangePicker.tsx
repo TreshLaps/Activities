@@ -18,7 +18,7 @@ interface DateRangePickerProps {
 const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
     const { startDate, endDate, onChange } = props;
     const [startDateFilter, setStartDateFilter] = useState<Date | null>(
-        startDate
+        startDate,
     );
     const [endDateFilter, setEndDateFilter] = useState<Date | null>(endDate);
     const [datepickerFocus, setDatepickerFocus] = useState<
@@ -57,7 +57,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
                         setDatepickerFocus(
                             datepickerFocus === START_DATE
                                 ? END_DATE
-                                : START_DATE
+                                : START_DATE,
                         );
                     }}
                     onFocusChange={(data) => {

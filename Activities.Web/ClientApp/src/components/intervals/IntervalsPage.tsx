@@ -132,16 +132,16 @@ const IntervalsPage: React.FC = () => {
                         (item) =>
                             `${new Date(item.date)
                                 .toUTCString()
-                                .substr(8, 8)}: ${item.lactate.toFixed(1)}`
-                    )
+                                .substr(8, 8)}: ${item.lactate.toFixed(1)}`,
+                    ),
                 );
 
                 setLactateAll(
                     getChartData(
                         data.allMeasurements,
                         (item) => new Date(item.date).getTime(),
-                        (item) => item.lactate
-                    )
+                        (item) => item.lactate,
+                    ),
                 );
 
                 setTotalDistances(
@@ -151,9 +151,10 @@ const IntervalsPage: React.FC = () => {
                         (item) => item.nonIntervalDistance,
                         (item) =>
                             `${item.date}\r\n- Total: ${Math.round(
-                                item.nonIntervalDistance + item.intervalDistance
-                            )} km`
-                    ).reverse()
+                                item.nonIntervalDistance +
+                                    item.intervalDistance,
+                            )} km`,
+                    ).reverse(),
                 );
 
                 setIntervalDistances(
@@ -168,9 +169,9 @@ const IntervalsPage: React.FC = () => {
                                 (100 /
                                     (item.nonIntervalDistance +
                                         item.intervalDistance)) *
-                                    item.intervalDistance
-                            )} %)`
-                    ).reverse()
+                                    item.intervalDistance,
+                            )} %)`,
+                    ).reverse(),
                 );
 
                 setShortPaces(
@@ -178,8 +179,8 @@ const IntervalsPage: React.FC = () => {
                         data.paces,
                         (item) => item.date,
                         (item) => item.averageShortPace,
-                        (item) => item.label
-                    ).reverse()
+                        (item) => item.label,
+                    ).reverse(),
                 );
 
                 setMediumPaces(
@@ -187,8 +188,8 @@ const IntervalsPage: React.FC = () => {
                         data.paces,
                         (item) => item.date,
                         (item) => item.averageMediumPace,
-                        (item) => item.label
-                    ).reverse()
+                        (item) => item.label,
+                    ).reverse(),
                 );
 
                 setLongPaces(
@@ -196,8 +197,8 @@ const IntervalsPage: React.FC = () => {
                         data.paces,
                         (item) => item.date,
                         (item) => item.averageLongPace,
-                        (item) => item.label
-                    ).reverse()
+                        (item) => item.label,
+                    ).reverse(),
                 );
 
                 setLoadingStatus(LoadingStatus.None);
@@ -217,7 +218,7 @@ const IntervalsPage: React.FC = () => {
                     <Grid
                         columns={Math.ceil(
                             (lactate && lactate.length > 0 ? 3 : 2) /
-                                ((lactate?.length ?? 0) > 12 ? 2 : 1)
+                                ((lactate?.length ?? 0) > 12 ? 2 : 1),
                         )}
                     >
                         <Box>
@@ -237,7 +238,8 @@ const IntervalsPage: React.FC = () => {
                                         }
                                         onValueMouseOut={() => setHint(null)}
                                         onValueClick={(value) => {
-                                            window.location.hash = value.x.toString();
+                                            window.location.hash =
+                                                value.x.toString();
                                         }}
                                     />
                                     <VerticalBarSeries
@@ -253,7 +255,8 @@ const IntervalsPage: React.FC = () => {
                                         }
                                         onValueMouseOut={() => setHint(null)}
                                         onValueClick={(value) => {
-                                            window.location.hash = value.x.toString();
+                                            window.location.hash =
+                                                value.x.toString();
                                         }}
                                     />
                                     {hint?.value.label != null &&
@@ -289,7 +292,7 @@ const IntervalsPage: React.FC = () => {
                                         getPaceString(
                                             distancePerSecond,
                                             (filters.get('type') ??
-                                                'All') as string
+                                                'All') as string,
                                         )
                                     }
                                 >
@@ -304,7 +307,8 @@ const IntervalsPage: React.FC = () => {
                                         }
                                         onValueMouseOut={() => setHint(null)}
                                         onValueClick={(value) => {
-                                            window.location.hash = value.x.toString();
+                                            window.location.hash =
+                                                value.x.toString();
                                         }}
                                     />
                                     <VerticalBarSeries
@@ -318,7 +322,8 @@ const IntervalsPage: React.FC = () => {
                                         }
                                         onValueMouseOut={() => setHint(null)}
                                         onValueClick={(value) => {
-                                            window.location.hash = value.x.toString();
+                                            window.location.hash =
+                                                value.x.toString();
                                         }}
                                     />
                                     <VerticalBarSeries
@@ -332,7 +337,8 @@ const IntervalsPage: React.FC = () => {
                                         }
                                         onValueMouseOut={() => setHint(null)}
                                         onValueClick={(value) => {
-                                            window.location.hash = value.x.toString();
+                                            window.location.hash =
+                                                value.x.toString();
                                         }}
                                     />
                                     {hint?.value.label != null &&
@@ -495,18 +501,18 @@ const IntervalsPage: React.FC = () => {
                                                                         activity.interval_Laps
                                                                             .map(
                                                                                 (
-                                                                                    lap
+                                                                                    lap,
                                                                                 ) =>
-                                                                                    lap.distance
+                                                                                    lap.distance,
                                                                             )
                                                                             .reduce(
                                                                                 (
                                                                                     sum,
-                                                                                    value
+                                                                                    value,
                                                                                 ) =>
                                                                                     sum +
-                                                                                    value
-                                                                            )
+                                                                                    value,
+                                                                            ),
                                                                     )}
                                                                 </th>
                                                                 <th title="Average pace">
@@ -514,15 +520,15 @@ const IntervalsPage: React.FC = () => {
                                                                         AveragePace(
                                                                             activity.interval_Laps,
                                                                             (
-                                                                                item
+                                                                                item,
                                                                             ) =>
                                                                                 item.elapsedTime,
                                                                             (
-                                                                                item
+                                                                                item,
                                                                             ) =>
-                                                                                item.averageSpeed
+                                                                                item.averageSpeed,
                                                                         ) || 0,
-                                                                        activity.type
+                                                                        activity.type,
                                                                     )}
                                                                 </th>
                                                                 <th title="Average heartrate">
@@ -530,46 +536,45 @@ const IntervalsPage: React.FC = () => {
                                                                         activity.interval_Laps
                                                                             .map(
                                                                                 (
-                                                                                    lap
+                                                                                    lap,
                                                                                 ) =>
-                                                                                    lap.averageHeartrate
+                                                                                    lap.averageHeartrate,
                                                                             )
                                                                             .reduce(
                                                                                 (
                                                                                     sum,
-                                                                                    value
+                                                                                    value,
                                                                                 ) =>
                                                                                     sum +
-                                                                                    value
+                                                                                    value,
                                                                             ) /
                                                                             activity
                                                                                 .interval_Laps
-                                                                                .length
+                                                                                .length,
                                                                     )}{' '}
                                                                     bpm
                                                                 </th>
                                                                 <th
                                                                     style={{
-                                                                        width:
-                                                                            '60px',
+                                                                        width: '60px',
                                                                     }}
                                                                 >
                                                                     {getTimeString(
                                                                         activity.interval_Laps
                                                                             .map(
                                                                                 (
-                                                                                    lap
+                                                                                    lap,
                                                                                 ) =>
-                                                                                    lap.elapsedTime
+                                                                                    lap.elapsedTime,
                                                                             )
                                                                             .reduce(
                                                                                 (
                                                                                     sum,
-                                                                                    value
+                                                                                    value,
                                                                                 ) =>
                                                                                     sum +
-                                                                                    value
-                                                                            )
+                                                                                    value,
+                                                                            ),
                                                                     )}
                                                                 </th>
                                                             </tr>
@@ -585,12 +590,12 @@ const IntervalsPage: React.FC = () => {
                                                                         <NoWrapTd
                                                                             title={`${getKmString(
                                                                                 lap.distance,
-                                                                                3
+                                                                                3,
                                                                             )}`}
                                                                         >
                                                                             <LapLabel>
                                                                                 {getKmString(
-                                                                                    lap.distance
+                                                                                    lap.distance,
                                                                                 )}
                                                                             </LapLabel>
                                                                             <LapFactor
@@ -607,7 +612,7 @@ const IntervalsPage: React.FC = () => {
                                                                             <LapLabel>
                                                                                 {getPaceString(
                                                                                     lap.averageSpeed,
-                                                                                    activity.type
+                                                                                    activity.type,
                                                                                 )}
                                                                             </LapLabel>
                                                                             <LapFactor
@@ -640,22 +645,21 @@ const IntervalsPage: React.FC = () => {
                                                                         <NoWrapTd
                                                                             title="Time"
                                                                             style={{
-                                                                                width:
-                                                                                    '60px',
+                                                                                width: '60px',
                                                                             }}
                                                                         >
                                                                             <LapLabel>
                                                                                 {lap.lactate &&
                                                                                     `(${lap.lactate.toFixed(
-                                                                                        1
+                                                                                        1,
                                                                                     )})`}{' '}
                                                                                 {getTimeString(
-                                                                                    lap.elapsedTime
+                                                                                    lap.elapsedTime,
                                                                                 )}
                                                                             </LapLabel>
                                                                         </NoWrapTd>
                                                                     </tr>
-                                                                )
+                                                                ),
                                                             )}
                                                         </tbody>
                                                     </LapsTable>

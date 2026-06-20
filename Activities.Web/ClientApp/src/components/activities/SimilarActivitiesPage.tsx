@@ -50,13 +50,13 @@ const SimiliarActivitiesPage: React.FC = () => {
             activities.filter(
                 (group) =>
                     group.items?.filter((activity) => activity.lactate).length >
-                        0 || false
+                        0 || false,
             ).length > 0) === true;
 
     const showFeeling =
         (activities &&
             activities.filter((group) =>
-                group.items?.filter((activity) => activity.feeling != null)
+                group.items?.filter((activity) => activity.feeling != null),
             ).length > 0) === true;
 
     const numberOfColumns = 7 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);

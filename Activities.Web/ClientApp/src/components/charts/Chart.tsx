@@ -122,7 +122,7 @@ export function getChartData<T>(
     data: T[],
     getX: (item: T) => number | string,
     getY: (item: T) => number,
-    getLabel?: (item: T) => string
+    getLabel?: (item: T) => string,
 ): ChartData[] {
     return data.map((item) => ({
         x: getX(item),

@@ -75,7 +75,7 @@ const RacesPage: React.FC = () => {
                                     <NoWrapTd>
                                         {getPaceString(
                                             activity.averageSpeed,
-                                            activity.type
+                                            activity.type,
                                         )}
                                     </NoWrapTd>
                                     <NoWrapTd>

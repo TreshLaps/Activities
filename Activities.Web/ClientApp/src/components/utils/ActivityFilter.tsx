@@ -85,25 +85,25 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         groupKey,
     } = query;
     const [typeFilter, setTypeFilter] = useState(
-        typeof type === 'string' ? type : defaultType
+        typeof type === 'string' ? type : defaultType,
     );
     const [durationFilter, setDurationFilter] = useState(
-        typeof duration === 'string' ? duration : defaultDuration
+        typeof duration === 'string' ? duration : defaultDuration,
     );
     const [yearFilter, setYearFilter] = useState(
-        typeof year === 'string' ? parseInt(year, 10) : defaultYear
+        typeof year === 'string' ? parseInt(year, 10) : defaultYear,
     );
     const [dataTypeFilter, setDataTypeFilter] = useState(
-        typeof dataType === 'string' ? dataType : defaultDataType
+        typeof dataType === 'string' ? dataType : defaultDataType,
     );
     const [startDateFilter, setStartDateFilter] = useState<Date | null>(
-        typeof startDate === 'string' ? new Date(startDate) : null
+        typeof startDate === 'string' ? new Date(startDate) : null,
     );
     const [endDateFilter, setEndDateFilter] = useState<Date | null>(
-        typeof endDate === 'string' ? new Date(endDate) : null
+        typeof endDate === 'string' ? new Date(endDate) : null,
     );
     const [groupKeyFilter, setGroupKeyFilter] = useState(
-        typeof groupKey === 'string' ? groupKey : defaultGroupKey
+        typeof groupKey === 'string' ? groupKey : defaultGroupKey,
     );
     const [paceFilter, setPaceFilter] = useState<Pace>({
         medianPace: undefined,
@@ -296,14 +296,14 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 placeholder="4.30"
                                 value={paceFilter.minPace}
                                 onChange={(
-                                    v: React.ChangeEvent<HTMLInputElement>
+                                    v: React.ChangeEvent<HTMLInputElement>,
                                 ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
                                                   v.currentTarget.value
                                                       .replace(',', '.')
-                                                      .replace(':', '.')
+                                                      .replace(':', '.'),
                                               )
                                             : undefined;
                                     setPaceFilter({
@@ -320,14 +320,14 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 placeholder="3.30"
                                 value={paceFilter.maxPace}
                                 onChange={(
-                                    v: React.ChangeEvent<HTMLInputElement>
+                                    v: React.ChangeEvent<HTMLInputElement>,
                                 ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
                                                   v.currentTarget.value
                                                       .replace(',', '.')
-                                                      .replace(':', '.')
+                                                      .replace(':', '.'),
                                               )
                                             : undefined;
                                     setPaceFilter({

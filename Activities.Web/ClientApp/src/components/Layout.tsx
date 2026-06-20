@@ -141,9 +141,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <LinkContainer>
                         <li>
                             <NavLink
-                                exact
                                 to="/"
-                                activeClassName="navLink-active"
+                                className={({ isActive }) => isActive ? 'navLink-active' : '' }
                             >
                                 Home
                             </NavLink>
@@ -152,27 +151,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             <>
                                 <li>
                                     <NavLink
-                                        exact
+                                        end
                                         to="/activities"
-                                        activeClassName="navLink-active"
+                                        className={({ isActive }) => isActive ? 'navLink-active' : '' }
                                     >
                                         Activities
                                     </NavLink>
                                 </li>
                                 <li>
                                     <NavLink
-                                        exact
+                                        end
                                         to="/progress"
-                                        activeClassName="navLink-active"
+                                        className={({ isActive }) => isActive ? 'navLink-active' : undefined }
                                     >
                                         Progress
                                     </NavLink>
                                 </li>
                                 <li>
                                     <NavLink
-                                        exact
+                                        end
                                         to="/intervals"
-                                        activeClassName="navLink-active"
+                                        className={({ isActive }) => isActive ? 'navLink-active' : undefined }
                                     >
                                         Intervals (Beta)
                                     </NavLink>

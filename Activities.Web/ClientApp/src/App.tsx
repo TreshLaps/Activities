@@ -1,4 +1,4 @@
-import { Route } from 'react-router';
+import { Route, Routes } from 'react-router-dom';
 import HomePage from './components/home/HomePage';
 import ActivitiesPage from './components/activities/ActivitiesPage';
 import SimiliarActivitiesPage from './components/activities/SimilarActivitiesPage';
@@ -11,18 +11,19 @@ import ScatterPage from './components/scatter/ScatterPage';
 
 const App = () => (
     <Layout>
-        <Route exact path="/" component={HomePage} />
-        <Route exact path="/activities" component={ActivitiesPage} />
-        <Route exact path="/intervals" component={IntervalsPage} />
-        <Route exact path="/progress" component={ProgressPage} />
-        <Route exact path="/races" component={RacesPage} />
-        <Route exact path="/scatter" component={ScatterPage} />
-        <Route exact path="/activities/:id" component={ActivitiesDetailsPage} />
-        <Route
-            exact
-            path="/activities/:id/similar"
-            component={SimiliarActivitiesPage}
-        />
+        <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/activities" element={<ActivitiesPage />} />
+            <Route path="/intervals" element={<IntervalsPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/races" element={<RacesPage />} />
+            <Route path="/scatter" element={<ScatterPage />} />
+            <Route path="/activities/:id" element={<ActivitiesDetailsPage />} />
+            <Route
+                path="/activities/:id/similar"
+                element={<SimiliarActivitiesPage />}
+            />
+        </Routes>
     </Layout>
 );
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import queryString from 'query-string';
 import DateRangePicker from './DateRangePicker';
 import {
     StackContainer,
@@ -70,6 +69,10 @@ interface Estimates {
 const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
     const { isLoading, onChange, disableDataTypeFilter } = props;
 
+    const query: Record<string, string> = {};
+    new URLSearchParams(window.location.search).forEach((value, key) => {
+        query[key] = value;
+    });
     const {
         type,
         duration,
@@ -80,7 +83,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         startDate,
         endDate,
         groupKey,
-    } = queryString.parse(window.location.search);
+    } = query;
     const [typeFilter, setTypeFilter] = useState(
         typeof type === 'string' ? type : defaultType
     );

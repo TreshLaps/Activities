@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -13,8 +13,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "lib": [
-      "es2015",
-      "dom"
+      "es2019",
+      "dom",
+      "dom.iterable"
     ],
     "skipLibCheck": false,
     "noFallthroughCasesInSwitch": true

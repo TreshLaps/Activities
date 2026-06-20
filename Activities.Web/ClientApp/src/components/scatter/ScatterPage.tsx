@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import queryString from 'query-string';
 import '../../../node_modules/react-vis/dist/style.css';
 import { AutoSizer } from 'react-virtualized';
 import {
@@ -63,7 +62,11 @@ const defaultYAxis: keyof Item = 'averageHeartrate';
 const defaultXAxis: keyof Item = 'pace';
 
 const ScatterPage: React.FC = () => {
-    const { yAxis, xAxis } = queryString.parse(window.location.search) as {
+    const query: Record<string, string> = {};
+    new URLSearchParams(window.location.search).forEach((value, key) => {
+        query[key] = value;
+    });
+    const { yAxis, xAxis } = query as {
         yAxis: keyof Item;
         xAxis: keyof Item;
     };

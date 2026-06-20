@@ -6,7 +6,7 @@ import {
     Hint,
     VerticalBarSeries,
 } from 'react-vis';
-import '../../../node_modules/react-vis/dist/style.css';
+import 'react-vis/dist/style.css';
 import { NavLink } from 'react-router-dom';
 import Chart, {
     AxisTypes,

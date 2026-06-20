@@ -8,7 +8,7 @@ import {
     RVTickFormat,
     Margin,
 } from 'react-vis';
-import '../../../node_modules/react-vis/dist/style.css';
+import 'react-vis/dist/style.css';
 
 export enum AxisTypes {
     Number,

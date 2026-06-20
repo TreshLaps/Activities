@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../../node_modules/react-vis/dist/style.css';
+import 'react-vis/dist/style.css';
 import { AutoSizer } from 'react-virtualized';
 import {
     ChartLabel,
@@ -122,7 +122,7 @@ const ScatterPage: React.FC = () => {
                     <StackContainer>
                         <Dropdown
                             defaultValue={yAxisFilter}
-                            onChange={(v) => {
+                            onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                                 setYAxisFilter(
                                     v.currentTarget.value as keyof Item
                                 );
@@ -139,7 +139,7 @@ const ScatterPage: React.FC = () => {
                         </Dropdown>
                         <Dropdown
                             defaultValue={xAxisFilter}
-                            onChange={(v) => {
+                            onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                                 setXAxisFilter(
                                     v.currentTarget.value as keyof Item
                                 );

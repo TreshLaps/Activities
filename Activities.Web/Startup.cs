@@ -166,6 +166,7 @@ public class Startup
 
             if (env.IsDevelopment())
             {
+                spa.Options.DevServerPort = 5173;
                 spa.UseReactDevelopmentServer("start");
             }
         });

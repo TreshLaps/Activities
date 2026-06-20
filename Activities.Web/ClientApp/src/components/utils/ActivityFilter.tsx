@@ -198,7 +198,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
             <Dropdown
                 disabled={isLoading}
                 defaultValue={typeFilter}
-                onChange={(v) => {
+                onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                     setTypeFilter(v.currentTarget.value);
                 }}
             >
@@ -213,7 +213,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
             <Dropdown
                 disabled={isLoading}
                 defaultValue={durationFilter}
-                onChange={(v) => {
+                onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                     setDurationFilter(v.currentTarget.value);
                 }}
                 style={durationFilter === 'Year' ? { marginRight: '5px' } : {}}
@@ -228,7 +228,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 <Dropdown
                     disabled={isLoading}
                     defaultValue={yearFilter}
-                    onChange={(v) => {
+                    onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                         setYearFilter(parseInt(v.currentTarget.value, 10));
                     }}
                 >
@@ -260,7 +260,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 <Dropdown
                     disabled={isLoading}
                     defaultValue={groupKeyFilter}
-                    onChange={(v) => {
+                    onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                         setGroupKeyFilter(v.currentTarget.value);
                     }}
                 >
@@ -274,7 +274,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                     <Dropdown
                         disabled={isLoading}
                         defaultValue={dataTypeFilter}
-                        onChange={(v) => {
+                        onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                             setDataTypeFilter(v.currentTarget.value);
                         }}
                         style={
@@ -295,7 +295,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 step="0.1"
                                 placeholder="4.30"
                                 value={paceFilter.minPace}
-                                onChange={(v) => {
+                                onChange={(v: React.ChangeEvent<HTMLInputElement>) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
@@ -317,7 +317,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 step="0.1"
                                 placeholder="3.30"
                                 value={paceFilter.maxPace}
-                                onChange={(v) => {
+                                onChange={(v: React.ChangeEvent<HTMLInputElement>) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(

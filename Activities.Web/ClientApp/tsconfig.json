@@ -17,8 +17,9 @@
       "dom",
       "dom.iterable"
     ],
-    "skipLibCheck": false,
-    "noFallthroughCasesInSwitch": true
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src",

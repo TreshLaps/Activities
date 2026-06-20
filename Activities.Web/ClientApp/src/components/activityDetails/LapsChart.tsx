@@ -227,7 +227,7 @@ const LapsChart: React.FC<{
                     xDomain={[0, chart.totalMovingTime]}
                     xAxisType={AxisTypes.None}
                     yDomain={[-0.05, 1.05]}
-                    yTickFormat={(distancePerSecond) =>
+                    yTickFormat={(distancePerSecond: number) =>
                         getPaceString(distancePerSecond, activityType)
                     }
                     margin={{ bottom: 15 }}

@@ -72,7 +72,7 @@ const Chart: React.FC<ChartProps> = (props) => {
                         />
                         {xAxisType === AxisTypes.Date && (
                             <XAxis
-                                tickFormat={(v) =>
+                                tickFormat={(v: number) =>
                                     new Date(v).toUTCString().substr(8, 8)
                                 }
                                 tickLabelAngle={30}

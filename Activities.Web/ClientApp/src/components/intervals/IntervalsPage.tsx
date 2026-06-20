@@ -288,7 +288,7 @@ const IntervalsPage: React.FC = () => {
                                 <Chart
                                     xType="ordinal"
                                     yDomain={[3, 6]}
-                                    yTickFormat={(distancePerSecond) =>
+                                    yTickFormat={(distancePerSecond: number) =>
                                         getPaceString(
                                             distancePerSecond,
                                             (filters.get('type') ??

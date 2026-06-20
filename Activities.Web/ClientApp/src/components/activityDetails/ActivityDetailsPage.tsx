@@ -137,7 +137,7 @@ interface DetailedActivity {
     maxWatts: number;
     movingTime: number;
     name: string;
-    perceivedExertion?: unknown;
+    perceivedExertion?: number;
     photoCount: number;
     photos: { primary: unknown; count: number };
     prCount: number;

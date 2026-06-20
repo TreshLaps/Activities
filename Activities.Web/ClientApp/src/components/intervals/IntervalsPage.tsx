@@ -646,7 +646,9 @@ const IntervalsPage: React.FC = () => {
                                                                         >
                                                                             <LapLabel>
                                                                                 {lap.lactate &&
-                                                                                    `(${lap.lactate.toFixed(1)})`}{' '}
+                                                                                    `(${lap.lactate.toFixed(
+                                                                                        1
+                                                                                    )})`}{' '}
                                                                                 {getTimeString(
                                                                                     lap.elapsedTime
                                                                                 )}

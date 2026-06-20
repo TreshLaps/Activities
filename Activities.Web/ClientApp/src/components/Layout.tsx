@@ -142,7 +142,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <li>
                             <NavLink
                                 to="/"
-                                className={({ isActive }) => isActive ? 'navLink-active' : '' }
+                                className={({ isActive }) =>
+                                    isActive ? 'navLink-active' : ''
+                                }
                             >
                                 Home
                             </NavLink>
@@ -153,7 +155,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     <NavLink
                                         end
                                         to="/activities"
-                                        className={({ isActive }) => isActive ? 'navLink-active' : '' }
+                                        className={({ isActive }) =>
+                                            isActive ? 'navLink-active' : ''
+                                        }
                                     >
                                         Activities
                                     </NavLink>
@@ -162,7 +166,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     <NavLink
                                         end
                                         to="/progress"
-                                        className={({ isActive }) => isActive ? 'navLink-active' : undefined }
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? 'navLink-active'
+                                                : undefined
+                                        }
                                     >
                                         Progress
                                     </NavLink>
@@ -171,7 +179,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                                     <NavLink
                                         end
                                         to="/intervals"
-                                        className={({ isActive }) => isActive ? 'navLink-active' : undefined }
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? 'navLink-active'
+                                                : undefined
+                                        }
                                     >
                                         Intervals (Beta)
                                     </NavLink>

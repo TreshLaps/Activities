@@ -36,8 +36,8 @@ module.exports = defineConfig([
                 'plugin:react/recommended',
                 'plugin:react/jsx-runtime',
                 'plugin:react-hooks/recommended',
-                'plugin:jsx-a11y/recommended',
-            ),
+                'plugin:jsx-a11y/recommended'
+            )
         ),
 
         rules: {
@@ -95,7 +95,7 @@ module.exports = defineConfig([
 
         extends: compat.extends(
             'plugin:@typescript-eslint/recommended',
-            'plugin:@typescript-eslint/recommended-requiring-type-checking',
+            'plugin:@typescript-eslint/recommended-requiring-type-checking'
         ),
 
         rules: {
@@ -122,10 +122,7 @@ module.exports = defineConfig([
         languageOptions: {
             globals: {
                 ...Object.fromEntries(
-                    Object.entries(globals.browser).map(([key]) => [
-                        key,
-                        'off',
-                    ]),
+                    Object.entries(globals.browser).map(([key]) => [key, 'off'])
                 ),
                 ...globals.node,
             },

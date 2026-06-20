@@ -178,8 +178,11 @@ const ActivityDetailsPage: React.FC = () => {
         activity?.laps != null &&
         activity.laps.filter((lap) => lap.isInterval).length > 0;
     const bislettIntervals =
-        (activity?.laps === null || !activity?.isBislettInterval) ?
-           [] : activity.laps.filter((lap) => lap.isInterval).map((lap) => (lap.originalDistance ?? lap.distance));
+        activity?.laps === null || !activity?.isBislettInterval
+            ? []
+            : activity.laps
+                  .filter((lap) => lap.isInterval)
+                  .map((lap) => lap.originalDistance ?? lap.distance);
 
     useEffect(() => {
         if (activity !== undefined) {
@@ -375,12 +378,15 @@ const ActivityDetailsPage: React.FC = () => {
                         </>
                     )}
                     {bislettIntervals.length > 0 && (
-                         <ActionButton
-                             href={`https://info.skvidar.run/intro/kalibrer-footpod#` + bislettIntervals.join(',')}
-                             rel="noopener noreferrer"
-                         >
-                             Calibrate footpod
-                         </ActionButton>
+                        <ActionButton
+                            href={
+                                `https://info.skvidar.run/intro/kalibrer-footpod#` +
+                                bislettIntervals.join(',')
+                            }
+                            rel="noopener noreferrer"
+                        >
+                            Calibrate footpod
+                        </ActionButton>
                     )}
                     <ActionButton
                         href={`https://www.strava.com/activities/${activity.id}`}

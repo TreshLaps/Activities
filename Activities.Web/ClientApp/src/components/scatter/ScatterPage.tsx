@@ -122,7 +122,9 @@ const ScatterPage: React.FC = () => {
                     <StackContainer>
                         <Dropdown
                             defaultValue={yAxisFilter}
-                            onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
+                            onChange={(
+                                v: React.ChangeEvent<HTMLSelectElement>
+                            ) => {
                                 setYAxisFilter(
                                     v.currentTarget.value as keyof Item
                                 );
@@ -139,7 +141,9 @@ const ScatterPage: React.FC = () => {
                         </Dropdown>
                         <Dropdown
                             defaultValue={xAxisFilter}
-                            onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
+                            onChange={(
+                                v: React.ChangeEvent<HTMLSelectElement>
+                            ) => {
                                 setXAxisFilter(
                                     v.currentTarget.value as keyof Item
                                 );

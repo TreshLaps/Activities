@@ -295,7 +295,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 step="0.1"
                                 placeholder="4.30"
                                 value={paceFilter.minPace}
-                                onChange={(v: React.ChangeEvent<HTMLInputElement>) => {
+                                onChange={(
+                                    v: React.ChangeEvent<HTMLInputElement>
+                                ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
@@ -317,7 +319,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                 step="0.1"
                                 placeholder="3.30"
                                 value={paceFilter.maxPace}
-                                onChange={(v: React.ChangeEvent<HTMLInputElement>) => {
+                                onChange={(
+                                    v: React.ChangeEvent<HTMLInputElement>
+                                ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(

@@ -56,8 +56,8 @@ const isPauseLap = (index: number, laps: Lap[]) => {
 
 function NormalizeChartData<T extends BasicChart>(
     data: T[],
-    minValue?: number | undefined,
-    maxValue?: number | undefined
+    minValue?: number,
+    maxValue?: number
 ) {
     if (data.length === 0) {
         return [];

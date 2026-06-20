@@ -13,6 +13,9 @@
         "styled-icons": "^10.47.1"
     },
     "devDependencies": {
+        "@eslint/compat": "^2.1.0",
+        "@eslint/eslintrc": "^3.3.5",
+        "@eslint/js": "^10.0.1",
         "@types/node": "^14.14.37",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
@@ -22,16 +25,19 @@
         "@types/react-vis": "^1.11.15",
         "@types/reactstrap": "8.7.1",
         "@types/styled-components": "^5.1.36",
-        "@typescript-eslint/eslint-plugin": "^4.21.0",
-        "@typescript-eslint/parser": "^4.21.0",
+        "@typescript-eslint/eslint-plugin": "^8.62.0",
+        "@typescript-eslint/parser": "^8.62.0",
+        "@typescript-eslint/typescript-estree": "^8.62.0",
         "@vitejs/plugin-react": "^6.0.2",
-        "eslint": "^7.24.0",
+        "eslint": "^10.5.0",
         "eslint-config-airbnb-typescript": "^12.3.1",
         "eslint-config-prettier": "^8.1.0",
         "eslint-config-react": "^1.1.7",
         "eslint-plugin-jsx-a11y": "^6.4.1",
         "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^4.2.0",
+        "globals": "^17.7.0",
         "prettier": "^2.2.1",
         "typescript": "^6.0.3",
         "vite": "^8.1.0"
@@ -40,9 +46,7 @@
         "start": "echo Starting the development server && vite",
         "dev": "vite dev",
         "build": "tsc && vite build",
-        "test": "vite test"
-    },
-    "eslintConfig": {
-        "extends": "react-app"
+        "test": "vite test",
+        "lint": "eslint --max-warnings=0 src"
     }
 }

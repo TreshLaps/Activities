@@ -11,6 +11,7 @@ export const Box = styled(Container)`
         rgb(0 0 0 / 13%) 0px 1.6px 3.6px 0px,
         rgb(0 0 0 / 11%) 0px 0.3px 0.9px 0px;
     padding: 20px;
+    container-type: inline-size;
 
     @media (max-width: 768px) {
         margin-left: -10px;

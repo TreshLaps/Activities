@@ -1,14 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import {
-    CustomSVGSeries,
-    Hint,
-    LabelSeries,
-    LineSeries,
-    VerticalRectSeries,
-} from 'react-vis';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
-import Chart, { AxisTypes, DynamicChartData } from '../charts/Chart';
+import { Bar, LinePath } from '@visx/shape';
+import { Text } from '@visx/text';
+import { scaleLinear } from '@visx/scale';
 
 const IntervalPaceContainer = styled.div`
     margin-top: 20px;
@@ -103,10 +98,6 @@ const LapsChart: React.FC<{
     averageIntervalPace: number | undefined;
     last60DaysIntervalPace: number | undefined;
 }> = ({ laps, activityType, averageIntervalPace, last60DaysIntervalPace }) => {
-    const [hint, setHint] = useState<{
-        value: DynamicChartData;
-        owner: string;
-    } | null>();
     const speedPadding = 0.1;
 
     const sortedBySpeed = [...laps]
@@ -190,10 +181,32 @@ const LapsChart: React.FC<{
         [chart.laps],
     );
 
-    const labelTicksComponent = (lap: ChartLap) => (
+    const xMax = 1000;
+    const yMax = 300;
+
+    const xScale = useMemo(
+        () =>
+            scaleLinear<number>({
+                range: [0, xMax],
+                round: true,
+                domain: [0, chart.totalMovingTime],
+            }),
+        [xMax, chart.totalMovingTime],
+    );
+    const yScale = useMemo(
+        () =>
+            scaleLinear<number>({
+                range: [yMax - 15, 5],
+                round: true,
+                domain: [-0.05, 1.05],
+            }),
+        [yMax],
+    );
+    const labelTicksComponent = (lap: ChartLap, index: number) => (
         <text
-            x={0}
-            y={25}
+            key={`labeltick-${index}`}
+            x={xScale(lap.x0 + (lap.x - lap.x0) / 2)}
+            y={yMax - 3}
             textAnchor="middle"
             style={{ fontSize: 10, letterSpacing: '-0.5px' }}
         >
@@ -201,62 +214,61 @@ const LapsChart: React.FC<{
         </text>
     );
 
-    const labelTicks = useMemo(
-        () =>
-            chart.laps
-                .filter(
-                    (_, index) =>
-                        !isPauseLap(
-                            index,
-                            chart.laps.map((chartLap) => chartLap.lap),
-                        ),
-                )
-                .map((lap) => ({
-                    x: lap.x0 + (lap.x - lap.x0) / 2,
-                    y: 0,
-                    customComponent: () => labelTicksComponent(lap),
-                })),
-        [chart.laps],
-    );
+    const labelTicks = chart.laps
+        .filter(
+            (_, index) =>
+                !isPauseLap(
+                    index,
+                    chart.laps.map((chartLap) => chartLap.lap),
+                ),
+        )
+        .map((lap, index) => labelTicksComponent(lap, index));
 
     return (
-        <div>
+        <div style={{ containerType: 'inline-size' }}>
             {chart.laps?.length > 1 && (
-                <Chart
-                    height={300}
-                    xDomain={[0, chart.totalMovingTime]}
-                    xAxisType={AxisTypes.None}
-                    yDomain={[-0.05, 1.05]}
-                    yTickFormat={(distancePerSecond: number) =>
-                        getPaceString(distancePerSecond, activityType)
-                    }
-                    margin={{ bottom: 15 }}
-                    hideYAxis
+                <svg
+                    style={{ width: '100%', height: 'min(300px, 66cqw)' }}
+                    viewBox={`0 0 ${xMax} ${yMax}`}
                 >
-                    <VerticalRectSeries
-                        data={chart.laps}
-                        onValueMouseOver={(value) =>
-                            setHint({ value, owner: 'pace' })
-                        }
-                        onValueMouseOut={() => setHint(null)}
-                        onValueClick={(value) => {
-                            window.location.hash = value.x.toString();
-                        }}
-                        stroke="0"
-                        colorRange={['#d6d6d6', '#92b7f8']}
-                    />
-                    <LabelSeries
-                        data={labelData}
-                        labelAnchorX="middle"
-                        labelAnchorY="top"
-                        style={{
-                            fontSize: 10,
-                            textShadow:
-                                '0 0 1px white, 0 0 2px white, 0 0 3px white',
-                        }}
-                    />
-                    <LineSeries
+                    {chart.laps.map((lap, index) => {
+                        const mixPercent = lap.y * 100 + '%';
+                        return (
+                            <Bar
+                                key={`bar-${index}`}
+                                x={xScale(lap.x0)}
+                                y={yScale(lap.y)}
+                                width={xScale(lap.x - lap.x0)}
+                                height={yScale(lap.y0 - lap.y)}
+                                fill={`color-mix(in oklab, #d6d6d6, #92b7f8 ${mixPercent})`}
+                                onClick={() => {
+                                    window.location.hash = lap.x.toString();
+                                }}
+                            />
+                        );
+                    })}
+                    {labelData.map((label, index) => {
+                        return (
+                            <Text
+                                key={`label-${index}`}
+                                x={xScale(label.x)}
+                                y={yScale(label.y) + label.yOffset}
+                                textAnchor="middle"
+                                verticalAnchor="end"
+                                style={{
+                                    fill: '#333',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {label.label}
+                            </Text>
+                        );
+                    })}
+                    <LinePath
                         data={chart.heartrateLaps}
+                        x={(d) => xScale(d.x) ?? 0}
+                        y={(d) => yScale(d.y) ?? 0}
                         style={{
                             shapeRendering: 'geometricPrecision',
                             strokeWidth: '1.5px',
@@ -266,33 +278,26 @@ const LapsChart: React.FC<{
                         }}
                         stroke="red"
                     />
-                    <LabelSeries
-                        data={chart.heartrateLaps}
-                        labelAnchorX="middle"
-                        labelAnchorY="middle"
-                        style={{ fontSize: 8, textShadow: '0 0 1px white' }}
-                    />
-                    <CustomSVGSeries data={labelTicks} />
-                    {hint?.value.label != null && hint?.owner === 'pace' && (
-                        <Hint value={hint.value}>
-                            <div
+                    {chart.heartrateLaps.map((lap, index) => {
+                        return (
+                            <Text
+                                key={`hrlabel-${index}`}
+                                x={xScale(lap.x)}
+                                y={yScale(lap.y) - lap.yOffset}
+                                textAnchor="middle"
+                                verticalAnchor="end"
                                 style={{
-                                    background: 'white',
-                                    boxShadow:
-                                        '1px 1px 6px rgba(0,0,0, 0.5), 1px 1px 4px rgba(0,0,0, 0.3)',
-                                    padding: '7px 10px',
-                                    color: 'black',
-                                    borderRadius: '2px',
-                                    fontSize: '12px',
-                                    lineHeight: 1.5,
-                                    whiteSpace: 'pre-line',
+                                    fill: '#333',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
                                 }}
                             >
-                                {hint.value.label}
-                            </div>
-                        </Hint>
-                    )}
-                </Chart>
+                                {lap.label}
+                            </Text>
+                        );
+                    })}
+                    {labelTicks}
+                </svg>
             )}
             {averageIntervalPace && (
                 <IntervalPaceContainer>

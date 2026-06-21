@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import {
-    MarkSeries,
-    HexbinSeries,
-    LineSeries,
-    Hint,
-    VerticalBarSeries,
-} from 'react-vis';
-import 'react-vis/dist/style.css';
+import { Bar, BarStack, LinePath, Circle } from '@visx/shape';
+import { scaleBand, scaleLinear, scaleOrdinal } from '@visx/scale';
+import { GridRows } from '@visx/grid';
+import { AxisBottom, AxisLeft } from '@visx/axis';
+import { Group } from '@visx/group';
+import { localPoint } from '@visx/event';
+import { useParentSize } from '@visx/responsive';
+import { useTooltip, useTooltipInPortal, defaultStyles } from '@visx/tooltip';
 import { NavLink } from 'react-router-dom';
-import Chart, {
-    AxisTypes,
-    ChartData,
-    DynamicChartData,
-    NumericChartData,
-    getChartData,
-} from '../charts/Chart';
 import {
     Box,
     SubHeader,
@@ -88,6 +81,11 @@ interface Distance {
     intervalDistance: number;
 }
 
+interface DistanceWithLabel extends Distance {
+    intervalLabel: string;
+    nonIntervalLabel: string;
+}
+
 interface Pace {
     date: string;
     label: string;
@@ -96,21 +94,543 @@ interface Pace {
     averageLongPace: number;
 }
 
+interface DistanceChartProps {
+    distances: DistanceWithLabel[];
+}
+
+const DistanceChart = ({ distances }: DistanceChartProps) => {
+    const { parentRef, width } = useParentSize({
+        debounceTime: 15,
+        ignoreDimensions: 'height',
+    });
+    const height = Math.min(200, width * 0.66);
+
+    const marginLeft = 35;
+    const marginBottom = 30;
+    const xMax = width;
+    const yMax = height - marginBottom;
+    const xScale = scaleBand<string>({
+        domain: distances.map((d) => d.date),
+        range: [0, xMax - marginLeft],
+        padding: 0.5,
+    });
+    const yScale = scaleLinear<number>({
+        domain: [
+            0,
+            Math.max(
+                ...distances.map(
+                    (d) => d.nonIntervalDistance + d.intervalDistance,
+                ),
+            ),
+        ],
+        range: [yMax, 0],
+    });
+    const colorScale = scaleOrdinal<string, string>({
+        domain: ['intervalDistance', 'nonIntervalDistance'],
+        range: ['#4c8eff', '#bdc9ce'],
+    });
+
+    const {
+        showTooltip,
+        hideTooltip,
+        tooltipOpen,
+        tooltipData,
+        tooltipLeft = 0,
+        tooltipTop = 0,
+    } = useTooltip<String>({
+        tooltipOpen: false,
+        tooltipLeft: width / 3,
+        tooltipTop: height / 3,
+        tooltipData: '',
+    });
+    const { containerRef, TooltipInPortal } = useTooltipInPortal({
+        scroll: true,
+        detectBounds: true,
+    });
+
+    return (
+        <div style={{ width: '100%', position: 'relative' }} ref={parentRef}>
+            <div ref={containerRef}>
+                <svg
+                    style={{ width: width + 'px', height: height + 'px' }}
+                    viewBox={`0 0 ${xMax} ${yMax}`}
+                >
+                    <Group left={marginLeft}>
+                        <GridRows
+                            scale={yScale}
+                            width={xMax}
+                            height={yMax}
+                            stroke="#eee"
+                            numTicks={5}
+                        />
+                        <AxisBottom
+                            top={yMax}
+                            scale={xScale}
+                            numTicks={10}
+                            stroke="#eee"
+                            strokeWidth="1.6px"
+                            hideTicks
+                            tickFormat={() => ''}
+                        />
+                        <AxisLeft
+                            scale={yScale}
+                            numTicks={5}
+                            stroke="#ddd"
+                            strokeWidth="1.6px"
+                            hideTicks
+                            tickLabelProps={{
+                                fontSize: '12px',
+                                fontFamily: 'inherit',
+                                fill: '#666',
+                            }}
+                        />
+                        <BarStack
+                            data={distances}
+                            keys={['intervalDistance', 'nonIntervalDistance']}
+                            fill="#4c8eff"
+                            stroke="0"
+                            xScale={xScale}
+                            yScale={yScale}
+                            x={(d: DistanceWithLabel) => d.date}
+                            color={colorScale}
+                        >
+                            {(barStacks) =>
+                                barStacks.map((barStack) =>
+                                    barStack.bars.map((bar) => (
+                                        <rect
+                                            key={`bar-stack-${barStack.index}-${bar.index}`}
+                                            x={bar.x}
+                                            y={bar.y}
+                                            height={bar.height}
+                                            width={bar.width}
+                                            fill={bar.color}
+                                            onMouseMove={(event) => {
+                                                const coords = localPoint(
+                                                    event,
+                                                ) || { x: 0, y: 0 };
+                                                showTooltip({
+                                                    tooltipData:
+                                                        barStack.index === 0
+                                                            ? bar.bar.data
+                                                                  .intervalLabel
+                                                            : bar.bar.data
+                                                                  .nonIntervalLabel,
+                                                    tooltipLeft: coords.x,
+                                                    tooltipTop: coords.y,
+                                                });
+                                            }}
+                                            onMouseLeave={hideTooltip}
+                                        />
+                                    )),
+                                )
+                            }
+                        </BarStack>
+                    </Group>
+                </svg>
+                {tooltipOpen && tooltipData && (
+                    <TooltipInPortal
+                        top={tooltipTop}
+                        left={tooltipLeft}
+                        style={{
+                            ...defaultStyles,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            color: 'white',
+                            fontFamily: 'inherit',
+                            fontSize: '12px',
+                            whiteSpaceCollapse: 'preserve',
+                        }}
+                    >
+                        <div>{tooltipData}</div>
+                    </TooltipInPortal>
+                )}
+            </div>
+        </div>
+    );
+};
+
+interface PaceData {
+    date: string;
+    pace: number;
+    label: string;
+}
+
+interface PaceChartProps {
+    shortPaces: PaceData[];
+    mediumPaces: PaceData[];
+    longPaces: PaceData[];
+    filters: Filters;
+}
+
+const PaceChart = ({
+    shortPaces,
+    mediumPaces,
+    longPaces,
+    filters,
+}: PaceChartProps) => {
+    const { parentRef, width } = useParentSize({
+        debounceTime: 15,
+        ignoreDimensions: 'height',
+    });
+    const height = Math.min(200, width * 0.66);
+
+    const marginLeft = 35;
+    const marginBottom = 30;
+    const xMax = width;
+    const yMax = height - marginBottom;
+    const xScale = scaleBand<string>({
+        domain: shortPaces.map((d) => d.date),
+        range: [0, xMax - marginLeft],
+        padding: 0.25,
+    });
+    const yScale = scaleLinear<number>({
+        domain: [3, 6],
+        range: [yMax, 0],
+    });
+
+    const {
+        showTooltip,
+        hideTooltip,
+        tooltipOpen,
+        tooltipData,
+        tooltipLeft = 0,
+        tooltipTop = 0,
+    } = useTooltip<String>({
+        tooltipOpen: false,
+        tooltipLeft: width / 3,
+        tooltipTop: height / 3,
+        tooltipData: '',
+    });
+    const { containerRef, TooltipInPortal } = useTooltipInPortal({
+        scroll: true,
+        detectBounds: true,
+    });
+
+    return (
+        <div style={{ width: '100%', position: 'relative' }} ref={parentRef}>
+            <div ref={containerRef}>
+                <svg
+                    style={{ width: width + 'px', height: height + 'px' }}
+                    viewBox={`0 0 ${xMax} ${yMax}`}
+                >
+                    <Group left={marginLeft}>
+                        <GridRows
+                            scale={yScale}
+                            width={xMax}
+                            height={yMax}
+                            stroke="#eee"
+                            numTicks={5}
+                        />
+                        <AxisBottom
+                            top={yMax}
+                            scale={xScale}
+                            numTicks={10}
+                            stroke="#eee"
+                            strokeWidth="1.6px"
+                            hideTicks
+                            tickFormat={() => ''}
+                        />
+                        <AxisLeft
+                            scale={yScale}
+                            numTicks={5}
+                            stroke="#ddd"
+                            strokeWidth="1.6px"
+                            hideTicks
+                            tickLabelProps={{
+                                fontSize: '12px',
+                                fontFamily: 'inherit',
+                                fill: '#666',
+                            }}
+                            tickFormat={(distancePerSecond: {
+                                valueOf(): number;
+                            }) =>
+                                getPaceString(
+                                    distancePerSecond.valueOf(),
+                                    (filters.get('type') ?? 'All') as string,
+                                )
+                            }
+                        />
+                        {shortPaces.map((pace) => (
+                            <Bar
+                                key={`shortPace-${pace.date}`}
+                                fill="#d4ce73"
+                                stroke="0"
+                                x={xScale(pace.date)}
+                                y={yScale(pace.pace)}
+                                width={xScale.bandwidth() / 3}
+                                height={yMax - yScale(pace.pace)}
+                                onMouseMove={(event) => {
+                                    const coords = localPoint(event) || {
+                                        x: 0,
+                                        y: 0,
+                                    };
+                                    showTooltip({
+                                        tooltipData: pace.label,
+                                        tooltipLeft: coords.x,
+                                        tooltipTop: coords.y,
+                                    });
+                                }}
+                                onMouseLeave={hideTooltip}
+                            />
+                        ))}
+                        {mediumPaces.map((pace) => (
+                            <Bar
+                                key={`mediumPace-${pace.date}`}
+                                fill="#448944"
+                                stroke="0"
+                                x={
+                                    (xScale(pace.date) ?? 0) +
+                                    xScale.bandwidth() / 3
+                                }
+                                y={yScale(pace.pace)}
+                                width={xScale.bandwidth() / 3}
+                                height={yMax - yScale(pace.pace)}
+                                onMouseMove={(event) => {
+                                    const coords = localPoint(event) || {
+                                        x: 0,
+                                        y: 0,
+                                    };
+                                    showTooltip({
+                                        tooltipData: pace.label,
+                                        tooltipLeft: coords.x,
+                                        tooltipTop: coords.y,
+                                    });
+                                }}
+                                onMouseLeave={hideTooltip}
+                            />
+                        ))}
+                        {longPaces.map((pace) => (
+                            <Bar
+                                key={`longPace-${pace.date}`}
+                                fill="#afcbfb"
+                                stroke="0"
+                                x={
+                                    (xScale(pace.date) ?? 0) +
+                                    (xScale.bandwidth() * 2) / 3
+                                }
+                                y={yScale(pace.pace)}
+                                width={xScale.bandwidth() / 3}
+                                height={yMax - yScale(pace.pace)}
+                                onMouseMove={(event) => {
+                                    const coords = localPoint(event) || {
+                                        x: 0,
+                                        y: 0,
+                                    };
+                                    showTooltip({
+                                        tooltipData: pace.label,
+                                        tooltipLeft: coords.x,
+                                        tooltipTop: coords.y,
+                                    });
+                                }}
+                                onMouseLeave={hideTooltip}
+                            />
+                        ))}
+                    </Group>
+                </svg>
+                {tooltipOpen && tooltipData && (
+                    <TooltipInPortal
+                        top={tooltipTop}
+                        left={tooltipLeft}
+                        style={{
+                            ...defaultStyles,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            color: 'white',
+                            fontFamily: 'inherit',
+                            fontSize: '12px',
+                            whiteSpaceCollapse: 'preserve',
+                        }}
+                    >
+                        <div>{tooltipData}</div>
+                    </TooltipInPortal>
+                )}
+            </div>
+        </div>
+    );
+};
+
+interface LactateData {
+    date: number;
+    lactate: number;
+}
+
+interface LactateWithLabelData extends LactateData {
+    label: string;
+}
+
+interface LactateChartProps {
+    lactate: LactateWithLabelData[];
+    lactateAll: LactateData[];
+}
+
+const LactateChart = ({ lactate, lactateAll }: LactateChartProps) => {
+    const { parentRef, width } = useParentSize({
+        debounceTime: 15,
+        ignoreDimensions: 'height',
+    });
+    const height = Math.min(200, width * 0.66);
+
+    const marginLeft = 35;
+    const marginBottom = 70;
+    const xMax = width;
+    const yMax = height - marginBottom;
+    const xs = lactate.map((d) => d.date);
+    const xScale = scaleLinear<number>({
+        domain: [Math.min(...xs), Math.max(...xs)],
+        range: [0, xMax - marginLeft],
+    });
+    const yScale = scaleLinear<number>({
+        domain: [0, 5],
+        range: [yMax, 0],
+    });
+
+    const {
+        showTooltip,
+        hideTooltip,
+        tooltipOpen,
+        tooltipData,
+        tooltipLeft = 0,
+        tooltipTop = 0,
+    } = useTooltip<String>({
+        tooltipOpen: false,
+        tooltipLeft: width / 3,
+        tooltipTop: height / 3,
+        tooltipData: 'Move me with your mouse or finger',
+    });
+    const { containerRef, TooltipInPortal } = useTooltipInPortal({
+        scroll: true,
+        detectBounds: true,
+    });
+
+    return (
+        <div style={{ width: '100%', position: 'relative' }} ref={parentRef}>
+            <div ref={containerRef}>
+                <svg
+                    style={{ width: width + 'px', height: height + 'px' }}
+                    viewBox={`0 0 ${xMax} ${yMax}`}
+                >
+                    <Group left={marginLeft}>
+                        <GridRows
+                            scale={yScale}
+                            width={xMax}
+                            height={yMax}
+                            stroke="#eee"
+                            numTicks={5}
+                        />
+                        <AxisBottom
+                            top={yMax}
+                            scale={xScale}
+                            numTicks={10}
+                            stroke="#ddd"
+                            strokeWidth="1.6px"
+                            tickFormat={(x: { valueOf(): number }) =>
+                                new Date(x.valueOf()).toLocaleDateString(
+                                    'en-US',
+                                    {
+                                        month: 'short',
+                                        year: 'numeric',
+                                    },
+                                )
+                            }
+                            tickLabelProps={{
+                                fontSize: '12px',
+                                fontFamily: 'inherit',
+                                fill: '#666',
+                                angle: 30,
+                                dy: 5,
+                            }}
+                            hideTicks
+                        />
+                        <AxisLeft
+                            scale={yScale}
+                            numTicks={5}
+                            stroke="#ddd"
+                            tickStroke="#eee"
+                            tickLength={7}
+                            strokeWidth="1.6px"
+                            tickLabelProps={{
+                                fontSize: '12px',
+                                fontFamily: 'inherit',
+                                fill: '#666',
+                            }}
+                            tickFormat={(x: { valueOf(): number }) =>
+                                x.valueOf().toFixed(0)
+                            }
+                        />
+                        <LinePath
+                            data={lactate}
+                            x={(d) => xScale(d.date) ?? 0}
+                            y={(d) => yScale(d.lactate) ?? 0}
+                            stroke="#2d76d8"
+                            style={{
+                                shapeRendering: 'geometricPrecision',
+                                strokeWidth: '2px',
+                            }}
+                        />
+                        {lactateAll.map((d, index) => (
+                            <Circle
+                                key={`lactate-all-point-${index}`}
+                                className="dot"
+                                cx={xScale(d.date)}
+                                cy={yScale(Math.min(d.lactate, 5))}
+                                r={3}
+                                opacity={0.2}
+                                fill="#333"
+                            />
+                        ))}
+                        {lactate.map((d, index) => (
+                            <Circle
+                                key={`lactate-point-${index}`}
+                                className="dot"
+                                cx={xScale(d.date)}
+                                cy={yScale(d.lactate)}
+                                r={5}
+                                fill="#2d76d8"
+                                onMouseMove={(event) => {
+                                    const coords = localPoint(event) || {
+                                        x: 0,
+                                        y: 0,
+                                    };
+                                    showTooltip({
+                                        tooltipData: d.label,
+                                        tooltipLeft: coords.x,
+                                        tooltipTop: coords.y,
+                                    });
+                                }}
+                                onMouseLeave={hideTooltip}
+                            />
+                        ))}
+                    </Group>
+                </svg>
+                {tooltipOpen && tooltipData && (
+                    <TooltipInPortal
+                        top={tooltipTop}
+                        left={tooltipLeft}
+                        style={{
+                            ...defaultStyles,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            color: 'white',
+                            fontFamily: 'inherit',
+                            fontSize: '12px',
+                            whiteSpaceCollapse: 'preserve',
+                        }}
+                    >
+                        <div>{tooltipData}</div>
+                    </TooltipInPortal>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const IntervalsPage: React.FC = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityMonth[]>();
-    const [lactate, setLactate] = useState<ChartData[]>();
-    const [lactateAll, setLactateAll] = useState<ChartData[]>();
-    const [hint, setHint] = useState<{
-        value: DynamicChartData;
-        owner: string;
-    } | null>();
-    const [totalDistances, setTotalDistances] = useState<ChartData[]>();
-    const [intervalDistances, setIntervalDistances] = useState<ChartData[]>();
-    const [shortPaces, setShortPaces] = useState<ChartData[]>();
-    const [mediumPaces, setMediumPaces] = useState<ChartData[]>();
-    const [longPaces, setLongPaces] = useState<ChartData[]>();
+    const [lactate, setLactate] = useState<LactateWithLabelData[]>();
+    const [lactateAll, setLactateAll] = useState<LactateData[]>();
+    const [distances, setDistances] = useState<DistanceWithLabel[]>();
+    const [shortPaces, setShortPaces] = useState<PaceData[]>();
+    const [mediumPaces, setMediumPaces] = useState<PaceData[]>();
+    const [longPaces, setLongPaces] = useState<PaceData[]>();
 
     useEffect(() => {
         if (filters === undefined) {
@@ -125,45 +645,35 @@ const IntervalsPage: React.FC = () => {
                 setActivities(data.intervals);
 
                 setLactate(
-                    getChartData(
-                        data.measurements,
-                        (item) => new Date(item.date).getTime(),
-                        (item) => item.lactate,
-                        (item) =>
-                            `${new Date(item.date)
-                                .toUTCString()
-                                .substr(8, 8)}: ${item.lactate.toFixed(1)}`,
-                    ),
+                    data.measurements.map((item) => ({
+                        date: new Date(item.date).getTime(),
+                        lactate: item.lactate,
+                        label: `${new Date(item.date)
+                            .toUTCString()
+                            .substr(8, 8)}: ${item.lactate.toFixed(1)}`,
+                    })),
                 );
 
                 setLactateAll(
-                    getChartData(
-                        data.allMeasurements,
-                        (item) => new Date(item.date).getTime(),
-                        (item) => item.lactate,
-                    ),
+                    data.allMeasurements.map((item) => ({
+                        date: new Date(item.date).getTime(),
+                        lactate: item.lactate,
+                    })),
                 );
 
-                setTotalDistances(
-                    getChartData(
-                        data.distances,
-                        (item) => item.date,
-                        (item) => item.nonIntervalDistance,
-                        (item) =>
-                            `${item.date}\r\n- Total: ${Math.round(
+                setDistances(
+                    data.distances
+                        .map((item) => ({
+                            date: item.date,
+                            nonIntervalDistance: item.nonIntervalDistance,
+                            intervalDistance: item.intervalDistance,
+                            nonIntervalLabel: `${
+                                item.date
+                            }\r\n- Total: ${Math.round(
                                 item.nonIntervalDistance +
                                     item.intervalDistance,
                             )} km`,
-                    ).reverse(),
-                );
-
-                setIntervalDistances(
-                    getChartData(
-                        data.distances,
-                        (item) => item.date,
-                        (item) => item.intervalDistance,
-                        (item) =>
-                            `${item.date}\r\n- Intervals: ${
+                            intervalLabel: `${item.date}\r\n- Intervals: ${
                                 item.intervalDistance
                             } km (${Math.round(
                                 (100 /
@@ -171,34 +681,38 @@ const IntervalsPage: React.FC = () => {
                                         item.intervalDistance)) *
                                     item.intervalDistance,
                             )} %)`,
-                    ).reverse(),
+                        }))
+                        .reverse(),
                 );
 
                 setShortPaces(
-                    getChartData(
-                        data.paces,
-                        (item) => item.date,
-                        (item) => item.averageShortPace,
-                        (item) => item.label,
-                    ).reverse(),
+                    data.paces
+                        .map((item) => ({
+                            date: item.date,
+                            pace: item.averageShortPace,
+                            label: item.label,
+                        }))
+                        .reverse(),
                 );
 
                 setMediumPaces(
-                    getChartData(
-                        data.paces,
-                        (item) => item.date,
-                        (item) => item.averageMediumPace,
-                        (item) => item.label,
-                    ).reverse(),
+                    data.paces
+                        .map((item) => ({
+                            date: item.date,
+                            pace: item.averageMediumPace,
+                            label: item.label,
+                        }))
+                        .reverse(),
                 );
 
                 setLongPaces(
-                    getChartData(
-                        data.paces,
-                        (item) => item.date,
-                        (item) => item.averageLongPace,
-                        (item) => item.label,
-                    ).reverse(),
+                    data.paces
+                        .map((item) => ({
+                            date: item.date,
+                            pace: item.averageLongPace,
+                            label: item.label,
+                        }))
+                        .reverse(),
                 );
 
                 setLoadingStatus(LoadingStatus.None);
@@ -223,202 +737,32 @@ const IntervalsPage: React.FC = () => {
                     >
                         <Box>
                             <SubHeader>Distance</SubHeader>
-                            {totalDistances && totalDistances.length > 0 && (
-                                <Chart stack xType="ordinal">
-                                    <VerticalBarSeries
-                                        barWidth={0.5}
-                                        data={intervalDistances}
-                                        fill="#4c8eff"
-                                        stroke="0"
-                                        onValueMouseOver={(value) =>
-                                            setHint({
-                                                value,
-                                                owner: 'distance',
-                                            })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                        onValueClick={(value) => {
-                                            window.location.hash =
-                                                value.x.toString();
-                                        }}
-                                    />
-                                    <VerticalBarSeries
-                                        barWidth={0.5}
-                                        data={totalDistances}
-                                        fill="#bdc9ce"
-                                        stroke="0"
-                                        onValueMouseOver={(value) =>
-                                            setHint({
-                                                value,
-                                                owner: 'distance',
-                                            })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                        onValueClick={(value) => {
-                                            window.location.hash =
-                                                value.x.toString();
-                                        }}
-                                    />
-                                    {hint?.value.label != null &&
-                                        hint?.owner === 'distance' && (
-                                            <Hint value={hint.value}>
-                                                <div
-                                                    style={{
-                                                        background: 'black',
-                                                        padding: '3px 5px',
-                                                        color: 'white',
-                                                        borderRadius: '5px',
-                                                        fontSize: '12px',
-                                                        whiteSpace: 'pre-line',
-                                                    }}
-                                                >
-                                                    {hint.value.label}
-                                                </div>
-                                            </Hint>
-                                        )}
-                                </Chart>
+                            {distances && distances.length > 0 && (
+                                <DistanceChart distances={distances} />
                             )}
                         </Box>
                         <Box>
                             <SubHeader>Pace</SubHeader>
-                            {shortPaces && filters && shortPaces.length > 0 && (
-                                // y-axis will show min/500m if showing only rowing activities, and min/km
-                                // otherwise (including if filter is set to “all”, no matter what kinds of
-                                // activities are actually visible).
-                                <Chart
-                                    xType="ordinal"
-                                    yDomain={[3, 6]}
-                                    yTickFormat={(distancePerSecond: number) =>
-                                        getPaceString(
-                                            distancePerSecond,
-                                            (filters.get('type') ??
-                                                'All') as string,
-                                        )
-                                    }
-                                >
-                                    <VerticalBarSeries
-                                        getY={(d) => (d.y < 3 ? 3 : d.y)}
-                                        barWidth={0.6}
-                                        data={shortPaces}
-                                        fill="#d4ce73"
-                                        stroke="0"
-                                        onValueMouseOver={(value) =>
-                                            setHint({ value, owner: 'pace' })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                        onValueClick={(value) => {
-                                            window.location.hash =
-                                                value.x.toString();
-                                        }}
+                            {shortPaces &&
+                                mediumPaces &&
+                                longPaces &&
+                                filters &&
+                                shortPaces.length > 0 && (
+                                    <PaceChart
+                                        shortPaces={shortPaces}
+                                        mediumPaces={mediumPaces}
+                                        longPaces={longPaces}
+                                        filters={filters}
                                     />
-                                    <VerticalBarSeries
-                                        getY={(d) => (d.y < 3 ? 3 : d.y)}
-                                        barWidth={0.9}
-                                        data={mediumPaces}
-                                        fill="#448944"
-                                        stroke="0"
-                                        onValueMouseOver={(value) =>
-                                            setHint({ value, owner: 'pace' })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                        onValueClick={(value) => {
-                                            window.location.hash =
-                                                value.x.toString();
-                                        }}
-                                    />
-                                    <VerticalBarSeries
-                                        getY={(d) => (d.y < 3 ? 3 : d.y)}
-                                        barWidth={0.55}
-                                        data={longPaces}
-                                        fill="#afcbfb"
-                                        stroke="0"
-                                        onValueMouseOver={(value) =>
-                                            setHint({ value, owner: 'pace' })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                        onValueClick={(value) => {
-                                            window.location.hash =
-                                                value.x.toString();
-                                        }}
-                                    />
-                                    {hint?.value.label != null &&
-                                        hint?.owner === 'pace' && (
-                                            <Hint value={hint.value}>
-                                                <div
-                                                    style={{
-                                                        background: 'black',
-                                                        padding: '3px 5px',
-                                                        color: 'white',
-                                                        borderRadius: '5px',
-                                                        fontSize: '12px',
-                                                        whiteSpace: 'pre-line',
-                                                    }}
-                                                >
-                                                    {hint.value.label}
-                                                </div>
-                                            </Hint>
-                                        )}
-                                </Chart>
-                            )}
+                                )}
                         </Box>
-                        {lactate && lactate.length > 0 && (
+                        {lactate && lactateAll && lactate.length > 0 && (
                             <Box>
                                 <SubHeader>Lactate</SubHeader>
-                                <Chart
-                                    xAxisType={AxisTypes.Date}
-                                    yDomain={[0, 5]}
-                                >
-                                    <HexbinSeries
-                                        sizeHexagonsWithCount
-                                        data={lactateAll as NumericChartData[]}
-                                        style={{
-                                            opacity: 0.5,
-                                            fill: '#ccc',
-                                            shapeRendering:
-                                                'geometricPrecision',
-                                        }}
-                                        stroke="gray"
-                                    />
-                                    <LineSeries
-                                        data={lactate as NumericChartData[]}
-                                        stroke="#2d76d8"
-                                        style={{
-                                            shapeRendering:
-                                                'geometricPrecision',
-                                        }}
-                                    />
-                                    <MarkSeries
-                                        data={lactate}
-                                        fill="#2d76d8"
-                                        stroke="transparent"
-                                        sizeBaseValue={50}
-                                        style={{
-                                            shapeRendering:
-                                                'geometricPrecision',
-                                        }}
-                                        onValueMouseOver={(value) =>
-                                            setHint({ value, owner: 'lactate' })
-                                        }
-                                        onValueMouseOut={() => setHint(null)}
-                                    />
-                                    {hint?.value.label != null &&
-                                        hint?.owner === 'lactate' && (
-                                            <Hint value={hint.value}>
-                                                <div
-                                                    style={{
-                                                        background: 'black',
-                                                        padding: '3px 5px',
-                                                        color: 'white',
-                                                        borderRadius: '5px',
-                                                        fontSize: '12px',
-                                                        whiteSpace: 'pre-line',
-                                                    }}
-                                                >
-                                                    {hint.value.label}
-                                                </div>
-                                            </Hint>
-                                        )}
-                                </Chart>
+                                <LactateChart
+                                    lactate={lactate}
+                                    lactateAll={lactateAll}
+                                />
                             </Box>
                         )}
                     </Grid>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DateRangeInput, START_DATE, END_DATE } from '@datepicker-react/styled';
 import styled, { ThemeProvider } from 'styled-components';
 
@@ -15,8 +15,11 @@ interface DateRangePickerProps {
     onChange: (startDate: Date, endDate: Date) => void;
 }
 
-const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
-    const { startDate, endDate, onChange } = props;
+function DateRangePicker({
+    startDate,
+    endDate,
+    onChange,
+}: DateRangePickerProps) {
     const [startDateFilter, setStartDateFilter] = useState<Date | null>(
         startDate,
     );
@@ -75,6 +78,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
             </DatePickerWrapper>
         </ThemeProvider>
     );
-};
+}
 
 export default DateRangePicker;

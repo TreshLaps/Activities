@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -165,7 +165,7 @@ interface DetailedActivity {
     workoutType?: WorkoutType;
 }
 
-const ActivityDetailsPage: React.FC = () => {
+const ActivityDetailsPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activity, setActivity] = useState<DetailedActivity>();
     const [averageIntervalPace, setAverageIntervalPace] = useState<number>();

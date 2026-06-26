@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import DateRangePicker from './DateRangePicker';
 import {
     StackContainer,
@@ -66,9 +66,11 @@ interface Estimates {
     maxPace: string;
 }
 
-const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
-    const { isLoading, onChange, disableDataTypeFilter } = props;
-
+function ActivityFilter({
+    isLoading,
+    onChange,
+    disableDataTypeFilter,
+}: ActivityFilterProps) {
     const query: Record<string, string> = {};
     new URLSearchParams(window.location.search).forEach((value, key) => {
         query[key] = value;
@@ -368,6 +370,6 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
             )}
         </StackContainer>
     );
-};
+}
 
 export default ActivityFilter;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import { FixedWidthTable } from '../utils/Table';
@@ -20,7 +20,7 @@ export interface ProgressResultItem extends ResultItem {
     lactate: ItemValue;
 }
 
-const ProgressPage: React.FC = () => {
+const ProgressPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [progress, setProgress] = useState<ProgressResultItem[]>();

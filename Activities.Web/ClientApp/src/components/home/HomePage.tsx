@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { Grid, SubHeader, TableContainer } from '../../styles/styles';
@@ -60,7 +60,7 @@ interface ActivitySummary {
     summary: Activity[];
 }
 
-const ProgressSummary: React.FC = () => {
+const ProgressSummary = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [progress, setProgress] = useState<ActivitySummary[]>();
 
@@ -101,7 +101,7 @@ const ProgressSummary: React.FC = () => {
     );
 };
 
-const ActivitiesSummary: React.FC = () => {
+const ActivitiesSummary = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activities, setActivities] = useState<Activity[]>();
 
@@ -204,7 +204,7 @@ const ActivitiesSummary: React.FC = () => {
     );
 };
 
-const HomePage: React.FC = () => (
+const HomePage = () => (
     <div style={{ paddingTop: '10px' }}>
         <ActivitiesSummary />
         <ProgressSummary />

@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import ValueTd from './ValueTd';
@@ -76,13 +75,13 @@ export const FeelingEmoji = styled.span`
     }
 `;
 
-const ActivityTr: React.FC<{
+interface ActivityTrProps {
     activity: Activity;
     showLactate: boolean;
     showFeeling: boolean;
-}> = (props) => {
-    const { activity, showLactate, showFeeling } = props;
+}
 
+function ActivityTr({ activity, showLactate, showFeeling }: ActivityTrProps) {
     return (
         <tr
             key={activity.id}
@@ -152,6 +151,6 @@ const ActivityTr: React.FC<{
             )}
         </tr>
     );
-};
+}
 
 export default ActivityTr;

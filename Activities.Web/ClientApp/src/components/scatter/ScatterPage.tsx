@@ -59,7 +59,7 @@ const getAxisSettings = (
 const defaultYAxis: keyof Item = 'averageHeartrate';
 const defaultXAxis: keyof Item = 'pace';
 
-const ScatterPage: React.FC = () => {
+const ScatterPage = () => {
     const query: Record<string, string> = {};
     new URLSearchParams(window.location.search).forEach((value, key) => {
         query[key] = value;

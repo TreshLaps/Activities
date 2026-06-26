@@ -116,7 +116,11 @@ const checkProgress = (
         );
 };
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface LayoutProps {
+    children: React.ReactNode;
+}
+
+function Layout({ children }: LayoutProps) {
     const [user, setUser] = useState<User | null | undefined>(undefined);
     const [syncProgress, setSyncProgress] = useState(0);
 
@@ -252,6 +256,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             )}
         </UserContext.Provider>
     );
-};
+}
 
 export default Layout;

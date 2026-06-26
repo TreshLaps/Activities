@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 
 const LoaderContainer = styled.div`
@@ -38,11 +37,13 @@ export enum LoadingStatus {
     Error,
 }
 
-const Loader: React.FC<{
+interface LoaderProps {
     status: LoadingStatus;
     loadingMessage?: string;
     errorMessage?: string;
-}> = ({ status, loadingMessage, errorMessage }) => {
+}
+
+function Loader({ status, loadingMessage, errorMessage }: LoaderProps) {
     if (status === LoadingStatus.None) {
         return null;
     }
@@ -163,6 +164,6 @@ const Loader: React.FC<{
             )}
         </LoaderContainer>
     );
-};
+}
 
 export default Loader;

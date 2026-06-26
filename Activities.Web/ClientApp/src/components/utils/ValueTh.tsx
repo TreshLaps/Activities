@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { ItemValue, ItemValueType, ResultItem } from '../models/ResultItem';
 import {
@@ -13,14 +12,14 @@ const Th = styled.th`
     white-space: nowrap;
 `;
 
-const ValueTh: React.FC<{
+interface ValueThProps {
     items: ResultItem[];
     valueFunc: (item: ResultItem) => ItemValue;
     activityType?: string | undefined;
     title?: string | undefined;
-}> = (props) => {
-    const { items, valueFunc, activityType, title } = props;
+}
 
+function ValueTh({ items, valueFunc, activityType, title }: ValueThProps) {
     if (items == null || items.length === 0) {
         return <Th>&nbsp;</Th>;
     }
@@ -67,6 +66,6 @@ const ValueTh: React.FC<{
     }
 
     return <Th title={title}>{value}</Th>;
-};
+}
 
 export default ValueTh;

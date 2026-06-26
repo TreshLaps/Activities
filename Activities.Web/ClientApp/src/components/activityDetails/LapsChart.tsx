@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import { Bar, LinePath } from '@visx/shape';
@@ -92,12 +92,19 @@ interface HeartRateChartLap extends BasicChart {
     label: string;
 }
 
-const LapsChart: React.FC<{
+interface LapsChartProps {
     laps: Lap[];
     activityType: string;
     averageIntervalPace: number | undefined;
     last60DaysIntervalPace: number | undefined;
-}> = ({ laps, activityType, averageIntervalPace, last60DaysIntervalPace }) => {
+}
+
+function LapsChart({
+    laps,
+    activityType,
+    averageIntervalPace,
+    last60DaysIntervalPace,
+}: LapsChartProps) {
     const speedPadding = 0.1;
 
     const sortedBySpeed = [...laps]
@@ -324,6 +331,6 @@ const LapsChart: React.FC<{
             )}
         </div>
     );
-};
+}
 
 export default LapsChart;

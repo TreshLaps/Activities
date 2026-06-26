@@ -15,7 +15,7 @@ interface ActivityGroup {
     items: Activity[];
 }
 
-const SimiliarActivitiesPage: React.FC = () => {
+const SimiliarActivitiesPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activities, setActivities] = useState<ActivityGroup[]>();
 

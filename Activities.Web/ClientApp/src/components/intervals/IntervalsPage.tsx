@@ -621,7 +621,7 @@ const LactateChart = ({ lactate, lactateAll }: LactateChartProps) => {
     );
 };
 
-const IntervalsPage: React.FC = () => {
+const IntervalsPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityMonth[]>();

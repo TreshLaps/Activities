@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { Droplet, Pulse, Run } from 'styled-icons/boxicons-regular';
 import foto from '../../assets/markus_ser_viktig_ut.jpg';
@@ -78,7 +77,7 @@ const BoxText = styled.p`
     margin-top: 5px;
 `;
 
-const LandingPage: React.FC<{ children?: React.ReactNode }> = () => (
+const LandingPage = () => (
     <LandingContainer>
         <BannerWrapper>
             <span>“All you need is red cells”</span>

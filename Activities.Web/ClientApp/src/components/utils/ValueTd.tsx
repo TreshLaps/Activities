@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { ItemValue, ItemValueType } from '../models/ResultItem';
 import {
@@ -41,13 +40,13 @@ const ValueContainer = styled.div`
     position: relative;
 `;
 
-const ValueTd: React.FC<{
+interface ValueTdProps {
     item: ItemValue;
     activityType?: string | undefined;
     title?: string | undefined;
-}> = (props) => {
-    const { item, activityType, title } = props;
+}
 
+function ValueTd({ item, activityType, title }: ValueTdProps) {
     if (item == null) {
         return (
             <td>
@@ -102,6 +101,6 @@ const ValueTd: React.FC<{
             </ValueContainer>
         </td>
     );
-};
+}
 
 export default ValueTd;

@@ -18,7 +18,7 @@ interface ActivityGroup {
     items: Activity[];
 }
 
-const ActivitiesPage: React.FC = () => {
+const ActivitiesPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityGroup[]>();

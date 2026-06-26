@@ -125,21 +125,23 @@ function LapsChart({
             .map((lap) => lap.elapsedTime)
             .reduce((l1, l2) => l1 + l2);
         const barPadding = totalMovingTime * 0.005;
-        let currentMovingTime = 0.0;
+
+        const x0s = [0];
+        for (const lap of laps) {
+            x0s.push(x0s[x0s.length - 1] + lap.elapsedTime + barPadding);
+        }
 
         const chartLaps: ChartLap[] = laps.map((lap, lapIndex) => {
             const averageLapSpeed = isPauseLap(lapIndex, laps)
                 ? slowSpeed + minChartHeight
                 : lap.averageSpeed;
-            const x0 = currentMovingTime;
-            const x = x0 + lap.elapsedTime;
-            currentMovingTime = x + barPadding;
+            const x0 = x0s[lapIndex];
 
             return {
                 lap,
                 x0,
                 y0: -1,
-                x,
+                x: x0 + lap.elapsedTime,
                 y: averageLapSpeed,
                 yHeartrate: lap.averageHeartrate,
                 label: isPauseLap(lapIndex, laps)
@@ -172,7 +174,7 @@ function LapsChart({
         return {
             laps: NormalizeChartData(chartLaps),
             heartrateLaps: NormalizeChartData(chartLapsHeartrate, 150, 190),
-            totalMovingTime: currentMovingTime - barPadding,
+            totalMovingTime: x0s[x0s.length - 1] - barPadding,
             barPadding,
         };
     }, [activityType, laps, minChartHeight, slowSpeed]);

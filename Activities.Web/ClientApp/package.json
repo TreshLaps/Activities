@@ -3,7 +3,6 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@datepicker-react/styled": "^2.8.0",
         "@react-spring/web": "^10.1.2",
         "@visx/axis": "^4.0.0",
         "@visx/event": "^4.0.0",

@@ -154,8 +154,15 @@ function ActivityFilter({
                 return;
             }
 
-            items.set('startDate', getUrlDateString(startDateFilter));
-            items.set('endDate', getUrlDateString(endDateFilter));
+            // The backend assumes start > end (!), but we let the user specify any order
+            // and just rewrite in the request.
+            let startDateText = getUrlDateString(startDateFilter);
+            let endDateText = getUrlDateString(endDateFilter);
+            if (endDateText > startDateText) {
+                [startDateText, endDateText] = [endDateText, startDateText];
+            }
+            items.set('startDate', startDateText);
+            items.set('endDate', endDateText);
             items.set('groupKey', groupKeyFilter);
         }
 

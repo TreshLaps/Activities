@@ -137,7 +137,7 @@ const DistanceChart = ({ distances }: DistanceChartProps) => {
         tooltipData,
         tooltipLeft = 0,
         tooltipTop = 0,
-    } = useTooltip<String>({
+    } = useTooltip<string>({
         tooltipOpen: false,
         tooltipLeft: width / 3,
         tooltipTop: height / 3,
@@ -294,7 +294,7 @@ const PaceChart = ({
         tooltipData,
         tooltipLeft = 0,
         tooltipTop = 0,
-    } = useTooltip<String>({
+    } = useTooltip<string>({
         tooltipOpen: false,
         tooltipLeft: width / 3,
         tooltipTop: height / 3,
@@ -489,7 +489,7 @@ const LactateChart = ({ lactate, lactateAll }: LactateChartProps) => {
         tooltipData,
         tooltipLeft = 0,
         tooltipTop = 0,
-    } = useTooltip<String>({
+    } = useTooltip<string>({
         tooltipOpen: false,
         tooltipLeft: width / 3,
         tooltipTop: height / 3,

@@ -322,7 +322,7 @@ const ActivityDetailsPage = () => {
                             >
                                 View similar intervals
                             </Link>
-                            <a
+                            <button
                                 className={pageStyles.actionButton}
                                 onClick={toggleIgnoreIntervals}
                             >
@@ -330,7 +330,7 @@ const ActivityDetailsPage = () => {
                                 {activity.ignoreIntervals
                                     .toString()
                                     .toUpperCase()}
-                            </a>
+                            </button>
                         </>
                     )}
                     {bislettIntervals.length > 0 && (
@@ -352,9 +352,12 @@ const ActivityDetailsPage = () => {
                     >
                         View on Strava
                     </a>
-                    <a className={pageStyles.actionButton} onClick={reimport}>
+                    <button
+                        className={pageStyles.actionButton}
+                        onClick={reimport}
+                    >
                         Reimport
-                    </a>
+                    </button>
                 </div>
             )}
         </>

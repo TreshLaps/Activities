@@ -1,5 +1,5 @@
 import styles from './LandingPage.module.css';
-import { Droplet, Pulse, Run } from 'styled-icons/boxicons-regular';
+import { Droplet, Activity, PersonStanding } from 'lucide-react';
 import foto from '../../assets/markus_ser_viktig_ut.jpg';
 
 const LandingPage = () => (
@@ -10,21 +10,21 @@ const LandingPage = () => (
         </div>
         <div className={styles.contentWrapper}>
             <div className={styles.boxWrapper}>
-                <Pulse />
+                <Activity size={96} />
                 <p className={styles.boxText}>
                     Prinsippet bak vår trening er å bygge aerob kapasitet, som
                     er den viktigste faktoren i langdistanseløping
                 </p>
             </div>
             <div className={styles.boxWrapper}>
-                <Droplet />
+                <Droplet size={96} />
                 <p className={styles.boxText}>
                     Treningen intensitetsstyres med å måle laktat, et direkte
                     mål på anaerob energiforbruk
                 </p>
             </div>
             <div className={styles.boxWrapper}>
-                <Run />
+                <PersonStanding size={96} />
                 <p className={styles.boxText}>
                     Terskelintervaller gir mulighet for et stort volum på
                     relativt høy intensitet, og stimulerer effektivt den aerobe

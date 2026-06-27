@@ -9,7 +9,7 @@ import {
 import { addOrUpdateQueryString } from './Urls';
 import { getUrlDateString } from './Formatters';
 
-export const getUrlWithFilters = (url: string, items: Filters) => {
+export const getUrlWithFilters = (url: string, items: Filters | undefined) => {
     if (items === undefined) {
         return url;
     }
@@ -19,6 +19,18 @@ export const getUrlWithFilters = (url: string, items: Filters) => {
     });
 
     return url;
+};
+
+// Since we send in the entire Filters object to useEffect() in various places,
+// and React compares them by object identity, we need a way to deep-compare them
+// to avoid unneccessary (or even infinite) refreshes. This is a kludge; the right
+// thing to do is probably to destructure the Filter before giving it as an Effect
+// dependency.
+export const filtersChanged = (
+    before: Filters | undefined,
+    after: Filters | undefined,
+) => {
+    return getUrlWithFilters('/', before) !== getUrlWithFilters('/', after);
 };
 
 const defaultType = 'All';

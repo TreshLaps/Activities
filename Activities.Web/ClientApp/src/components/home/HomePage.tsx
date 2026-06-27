@@ -61,16 +61,10 @@ interface ActivitySummary {
 }
 
 const ProgressSummary = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [progress, setProgress] = useState<ActivitySummary[]>();
 
     useEffect(() => {
-        if (progress != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/progress/summary')
             .then((response) => response.json() as Promise<ActivitySummary[]>)
             .then((data) => {
@@ -81,7 +75,7 @@ const ProgressSummary = () => {
                 setProgress([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [progress]);
+    }, []);
 
     return (
         <>
@@ -102,16 +96,10 @@ const ProgressSummary = () => {
 };
 
 const ActivitiesSummary = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [activities, setActivities] = useState<Activity[]>();
 
     useEffect(() => {
-        if (activities != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/activities/summary')
             .then((response) => response.json() as Promise<Activity[]>)
             .then((data) => {
@@ -122,7 +110,7 @@ const ActivitiesSummary = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities]);
+    }, []);
 
     const showLactate =
         (activities &&

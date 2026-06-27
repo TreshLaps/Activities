@@ -20,16 +20,10 @@ interface Activity {
 }
 
 const RacesPage = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [activities, setActivities] = useState<Activity[]>();
 
     useEffect(() => {
-        if (activities != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/races/')
             .then((response) => response.json() as Promise<Activity[]>)
             .then((data) => {
@@ -40,7 +34,7 @@ const RacesPage = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities]);
+    }, []);
 
     return (
         <>

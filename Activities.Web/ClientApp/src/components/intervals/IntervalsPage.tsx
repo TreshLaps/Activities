@@ -30,6 +30,7 @@ import {
     getTimeString,
 } from '../utils/Formatters';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
@@ -632,12 +633,17 @@ const IntervalsPage = () => {
     const [mediumPaces, setMediumPaces] = useState<PaceData[]>();
     const [longPaces, setLongPaces] = useState<PaceData[]>();
 
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
+
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/intervals/', filters))
             .then((response) => response.json() as Promise<IntervalsResponse>)
@@ -725,7 +731,7 @@ const IntervalsPage = () => {
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>

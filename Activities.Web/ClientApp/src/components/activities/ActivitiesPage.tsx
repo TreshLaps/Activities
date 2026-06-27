@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TableContainer } from '../../styles/styles';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
@@ -23,12 +24,17 @@ const ActivitiesPage = () => {
     const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityGroup[]>();
 
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
+
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/activities/', filters))
             .then((response) => {
@@ -73,7 +79,7 @@ const ActivitiesPage = () => {
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>

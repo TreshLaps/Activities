@@ -3,6 +3,7 @@ import { Axis, Grid, GlyphSeries, XYChart } from '@visx/xychart';
 import { ParentSize } from '@visx/responsive';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
@@ -79,12 +80,17 @@ const ScatterPage = () => {
     );
     const [lockAxisFilter] = useState(false);
 
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
+
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/scatter/', filters))
             .then((response) => {
@@ -113,7 +119,7 @@ const ScatterPage = () => {
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && items && (
                 <div>

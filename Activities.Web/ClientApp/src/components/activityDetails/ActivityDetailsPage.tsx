@@ -171,7 +171,9 @@ const ActivityDetailsPage = () => {
     const [averageIntervalPace, setAverageIntervalPace] = useState<number>();
     const [last60DaysIntervalPace, setLast60DaysIntervalPace] =
         useState<number>();
+    const [generation, setGeneration] = useState<number>(0);
     const { id } = useParams<{ id: string | undefined }>();
+    const [prevId, setPrevId] = useState(id);
     const hasIntervals =
         activity?.laps != null &&
         activity.laps.filter((lap) => lap.isInterval).length > 0;
@@ -182,13 +184,12 @@ const ActivityDetailsPage = () => {
                   .filter((lap) => lap.isInterval)
                   .map((lap) => lap.originalDistance ?? lap.distance);
 
+    if (id !== prevId) {
+        setPrevId(id);
+        setLoadingStatus(LoadingStatus.Loading); // The load will happen in useEffect() below.
+    }
+
     useEffect(() => {
-        if (activity !== undefined) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch(`/api/activities/${id}`)
             .then((response) => response.json() as Promise<ActivityResponse>)
             .then((data) => {
@@ -201,29 +202,31 @@ const ActivityDetailsPage = () => {
                 setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activity, id]);
+    }, [id, generation]);
 
     const reimport = () => {
         fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
             .then(() => {
+                setLoadingStatus(LoadingStatus.Loading);
                 setActivity(undefined);
-                setLoadingStatus(LoadingStatus.None);
+                setGeneration(generation + 1);
             })
             .catch(() => {
-                setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
+                setActivity(undefined);
             });
     };
 
     const toggleIgnoreIntervals = () => {
         fetch(`/api/activities/${id}/toggleIgnoreIntervals`, { method: 'POST' })
             .then(() => {
+                setLoadingStatus(LoadingStatus.Loading);
                 setActivity(undefined);
-                setLoadingStatus(LoadingStatus.None);
+                setGeneration(generation + 1);
             })
             .catch(() => {
-                setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
+                setActivity(undefined);
             });
     };
 

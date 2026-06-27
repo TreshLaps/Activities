@@ -21,13 +21,13 @@ const SimiliarActivitiesPage = () => {
 
     const { id } = useParams<{ id: string | undefined }>();
 
+    const [prevId, setPrevId] = useState(id);
+    if (id !== prevId) {
+        setPrevId(id);
+        setLoadingStatus(LoadingStatus.Loading); // The load will happen in useEffect() below.
+    }
+
     useEffect(() => {
-        if (activities !== undefined) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch(`/api/activities/${id}/similar`)
             .then((response) => {
                 if (!response.ok) {
@@ -43,7 +43,7 @@ const SimiliarActivitiesPage = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities, id]);
+    }, [id]);
 
     const showLactate =
         (activities &&

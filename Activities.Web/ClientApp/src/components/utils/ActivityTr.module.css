@@ -1,0 +1,52 @@
+.descriptionText {
+    font-size: 9px;
+    white-space: normal;
+    line-height: 1.1;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.boldNavLink {
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.activityDate {
+    @media (max-width: 768px) {
+        white-space: pre-line;
+        margin-left: 15px;
+        display: block;
+        font-size: 9px;
+        line-height: 1;
+    }
+}
+
+.typeEmoji {
+    display: inline-block;
+    font-size: 17px;
+    width: 30px;
+
+    @media (max-width: 768px) {
+        font-size: 13px;
+        width: 17px;
+        position: absolute;
+        left: 4px;
+        top: calc(50% - 8px);
+    }
+}
+
+.feelingEmoji {
+    display: inline-block;
+    font-size: 17px;
+    width: 30px;
+
+    @media (max-width: 768px) {
+        font-size: 13px;
+        width: 17px;
+        position: absolute;
+        left: 4px;
+        top: calc(50% - 8px);
+    }
+}

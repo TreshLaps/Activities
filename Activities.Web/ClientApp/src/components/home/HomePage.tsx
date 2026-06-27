@@ -1,32 +1,16 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
-import { Grid, SubHeader, TableContainer } from '../../styles/styles';
+import pageStyles from './HomePage.module.css';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { SmallTable, Table } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ValueTd from '../utils/ValueTd';
 import ValueTh from '../utils/ValueTh';
 import { getActivityEmoji } from '../../styles/TypeEmoji';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 
-// const NavButton = styled(NavLink)`
-//   padding: 7px 12px;
-//   background-color: #005dff;
-//   margin-right: 10px;
-//   text-decoration: none;
-//   font-weight: 500;
-//   cursor: pointer;
-//   color: white;
-//   display: inline-block;
-// `;
-
-const PageLink = styled(NavLink)`
-    display: inline-block;
-    margin-bottom: 20px;
-`;
-
 const progressTable = (name: string, items: Activity[]) => (
-    <SmallTable key={name}>
+    <table className={tableStyles.smallTable} key={name}>
         <thead>
             <tr>
                 <th>{getActivityEmoji(name)}</th>
@@ -52,7 +36,7 @@ const progressTable = (name: string, items: Activity[]) => (
                 </tr>
             ))}
         </tbody>
-    </SmallTable>
+    </table>
 );
 
 interface ActivitySummary {
@@ -82,13 +66,20 @@ const ProgressSummary = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && progress && (
                 <>
-                    <SubHeader>Progress overview</SubHeader>
-                    <Grid columns={3}>
+                    <h2 className={styles.subHeader}>Progress overview</h2>
+                    <div
+                        className={styles.grid}
+                        style={
+                            { '--grid-num-columns': 3 } as React.CSSProperties
+                        }
+                    >
                         {progress.map((item) =>
                             progressTable(item.name, item.summary),
                         )}
-                    </Grid>
-                    <PageLink to="/progress">View all progress</PageLink>
+                    </div>
+                    <NavLink className={pageStyles.pageLink} to="/progress">
+                        View all progress
+                    </NavLink>
                 </>
             )}
         </>
@@ -127,10 +118,13 @@ const ActivitiesSummary = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <>
-                    <SubHeader>Latest activities</SubHeader>
+                    <h2 className={styles.subHeader}>Latest activities</h2>
                     <div>
-                        <TableContainer>
-                            <Table style={{ marginBottom: '10px' }}>
+                        <div className={styles.tableContainer}>
+                            <table
+                                className={tableStyles.table}
+                                style={{ marginBottom: '10px' }}
+                            >
                                 <thead>
                                     <tr>
                                         <th colSpan={2}>&nbsp;</th>
@@ -182,10 +176,12 @@ const ActivitiesSummary = () => {
                                         />
                                     ))}
                                 </tbody>
-                            </Table>
-                        </TableContainer>
+                            </table>
+                        </div>
                     </div>
-                    <PageLink to="/activities">View all activities</PageLink>
+                    <NavLink className={pageStyles.pageLink} to="/activities">
+                        View all activities
+                    </NavLink>
                 </>
             )}
         </>

@@ -7,7 +7,7 @@ import ActivityFilter, {
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
-import { Box, Dropdown, StackContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import { getPaceString } from '../utils/Formatters';
 
 interface Item {
@@ -123,8 +123,9 @@ const ScatterPage = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && items && (
                 <div>
-                    <StackContainer>
-                        <Dropdown
+                    <div className={styles.stackContainer}>
+                        <select
+                            className={styles.dropdown}
                             defaultValue={yAxisFilter}
                             onChange={(
                                 v: React.ChangeEvent<HTMLSelectElement>,
@@ -142,8 +143,9 @@ const ScatterPage = () => {
                                 Average heartrate
                             </option>
                             <option value="maxHeartrate">Max heartrate</option>
-                        </Dropdown>
-                        <Dropdown
+                        </select>
+                        <select
+                            className={styles.dropdown}
                             defaultValue={xAxisFilter}
                             onChange={(
                                 v: React.ChangeEvent<HTMLSelectElement>,
@@ -161,9 +163,9 @@ const ScatterPage = () => {
                                 Average heartrate
                             </option>
                             <option value="maxHeartrate">Max heartrate</option>
-                        </Dropdown>
-                    </StackContainer>
-                    <Box style={{ height: '80vh' }}>
+                        </select>
+                    </div>
+                    <div className={styles.box} style={{ height: '80vh' }}>
                         <ParentSize>
                             {({ width, height }) => (
                                 <XYChart
@@ -210,7 +212,7 @@ const ScatterPage = () => {
                                 </XYChart>
                             )}
                         </ParentSize>
-                    </Box>
+                    </div>
                 </div>
             )}
         </div>

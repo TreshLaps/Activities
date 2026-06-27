@@ -8,20 +8,7 @@ import { localPoint } from '@visx/event';
 import { useParentSize } from '@visx/responsive';
 import { useTooltip, useTooltipInPortal, defaultStyles } from '@visx/tooltip';
 import { NavLink } from 'react-router-dom';
-import {
-    Box,
-    SubHeader,
-    Table,
-    LapsTable,
-    Grid,
-    LapFactor,
-    LapLabel,
-    EmptyThead,
-    TableContainer,
-    NoWrapTd,
-    BigScreenTh,
-    BigScreenTd,
-} from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
     AveragePace,
@@ -735,20 +722,25 @@ const IntervalsPage = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>
-                    <Grid
-                        columns={Math.ceil(
-                            (lactate && lactate.length > 0 ? 3 : 2) /
-                                ((lactate?.length ?? 0) > 12 ? 2 : 1),
-                        )}
+                    <div
+                        className={styles.grid}
+                        style={
+                            {
+                                '--grid-num-columns': Math.ceil(
+                                    (lactate && lactate.length > 0 ? 3 : 2) /
+                                        ((lactate?.length ?? 0) > 12 ? 2 : 1),
+                                ),
+                            } as React.CSSProperties
+                        }
                     >
-                        <Box>
-                            <SubHeader>Distance</SubHeader>
+                        <div className={styles.box}>
+                            <h2 className={styles.subHeader}>Distance</h2>
                             {distances && distances.length > 0 && (
                                 <DistanceChart distances={distances} />
                             )}
-                        </Box>
-                        <Box>
-                            <SubHeader>Pace</SubHeader>
+                        </div>
+                        <div className={styles.box}>
+                            <h2 className={styles.subHeader}>Pace</h2>
                             {shortPaces &&
                                 mediumPaces &&
                                 longPaces &&
@@ -761,19 +753,19 @@ const IntervalsPage = () => {
                                         filters={filters}
                                     />
                                 )}
-                        </Box>
+                        </div>
                         {lactate && lactateAll && lactate.length > 0 && (
-                            <Box>
-                                <SubHeader>Lactate</SubHeader>
+                            <div className={styles.box}>
+                                <h2 className={styles.subHeader}>Lactate</h2>
                                 <LactateChart
                                     lactate={lactate}
                                     lactateAll={lactateAll}
                                 />
-                            </Box>
+                            </div>
                         )}
-                    </Grid>
-                    <TableContainer>
-                        <Table>
+                    </div>
+                    <div className={styles.tableContainer}>
+                        <table className={styles.table}>
                             {activities?.map((month) => (
                                 <React.Fragment key={month.date}>
                                     {month.activities.length > 0 && (
@@ -782,19 +774,25 @@ const IntervalsPage = () => {
                                                 <th colSpan={1} id={month.date}>
                                                     {month.date}
                                                 </th>
-                                                <BigScreenTh>Pace</BigScreenTh>
+                                                <th
+                                                    className={
+                                                        styles.bigScreenTh
+                                                    }
+                                                >
+                                                    Pace
+                                                </th>
                                                 <th>Laps</th>
                                             </tr>
                                         </thead>
                                     )}
                                     {month.activities.length === 0 && (
-                                        <EmptyThead>
+                                        <thead className={styles.emptyThead}>
                                             <tr>
                                                 <th id={month.date} colSpan={5}>
                                                     {month.date} (0 activities)
                                                 </th>
                                             </tr>
-                                        </EmptyThead>
+                                        </thead>
                                     )}
                                     <tbody>
                                         {month.activities.map((activity) => (
@@ -833,17 +831,25 @@ const IntervalsPage = () => {
                                                         {activity.description}
                                                     </div>
                                                 </td>
-                                                <BigScreenTd>
+                                                <td
+                                                    className={
+                                                        styles.bigScreenTd
+                                                    }
+                                                >
                                                     {
                                                         activity.interval_AveragePace
                                                     }
-                                                </BigScreenTd>
+                                                </td>
                                                 <td
                                                     style={{
                                                         minWidth: '220px',
                                                     }}
                                                 >
-                                                    <LapsTable>
+                                                    <table
+                                                        className={
+                                                            styles.lapsTable
+                                                        }
+                                                    >
                                                         <thead>
                                                             <tr>
                                                                 <th title="Total distance">
@@ -937,68 +943,112 @@ const IntervalsPage = () => {
                                                                             lap.id
                                                                         }
                                                                     >
-                                                                        <NoWrapTd
+                                                                        <td
+                                                                            className={
+                                                                                styles.noWrapTd
+                                                                            }
                                                                             title={`${getKmString(
                                                                                 lap.distance,
                                                                                 3,
                                                                             )}`}
                                                                         >
-                                                                            <LapLabel>
+                                                                            <span
+                                                                                className={
+                                                                                    styles.lapLabel
+                                                                                }
+                                                                            >
                                                                                 {getKmString(
                                                                                     lap.distance,
                                                                                 )}
-                                                                            </LapLabel>
-                                                                            <LapFactor
+                                                                            </span>
+                                                                            <div
+                                                                                className={
+                                                                                    styles.lapFactor
+                                                                                }
                                                                                 style={{
                                                                                     width: `${
                                                                                         lap.distanceFactor *
                                                                                         100
                                                                                     }%`,
+                                                                                    backgroundColor:
+                                                                                        '#005dff',
                                                                                 }}
-                                                                                color="#005dff"
                                                                             />
-                                                                        </NoWrapTd>
-                                                                        <NoWrapTd title="Pace">
-                                                                            <LapLabel>
+                                                                        </td>
+                                                                        <td
+                                                                            className={
+                                                                                styles.noWrapTd
+                                                                            }
+                                                                            title="Pace"
+                                                                        >
+                                                                            <span
+                                                                                className={
+                                                                                    styles.lapLabel
+                                                                                }
+                                                                            >
                                                                                 {getPaceString(
                                                                                     lap.averageSpeed,
                                                                                     activity.type,
                                                                                 )}
-                                                                            </LapLabel>
-                                                                            <LapFactor
+                                                                            </span>
+                                                                            <div
+                                                                                className={
+                                                                                    styles.lapFactor
+                                                                                }
                                                                                 style={{
                                                                                     width: `${
                                                                                         lap.averageSpeedFactor *
                                                                                         100
                                                                                     }%`,
+                                                                                    backgroundColor:
+                                                                                        '#00a000',
                                                                                 }}
-                                                                                color="#00a000"
                                                                             />
-                                                                        </NoWrapTd>
-                                                                        <NoWrapTd title="Heartrate">
-                                                                            <LapLabel>
+                                                                        </td>
+                                                                        <td
+                                                                            className={
+                                                                                styles.noWrapTd
+                                                                            }
+                                                                            title="Heartrate"
+                                                                        >
+                                                                            <span
+                                                                                className={
+                                                                                    styles.lapLabel
+                                                                                }
+                                                                            >
                                                                                 {
                                                                                     lap.averageHeartrate
                                                                                 }{' '}
                                                                                 bpm
-                                                                            </LapLabel>
-                                                                            <LapFactor
+                                                                            </span>
+                                                                            <div
+                                                                                className={
+                                                                                    styles.lapFactor
+                                                                                }
                                                                                 style={{
                                                                                     width: `${
                                                                                         lap.averageHeartrateFactor *
                                                                                         100
                                                                                     }%`,
+                                                                                    backgroundColor:
+                                                                                        '#ff1700',
                                                                                 }}
-                                                                                color="#ff1700"
                                                                             />
-                                                                        </NoWrapTd>
-                                                                        <NoWrapTd
+                                                                        </td>
+                                                                        <td
+                                                                            className={
+                                                                                styles.noWrapTd
+                                                                            }
                                                                             title="Time"
                                                                             style={{
                                                                                 width: '60px',
                                                                             }}
                                                                         >
-                                                                            <LapLabel>
+                                                                            <span
+                                                                                className={
+                                                                                    styles.lapLabel
+                                                                                }
+                                                                            >
                                                                                 {lap.lactate &&
                                                                                     `(${lap.lactate.toFixed(
                                                                                         1,
@@ -1006,21 +1056,21 @@ const IntervalsPage = () => {
                                                                                 {getTimeString(
                                                                                     lap.elapsedTime,
                                                                                 )}
-                                                                            </LapLabel>
-                                                                        </NoWrapTd>
+                                                                            </span>
+                                                                        </td>
                                                                     </tr>
                                                                 ),
                                                             )}
                                                         </tbody>
-                                                    </LapsTable>
+                                                    </table>
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </React.Fragment>
                             ))}
-                        </Table>
-                    </TableContainer>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

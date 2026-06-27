@@ -1,8 +1,9 @@
-import styled from 'styled-components';
+.emptyThead {
+}
 
-export const EmptyThead = styled.thead``;
-
-export const Table = styled.table`
+.table,
+.fixedWidthTable,
+.smallTable {
     width: 100%;
     border-spacing: 0;
     border-collapse: separate;
@@ -49,7 +50,7 @@ export const Table = styled.table`
         }
     }
 
-    > ${EmptyThead} > tr > th {
+    > .emptyThead > tr > th {
         background: #ddd;
         color: #555;
         padding-top: 5px;
@@ -104,15 +105,15 @@ export const Table = styled.table`
             }
         }
     }
-`;
+}
 
-export const FixedWidthTable = styled(Table)`
+.fixedWidthTable {
     @media (min-width: 1024px) {
         table-layout: fixed;
     }
-`;
+}
 
-export const SmallTable = styled(Table)`
+.smallTable {
     font-size: 11px;
     line-height: 1.3;
     table-layout: auto;
@@ -122,4 +123,4 @@ export const SmallTable = styled(Table)`
             padding: 10px;
         }
     }
-`;
+}

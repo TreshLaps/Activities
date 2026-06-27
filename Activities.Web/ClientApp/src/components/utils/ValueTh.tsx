@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styles from './ValueTh.module.css';
 import { ItemValue, ItemValueType, ResultItem } from '../models/ResultItem';
 import {
     AveragePace,
@@ -7,10 +7,6 @@ import {
     getTimeString,
     round,
 } from './Formatters';
-
-const Th = styled.th`
-    white-space: nowrap;
-`;
 
 interface ValueThProps {
     items: ResultItem[];
@@ -21,7 +17,7 @@ interface ValueThProps {
 
 function ValueTh({ items, valueFunc, activityType, title }: ValueThProps) {
     if (items == null || items.length === 0) {
-        return <Th>&nbsp;</Th>;
+        return <th className={styles.th}>&nbsp;</th>;
     }
 
     const values = items
@@ -29,7 +25,7 @@ function ValueTh({ items, valueFunc, activityType, title }: ValueThProps) {
         .map((item) => valueFunc(item).value);
 
     if (values.length === 0) {
-        return <Th>&nbsp;</Th>;
+        return <th className={styles.th}>&nbsp;</th>;
     }
 
     const { type } = valueFunc(items.filter((item) => valueFunc(item))[0]);
@@ -65,7 +61,11 @@ function ValueTh({ items, valueFunc, activityType, title }: ValueThProps) {
         default:
     }
 
-    return <Th title={title}>{value}</Th>;
+    return (
+        <th className={styles.th} title={title}>
+            {value}
+        </th>
+    );
 }
 
 export default ValueTh;

@@ -1,0 +1,54 @@
+.actionButton {
+    padding: 13px 15px;
+    background-color: #005dff;
+    margin-right: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+    display: inline-block;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.scrollableBox {
+    @media (max-width: 768px) {
+        overflow-x: auto;
+        padding: 0;
+
+        > * {
+            min-width: 700px;
+            padding: 20px;
+        }
+    }
+}
+
+.actionButtonNav {
+    padding: 13px 15px;
+    background-color: #005dff;
+    margin-right: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    color: white;
+    display: inline-block;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.heading {
+    font-size: 40px;
+    font-weight: normal;
+    line-height: 1.2;
+    margin: 0;
+    margin-top: 40px;
+
+    @media (max-width: 768px) {
+        margin-top: 20px;
+        font-size: 30px;
+    }
+}
+
+.description {
+    white-space: pre-line;
+}

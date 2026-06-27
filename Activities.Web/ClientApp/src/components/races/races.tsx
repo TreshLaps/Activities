@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import {
     getDateString,
     getKmString,
@@ -40,8 +40,8 @@ const RacesPage = () => {
         <>
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
-                <TableContainer>
-                    <Table>
+                <div className={styles.tableContainer}>
+                    <table className={styles.table}>
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -63,26 +63,26 @@ const RacesPage = () => {
                                             </NavLink>
                                         </div>
                                     </td>
-                                    <NoWrapTd>
+                                    <td className={styles.noWrapTd}>
                                         {getKmString(activity.distance)}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getPaceString(
                                             activity.averageSpeed,
                                             activity.type,
                                         )}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getTimeString(activity.movingTime)}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getDateString(activity.startDate)}
-                                    </NoWrapTd>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
-                    </Table>
-                </TableContainer>
+                    </table>
+                </div>
             )}
         </>
     );

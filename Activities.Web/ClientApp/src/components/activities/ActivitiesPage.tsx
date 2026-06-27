@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { TableContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, {
     filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
-import { EmptyThead, Table } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 import ValueTh from '../utils/ValueTh';
 
@@ -83,8 +83,8 @@ const ActivitiesPage = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>
-                    <TableContainer>
-                        <Table>
+                    <div className={styles.tableContainer}>
+                        <table className={tableStyles.table}>
                             {activities?.map((group) => (
                                 <React.Fragment key={group.name}>
                                     {group.items.length > 0 && (
@@ -140,7 +140,9 @@ const ActivitiesPage = () => {
                                         </thead>
                                     )}
                                     {group.items.length === 0 && (
-                                        <EmptyThead>
+                                        <thead
+                                            className={tableStyles.emptyThead}
+                                        >
                                             <tr>
                                                 <th
                                                     colSpan={numberOfColumns}
@@ -149,7 +151,7 @@ const ActivitiesPage = () => {
                                                     {group.name}
                                                 </th>
                                             </tr>
-                                        </EmptyThead>
+                                        </thead>
                                     )}
                                     <tbody>
                                         {group.items.map((activity) => (
@@ -163,8 +165,8 @@ const ActivitiesPage = () => {
                                     </tbody>
                                 </React.Fragment>
                             ))}
-                        </Table>
-                    </TableContainer>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

@@ -1,0 +1,19 @@
+.datePickerWrapper {
+    input {
+        border-radius: 3px;
+        border: thin solid #ddd;
+        padding: 10px 15px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 15px;
+        line-height: 1;
+        background: #fff;
+        color: #000;
+        font-weight: 500;
+
+        @media (max-width: 768px) {
+            padding: 8px;
+            font-size: 11px;
+            line-height: 1;
+        }
+    }
+}

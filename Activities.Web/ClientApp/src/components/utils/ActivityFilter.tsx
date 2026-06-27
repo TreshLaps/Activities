@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import DateRangePicker from './DateRangePicker';
-import {
-    StackContainer,
-    Dropdown,
-    Input,
-    WarningLabel,
-} from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import { addOrUpdateQueryString } from './Urls';
 import { getUrlDateString } from './Formatters';
 
@@ -215,8 +210,12 @@ function ActivityFilter({
     ]);
 
     return (
-        <StackContainer style={{ position: 'relative', zIndex: 100 }}>
-            <Dropdown
+        <div
+            className={styles.stackContainer}
+            style={{ position: 'relative', zIndex: 100 }}
+        >
+            <select
+                className={styles.dropdown}
                 disabled={isLoading}
                 defaultValue={typeFilter}
                 onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
@@ -230,8 +229,9 @@ function ActivityFilter({
                 <option value="NordicSki">NordicSki</option>
                 <option value="Swim">Swim</option>
                 <option value="Rowing">Rowing</option>
-            </Dropdown>
-            <Dropdown
+            </select>
+            <select
+                className={styles.dropdown}
                 disabled={isLoading}
                 defaultValue={durationFilter}
                 onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
@@ -244,9 +244,10 @@ function ActivityFilter({
                 <option value="Last3Years">Last 3 years</option>
                 <option value="Year">Single year</option>
                 <option value="Custom">Custom range</option>
-            </Dropdown>
+            </select>
             {durationFilter === 'Year' && (
-                <Dropdown
+                <select
+                    className={styles.dropdown}
                     disabled={isLoading}
                     defaultValue={yearFilter}
                     onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
@@ -261,7 +262,7 @@ function ActivityFilter({
                             </option>
                         );
                     })}
-                </Dropdown>
+                </select>
             )}
             {durationFilter === 'Custom' && (
                 <DateRangePicker
@@ -278,7 +279,8 @@ function ActivityFilter({
                 durationFilter === 'Custom' ||
                 durationFilter === 'LastYear' ||
                 durationFilter === 'Last3Years') && (
-                <Dropdown
+                <select
+                    className={styles.dropdown}
                     disabled={isLoading}
                     defaultValue={groupKeyFilter}
                     onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
@@ -288,11 +290,12 @@ function ActivityFilter({
                     <option value="Week">Week</option>
                     <option value="Month">Month</option>
                     <option value="Quarter">Quarter</option>
-                </Dropdown>
+                </select>
             )}
             {disableDataTypeFilter !== true && (
                 <>
-                    <Dropdown
+                    <select
+                        className={styles.dropdown}
                         disabled={isLoading}
                         defaultValue={dataTypeFilter}
                         onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
@@ -307,10 +310,11 @@ function ActivityFilter({
                         <option value="Activity">Show activity data</option>
                         <option value="Interval">Show interval data</option>
                         <option value="Threshold">Show threshold data</option>
-                    </Dropdown>
+                    </select>
                     {dataTypeFilter === 'Threshold' && (
                         <>
-                            <Input
+                            <input
+                                className={styles.input}
                                 type="number"
                                 style={{ width: '80px', marginRight: '5px' }}
                                 step="0.1"
@@ -334,7 +338,8 @@ function ActivityFilter({
                                     });
                                 }}
                             />
-                            <Input
+                            <input
+                                className={styles.input}
                                 type="number"
                                 style={{ width: '80px' }}
                                 step="0.1"
@@ -361,15 +366,15 @@ function ActivityFilter({
                             {paceFilter.minPace &&
                                 paceFilter.maxPace &&
                                 paceFilter.minPace <= paceFilter.maxPace && (
-                                    <WarningLabel>
+                                    <span className={styles.warningLabel}>
                                         Min/max pace is in wrong order.
-                                    </WarningLabel>
+                                    </span>
                                 )}
                             {paceFilter.medianPace && (
-                                <WarningLabel>
+                                <span className={styles.warningLabel}>
                                     Estimated threshold pace:{' '}
                                     {paceFilter.medianPace}
-                                </WarningLabel>
+                                </span>
                             )}
                             <button
                                 type="button"
@@ -387,7 +392,7 @@ function ActivityFilter({
                     )}
                 </>
             )}
-        </StackContainer>
+        </div>
     );
 }
 

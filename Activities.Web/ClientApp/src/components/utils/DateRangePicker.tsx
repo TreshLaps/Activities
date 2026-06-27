@@ -1,25 +1,5 @@
 import { useEffect, useState } from 'react';
-import styled from 'styled-components';
-
-const DatePickerWrapper = styled.div`
-    input {
-        border-radius: 3px;
-        border: thin solid #ddd;
-        padding: 10px 15px;
-        font-family: 'Roboto', sans-serif;
-        font-size: 15px;
-        line-height: 1;
-        background: #fff;
-        color: #000;
-        font-weight: 500;
-
-        @media (max-width: 768px) {
-            padding: 8px;
-            font-size: 11px;
-            line-height: 1;
-        }
-    }
-`;
+import styles from './DateRangePicker.module.css';
 
 interface DateRangePickerProps {
     startDate: Date | null;
@@ -47,7 +27,7 @@ function DateRangePicker({
     }, [startDateFilter, endDateFilter, onChange]);
 
     return (
-        <DatePickerWrapper>
+        <div className={styles.datePickerWrapper}>
             From:{' '}
             <input
                 type="date"
@@ -64,7 +44,7 @@ function DateRangePicker({
                     setEndDateFilter(new Date(e.target.valueAsNumber));
                 }}
             />
-        </DatePickerWrapper>
+        </div>
     );
 }
 

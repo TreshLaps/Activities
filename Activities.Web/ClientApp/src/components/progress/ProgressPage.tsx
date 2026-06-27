@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { TableContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { FixedWidthTable } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ActivityFilter, {
     filtersChanged,
     getUrlWithFilters,
@@ -66,8 +66,8 @@ const ProgressPage = () => {
             {loadingStatus === LoadingStatus.None &&
                 progress &&
                 progress.length > 0 && (
-                    <TableContainer>
-                        <FixedWidthTable>
+                    <div className={styles.tableContainer}>
+                        <table className={tableStyles.fixedWidthTable}>
                             <thead>
                                 <tr>
                                     <th>&nbsp;</th>
@@ -114,8 +114,8 @@ const ProgressPage = () => {
                                     </tr>
                                 ))}
                             </tbody>
-                        </FixedWidthTable>
-                    </TableContainer>
+                        </table>
+                    </div>
                 )}
         </div>
     );

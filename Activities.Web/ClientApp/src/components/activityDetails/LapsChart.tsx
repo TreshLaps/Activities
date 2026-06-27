@@ -1,15 +1,9 @@
 import { useMemo } from 'react';
-import styled from 'styled-components';
+import styles from './LapsChart.module.css';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
 import { Bar, LinePath } from '@visx/shape';
 import { Text } from '@visx/text';
 import { scaleLinear } from '@visx/scale';
-
-const IntervalPaceContainer = styled.div`
-    margin-top: 20px;
-    font-size: 10px;
-    margin-bottom: -10px;
-`;
 
 export interface Lap {
     averageCadence: number;
@@ -309,7 +303,7 @@ function LapsChart({
                 </svg>
             )}
             {averageIntervalPace && (
-                <IntervalPaceContainer>
+                <div className={styles.intervalPaceContainer}>
                     <span>
                         Average interval pace:{' '}
                         <strong>
@@ -329,7 +323,7 @@ function LapsChart({
                             )}
                         </strong>
                     </span>
-                </IntervalPaceContainer>
+                </div>
             )}
         </div>
     );

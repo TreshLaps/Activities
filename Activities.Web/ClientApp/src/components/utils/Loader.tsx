@@ -1,35 +1,4 @@
-import styled from 'styled-components';
-
-const LoaderContainer = styled.div`
-    height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-
-    svg {
-        width: 100px;
-    }
-
-    animation: fadein 2s;
-
-    @keyframes fadein {
-        0% {
-            opacity: 0;
-        }
-        50% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
-        }
-    }
-`;
-
-const Message = styled.div`
-    text-align: center;
-    margin-top: 20px;
-`;
+import styles from './Loader.module.css';
 
 export enum LoadingStatus {
     None,
@@ -49,7 +18,7 @@ function Loader({ status, loadingMessage, errorMessage }: LoaderProps) {
     }
 
     return (
-        <LoaderContainer>
+        <div className={styles.loaderContainer}>
             {status === LoadingStatus.Loading && (
                 <>
                     <svg
@@ -154,15 +123,17 @@ function Loader({ status, loadingMessage, errorMessage }: LoaderProps) {
                             </rect>
                         </g>
                     </svg>
-                    <Message>{loadingMessage ?? 'Loading items ...'}</Message>
+                    <div className={styles.message}>
+                        {loadingMessage ?? 'Loading items ...'}
+                    </div>
                 </>
             )}
             {status === LoadingStatus.Error && (
-                <Message>
+                <div className={styles.message}>
                     {errorMessage ?? 'Failed to fetch content. Unknown error'}
-                </Message>
+                </div>
             )}
-        </LoaderContainer>
+        </div>
     );
 }
 

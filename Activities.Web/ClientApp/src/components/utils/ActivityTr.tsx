@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import styles from './ActivityTr.module.css';
 import ValueTd from './ValueTd';
 import { ItemValue, ResultItem } from '../models/ResultItem';
 import { getActivityEmoji } from '../../styles/TypeEmoji';
@@ -22,59 +22,6 @@ export interface Activity extends ResultItem {
     feeling: ItemValue;
 }
 
-const DescriptionText = styled.div`
-    font-size: 9px;
-    white-space: normal;
-    line-height: 1.1;
-
-    @media (max-width: 768px) {
-        display: none;
-    }
-`;
-
-const BoldNavLink = styled(NavLink)`
-    font-weight: 500;
-    text-decoration: none;
-`;
-
-const ActivityDate = styled.span`
-    @media (max-width: 768px) {
-        white-space: pre-line;
-        margin-left: 15px;
-        display: block;
-        font-size: 9px;
-        line-height: 1;
-    }
-`;
-
-export const TypeEmoji = styled.span`
-    display: inline-block;
-    font-size: 17px;
-    width: 30px;
-
-    @media (max-width: 768px) {
-        font-size: 13px;
-        width: 17px;
-        position: absolute;
-        left: 4px;
-        top: calc(50% - 8px);
-    }
-`;
-
-export const FeelingEmoji = styled.span`
-    display: inline-block;
-    font-size: 17px;
-    width: 30px;
-
-    @media (max-width: 768px) {
-        font-size: 13px;
-        width: 17px;
-        position: absolute;
-        left: 4px;
-        top: calc(50% - 8px);
-    }
-`;
-
 interface ActivityTrProps {
     activity: Activity;
     showLactate: boolean;
@@ -96,7 +43,8 @@ function ActivityTr({ activity, showLactate, showFeeling }: ActivityTrProps) {
         >
             <td>
                 <div>
-                    <TypeEmoji
+                    <span
+                        className={styles.typeEmoji}
                         title={
                             activity.isBislettInterval
                                 ? 'Bislett'
@@ -107,8 +55,8 @@ function ActivityTr({ activity, showLactate, showFeeling }: ActivityTrProps) {
                             activity.type,
                             activity.isBislettInterval,
                         )}
-                    </TypeEmoji>
-                    <ActivityDate>{activity.date}</ActivityDate>
+                    </span>
+                    <span className={styles.activityDate}>{activity.date}</span>
                 </div>
             </td>
             <td
@@ -118,10 +66,15 @@ function ActivityTr({ activity, showLactate, showFeeling }: ActivityTrProps) {
                     whiteSpace: 'pre-wrap',
                 }}
             >
-                <BoldNavLink to={`/activities/${activity.id}`}>
+                <NavLink
+                    className={styles.boldNavLink}
+                    to={`/activities/${activity.id}`}
+                >
                     {activity.name}
-                </BoldNavLink>
-                <DescriptionText>{activity.description}</DescriptionText>
+                </NavLink>
+                <div className={styles.descriptionText}>
+                    {activity.description}
+                </div>
             </td>
             {activity.laps && <ValueTd item={activity.laps} title="Laps" />}
             <ValueTd item={activity.distance} title="Distance" />
@@ -136,11 +89,12 @@ function ActivityTr({ activity, showLactate, showFeeling }: ActivityTrProps) {
             {showFeeling && activity.feeling && (
                 <td>
                     <div>
-                        <FeelingEmoji
+                        <span
+                            className={styles.feelingEmoji}
                             title={getFeelingTitle(activity.feeling.value)}
                         >
                             {getFeelingEmoji(activity.feeling.value)}
-                        </FeelingEmoji>
+                        </span>
                     </div>
                 </td>
             )}

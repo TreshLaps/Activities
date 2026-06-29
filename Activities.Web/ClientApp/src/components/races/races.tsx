@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { NoWrapTd, Table, TableContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import {
     getDateString,
     getKmString,
@@ -19,17 +19,11 @@ interface Activity {
     averageSpeed: number;
 }
 
-const RacesPage: React.FC = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+const RacesPage = () => {
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [activities, setActivities] = useState<Activity[]>();
 
     useEffect(() => {
-        if (activities != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/races/')
             .then((response) => response.json() as Promise<Activity[]>)
             .then((data) => {
@@ -40,14 +34,14 @@ const RacesPage: React.FC = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities]);
+    }, []);
 
     return (
         <>
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
-                <TableContainer>
-                    <Table>
+                <div className={styles.tableContainer}>
+                    <table className={styles.table}>
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -69,26 +63,26 @@ const RacesPage: React.FC = () => {
                                             </NavLink>
                                         </div>
                                     </td>
-                                    <NoWrapTd>
+                                    <td className={styles.noWrapTd}>
                                         {getKmString(activity.distance)}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getPaceString(
                                             activity.averageSpeed,
-                                            activity.type
+                                            activity.type,
                                         )}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getTimeString(activity.movingTime)}
-                                    </NoWrapTd>
-                                    <NoWrapTd>
+                                    </td>
+                                    <td className={styles.noWrapTd}>
                                         {getDateString(activity.startDate)}
-                                    </NoWrapTd>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
-                    </Table>
-                </TableContainer>
+                    </table>
+                </div>
             )}
         </>
     );

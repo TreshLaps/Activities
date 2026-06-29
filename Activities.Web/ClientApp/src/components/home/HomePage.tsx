@@ -1,32 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
-import { Grid, SubHeader, TableContainer } from '../../styles/styles';
+import pageStyles from './HomePage.module.css';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { SmallTable, Table } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ValueTd from '../utils/ValueTd';
 import ValueTh from '../utils/ValueTh';
 import { getActivityEmoji } from '../../styles/TypeEmoji';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 
-// const NavButton = styled(NavLink)`
-//   padding: 7px 12px;
-//   background-color: #005dff;
-//   margin-right: 10px;
-//   text-decoration: none;
-//   font-weight: 500;
-//   cursor: pointer;
-//   color: white;
-//   display: inline-block;
-// `;
-
-const PageLink = styled(NavLink)`
-    display: inline-block;
-    margin-bottom: 20px;
-`;
-
 const progressTable = (name: string, items: Activity[]) => (
-    <SmallTable key={name}>
+    <table className={tableStyles.smallTable} key={name}>
         <thead>
             <tr>
                 <th>{getActivityEmoji(name)}</th>
@@ -52,7 +36,7 @@ const progressTable = (name: string, items: Activity[]) => (
                 </tr>
             ))}
         </tbody>
-    </SmallTable>
+    </table>
 );
 
 interface ActivitySummary {
@@ -60,17 +44,11 @@ interface ActivitySummary {
     summary: Activity[];
 }
 
-const ProgressSummary: React.FC = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+const ProgressSummary = () => {
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [progress, setProgress] = useState<ActivitySummary[]>();
 
     useEffect(() => {
-        if (progress != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/progress/summary')
             .then((response) => response.json() as Promise<ActivitySummary[]>)
             .then((data) => {
@@ -81,37 +59,38 @@ const ProgressSummary: React.FC = () => {
                 setProgress([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [progress]);
+    }, []);
 
     return (
         <>
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && progress && (
                 <>
-                    <SubHeader>Progress overview</SubHeader>
-                    <Grid columns={3}>
+                    <h2 className={styles.subHeader}>Progress overview</h2>
+                    <div
+                        className={styles.grid}
+                        style={
+                            { '--grid-num-columns': 3 } as React.CSSProperties
+                        }
+                    >
                         {progress.map((item) =>
-                            progressTable(item.name, item.summary)
+                            progressTable(item.name, item.summary),
                         )}
-                    </Grid>
-                    <PageLink to="/progress">View all progress</PageLink>
+                    </div>
+                    <NavLink className={pageStyles.pageLink} to="/progress">
+                        View all progress
+                    </NavLink>
                 </>
             )}
         </>
     );
 };
 
-const ActivitiesSummary: React.FC = () => {
-    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
+const ActivitiesSummary = () => {
+    const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.Loading);
     const [activities, setActivities] = useState<Activity[]>();
 
     useEffect(() => {
-        if (activities != null) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch('/api/activities/summary')
             .then((response) => response.json() as Promise<Activity[]>)
             .then((data) => {
@@ -122,7 +101,7 @@ const ActivitiesSummary: React.FC = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities]);
+    }, []);
 
     const showLactate =
         (activities &&
@@ -139,10 +118,13 @@ const ActivitiesSummary: React.FC = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <>
-                    <SubHeader>Latest activities</SubHeader>
+                    <h2 className={styles.subHeader}>Latest activities</h2>
                     <div>
-                        <TableContainer>
-                            <Table style={{ marginBottom: '10px' }}>
+                        <div className={styles.tableContainer}>
+                            <table
+                                className={tableStyles.table}
+                                style={{ marginBottom: '10px' }}
+                            >
                                 <thead>
                                     <tr>
                                         <th colSpan={2}>&nbsp;</th>
@@ -194,17 +176,19 @@ const ActivitiesSummary: React.FC = () => {
                                         />
                                     ))}
                                 </tbody>
-                            </Table>
-                        </TableContainer>
+                            </table>
+                        </div>
                     </div>
-                    <PageLink to="/activities">View all activities</PageLink>
+                    <NavLink className={pageStyles.pageLink} to="/activities">
+                        View all activities
+                    </NavLink>
                 </>
             )}
         </>
     );
 };
 
-const HomePage: React.FC = () => (
+const HomePage = () => (
     <div style={{ paddingTop: '10px' }}>
         <ActivitiesSummary />
         <ProgressSummary />

@@ -1,5 +1,4 @@
-import React from 'react';
-import styled from 'styled-components';
+import styles from './ValueTd.module.css';
 import { ItemValue, ItemValueType } from '../models/ResultItem';
 import {
     getFeelingEmoji,
@@ -9,49 +8,17 @@ import {
     round,
 } from './Formatters';
 
-const ValueTdLabel = styled.span`
-    z-index: 1;
-    position: relative;
-    display: block;
-    min-width: 60px;
-    padding: 2px 3px 1px 0px;
-
-    @media (max-width: 768px) {
-        min-width: 40px;
-    }
-`;
-
-const ValueTdFactor = styled.div<{ color: string }>`
-    position: absolute;
-    right: 0;
-    top: -4px;
-    bottom: -4px;
-    opacity: 0.4;
-    max-width: 100%;
-    background: ${(props) => props.color};
-    border-radius: 3px;
-`;
-
-const ValueTdFactorBackground = styled(ValueTdFactor)`
-    opacity: 1;
-    width: 100%;
-`;
-
-const ValueContainer = styled.div`
-    position: relative;
-`;
-
-const ValueTd: React.FC<{
+interface ValueTdProps {
     item: ItemValue;
     activityType?: string | undefined;
     title?: string | undefined;
-}> = (props) => {
-    const { item, activityType, title } = props;
+}
 
+function ValueTd({ item, activityType, title }: ValueTdProps) {
     if (item == null) {
         return (
             <td>
-                <ValueTdLabel>-</ValueTdLabel>
+                <span className={styles.valueTdLabel}>-</span>
             </td>
         );
     }
@@ -88,20 +55,28 @@ const ValueTd: React.FC<{
 
     return (
         <td title={title}>
-            <ValueContainer>
-                <ValueTdLabel>{value}</ValueTdLabel>
+            <div className={styles.valueContainer}>
+                <span className={styles.valueTdLabel}>{value}</span>
                 {item.factor > 0 && (
                     <>
-                        <ValueTdFactorBackground color="rgba(240, 240, 240, 0.7)" />
-                        <ValueTdFactor
-                            style={{ width: `${item.factor * 100}%` }}
-                            color={color}
+                        <div
+                            className={styles.valueTdFactorBackground}
+                            style={{
+                                backgroundColor: 'rgba(240, 240, 240, 0.7)',
+                            }}
+                        />
+                        <div
+                            className={styles.valueTdFactor}
+                            style={{
+                                width: `${item.factor * 100}%`,
+                                backgroundColor: color,
+                            }}
                         />
                     </>
                 )}
-            </ValueContainer>
+            </div>
         </td>
     );
-};
+}
 
 export default ValueTd;

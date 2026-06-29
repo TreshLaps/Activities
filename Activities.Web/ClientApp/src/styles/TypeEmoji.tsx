@@ -1,7 +1,4 @@
-export const getActivityEmoji = (
-    type: string,
-    isBislettInterval?: boolean | undefined
-) => {
+export const getActivityEmoji = (type: string, isBislettInterval?: boolean) => {
     switch (type) {
         case 'Run':
             if (isBislettInterval) {

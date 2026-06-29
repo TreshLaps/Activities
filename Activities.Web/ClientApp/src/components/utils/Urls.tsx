@@ -1,7 +1,7 @@
 export const addOrUpdateQueryString = (
     url: string,
     name: string,
-    value: string
+    value: string,
 ) => {
     const separator = url.indexOf('?') === -1 ? '?' : '&';
     const parameter = `${name}=${value}`;

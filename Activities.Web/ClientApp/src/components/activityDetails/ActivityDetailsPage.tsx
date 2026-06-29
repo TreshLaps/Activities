@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
-import styled from 'styled-components';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import pageStyles from './ActivityDetailsPage.module.css';
 import { Link } from 'react-router-dom';
-import { Box, Container } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import {
     getDateString,
@@ -12,61 +12,6 @@ import {
     getTimeString,
 } from '../utils/Formatters';
 import LapsChart, { Lap } from './LapsChart';
-
-const ActionButton = styled.a`
-    padding: 13px 15px;
-    background-color: #005dff;
-    margin-right: 10px;
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    color: white;
-    display: inline-block;
-    margin-bottom: 10px;
-    line-height: 1;
-`;
-
-const ScrollableBox = styled(Box)`
-    @media (max-width: 768px) {
-        overflow-x: auto;
-        padding: 0;
-
-        > * {
-            min-width: 700px;
-            padding: 20px;
-        }
-    }
-`;
-
-const ActionButtonNav = styled(Link)`
-    padding: 13px 15px;
-    background-color: #005dff;
-    margin-right: 10px;
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    color: white;
-    display: inline-block;
-    margin-bottom: 10px;
-    line-height: 1;
-`;
-
-const Heading = styled.h2`
-    font-size: 40px;
-    font-weight: normal;
-    line-height: 1.2;
-    margin: 0;
-    margin-top: 40px;
-
-    @media (max-width: 768px) {
-        margin-top: 20px;
-        font-size: 30px;
-    }
-`;
-
-const Description = styled.p`
-    white-space: pre-line;
-`;
 
 interface Split {
     averageGradeAdjustedSpeed: number;
@@ -137,7 +82,7 @@ interface DetailedActivity {
     maxWatts: number;
     movingTime: number;
     name: string;
-    perceivedExertion?: unknown;
+    perceivedExertion?: number;
     photoCount: number;
     photos: { primary: unknown; count: number };
     prCount: number;
@@ -165,29 +110,31 @@ interface DetailedActivity {
     workoutType?: WorkoutType;
 }
 
-const ActivityDetailsPage: React.FC = () => {
+const ActivityDetailsPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activity, setActivity] = useState<DetailedActivity>();
     const [averageIntervalPace, setAverageIntervalPace] = useState<number>();
-    const [
-        last60DaysIntervalPace,
-        setLast60DaysIntervalPace,
-    ] = useState<number>();
+    const [last60DaysIntervalPace, setLast60DaysIntervalPace] =
+        useState<number>();
+    const [generation, setGeneration] = useState<number>(0);
     const { id } = useParams<{ id: string | undefined }>();
+    const [prevId, setPrevId] = useState(id);
     const hasIntervals =
         activity?.laps != null &&
         activity.laps.filter((lap) => lap.isInterval).length > 0;
     const bislettIntervals =
-        (activity?.laps === null || !activity?.isBislettInterval) ?
-           [] : activity.laps.filter((lap) => lap.isInterval).map((lap) => (lap.originalDistance ?? lap.distance));
+        activity?.laps === null || !activity?.isBislettInterval
+            ? []
+            : activity.laps
+                  .filter((lap) => lap.isInterval)
+                  .map((lap) => lap.originalDistance ?? lap.distance);
+
+    if (id !== prevId) {
+        setPrevId(id);
+        setLoadingStatus(LoadingStatus.Loading); // The load will happen in useEffect() below.
+    }
 
     useEffect(() => {
-        if (activity !== undefined) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch(`/api/activities/${id}`)
             .then((response) => response.json() as Promise<ActivityResponse>)
             .then((data) => {
@@ -200,29 +147,31 @@ const ActivityDetailsPage: React.FC = () => {
                 setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activity, id]);
+    }, [id, generation]);
 
     const reimport = () => {
         fetch(`/api/activities/${id}/reimport`, { method: 'POST' })
             .then(() => {
+                setLoadingStatus(LoadingStatus.Loading);
                 setActivity(undefined);
-                setLoadingStatus(LoadingStatus.None);
+                setGeneration(generation + 1);
             })
             .catch(() => {
-                setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
+                setActivity(undefined);
             });
     };
 
     const toggleIgnoreIntervals = () => {
         fetch(`/api/activities/${id}/toggleIgnoreIntervals`, { method: 'POST' })
             .then(() => {
+                setLoadingStatus(LoadingStatus.Loading);
                 setActivity(undefined);
-                setLoadingStatus(LoadingStatus.None);
+                setGeneration(generation + 1);
             })
             .catch(() => {
-                setActivity(undefined);
                 setLoadingStatus(LoadingStatus.Error);
+                setActivity(undefined);
             });
     };
 
@@ -230,9 +179,11 @@ const ActivityDetailsPage: React.FC = () => {
         <>
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activity && (
-                <Container>
-                    <Heading>{activity.name}</Heading>
-                    <Description>{activity.description}</Description>
+                <div className={styles.container}>
+                    <h2 className={pageStyles.heading}>{activity.name}</h2>
+                    <p className={pageStyles.description}>
+                        {activity.description}
+                    </p>
                     <ul>
                         <li>
                             <strong>Type:</strong> {activity.type}{' '}
@@ -259,12 +210,12 @@ const ActivityDetailsPage: React.FC = () => {
                                 <strong>Pace:</strong>{' '}
                                 {getPaceString(
                                     activity.averageSpeed,
-                                    activity.type
+                                    activity.type,
                                 )}{' '}
                                 (avg),
                                 {getPaceString(
                                     activity.maxSpeed,
-                                    activity.type
+                                    activity.type,
                                 )}{' '}
                                 (max)
                             </li>
@@ -285,14 +236,18 @@ const ActivityDetailsPage: React.FC = () => {
                     </ul>
 
                     {activity.laps && activity.laps.length > 1 && (
-                        <ScrollableBox>
+                        <div
+                            className={
+                                styles.box + ' ' + pageStyles.scrollableBox
+                            }
+                        >
                             <LapsChart
                                 laps={activity.laps}
                                 activityType={activity.type}
                                 averageIntervalPace={averageIntervalPace}
                                 last60DaysIntervalPace={last60DaysIntervalPace}
                             />
-                        </ScrollableBox>
+                        </div>
                     )}
 
                     <h3>Random info</h3>
@@ -361,35 +316,49 @@ const ActivityDetailsPage: React.FC = () => {
                     <h3>Actions</h3>
                     {hasIntervals && (
                         <>
-                            <ActionButtonNav
+                            <Link
+                                className={pageStyles.actionButtonNav}
                                 to={`/activities/${activity.id}/similar`}
                             >
                                 View similar intervals
-                            </ActionButtonNav>
-                            <ActionButton onClick={toggleIgnoreIntervals}>
+                            </Link>
+                            <button
+                                className={pageStyles.actionButton}
+                                onClick={toggleIgnoreIntervals}
+                            >
                                 Ignore in interval summaries:{' '}
                                 {activity.ignoreIntervals
                                     .toString()
                                     .toUpperCase()}
-                            </ActionButton>
+                            </button>
                         </>
                     )}
                     {bislettIntervals.length > 0 && (
-                         <ActionButton
-                             href={`https://info.skvidar.run/intro/kalibrer-footpod#` + bislettIntervals.join(',')}
-                             rel="noopener noreferrer"
-                         >
-                             Calibrate footpod
-                         </ActionButton>
+                        <a
+                            className={pageStyles.actionButton}
+                            href={
+                                `https://info.skvidar.run/intro/kalibrer-footpod#` +
+                                bislettIntervals.join(',')
+                            }
+                            rel="noopener noreferrer"
+                        >
+                            Calibrate footpod
+                        </a>
                     )}
-                    <ActionButton
+                    <a
+                        className={pageStyles.actionButton}
                         href={`https://www.strava.com/activities/${activity.id}`}
                         rel="noopener noreferrer"
                     >
                         View on Strava
-                    </ActionButton>
-                    <ActionButton onClick={reimport}>Reimport</ActionButton>
-                </Container>
+                    </a>
+                    <button
+                        className={pageStyles.actionButton}
+                        onClick={reimport}
+                    >
+                        Reimport
+                    </button>
+                </div>
             )}
         </>
     );

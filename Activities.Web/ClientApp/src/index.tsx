@@ -1,4 +1,4 @@
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 
@@ -7,9 +7,8 @@ const baseUrl = document
     .getAttribute('href') as string;
 const rootElement = document.getElementById('root');
 
-ReactDOM.render(
+createRoot(rootElement!).render(
     <BrowserRouter basename={baseUrl}>
         <App />
     </BrowserRouter>,
-    rootElement
 );

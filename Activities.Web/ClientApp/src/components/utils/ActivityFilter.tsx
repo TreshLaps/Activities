@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import queryString from 'query-string';
+import { useEffect, useState } from 'react';
 import DateRangePicker from './DateRangePicker';
-import {
-    StackContainer,
-    Dropdown,
-    Input,
-    WarningLabel,
-} from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import { addOrUpdateQueryString } from './Urls';
 import { getUrlDateString } from './Formatters';
 
-export const getUrlWithFilters = (url: string, items: Filters) => {
+export const getUrlWithFilters = (url: string, items: Filters | undefined) => {
     if (items === undefined) {
         return url;
     }
@@ -20,6 +14,18 @@ export const getUrlWithFilters = (url: string, items: Filters) => {
     });
 
     return url;
+};
+
+// Since we send in the entire Filters object to useEffect() in various places,
+// and React compares them by object identity, we need a way to deep-compare them
+// to avoid unneccessary (or even infinite) refreshes. This is a kludge; the right
+// thing to do is probably to destructure the Filter before giving it as an Effect
+// dependency.
+export const filtersChanged = (
+    before: Filters | undefined,
+    after: Filters | undefined,
+) => {
+    return getUrlWithFilters('/', before) !== getUrlWithFilters('/', after);
 };
 
 const defaultType = 'All';
@@ -67,9 +73,15 @@ interface Estimates {
     maxPace: string;
 }
 
-const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
-    const { isLoading, onChange, disableDataTypeFilter } = props;
-
+function ActivityFilter({
+    isLoading,
+    onChange,
+    disableDataTypeFilter,
+}: ActivityFilterProps) {
+    const query: Record<string, string> = {};
+    new URLSearchParams(window.location.search).forEach((value, key) => {
+        query[key] = value;
+    });
     const {
         type,
         duration,
@@ -80,27 +92,27 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
         startDate,
         endDate,
         groupKey,
-    } = queryString.parse(window.location.search);
+    } = query;
     const [typeFilter, setTypeFilter] = useState(
-        typeof type === 'string' ? type : defaultType
+        typeof type === 'string' ? type : defaultType,
     );
     const [durationFilter, setDurationFilter] = useState(
-        typeof duration === 'string' ? duration : defaultDuration
+        typeof duration === 'string' ? duration : defaultDuration,
     );
     const [yearFilter, setYearFilter] = useState(
-        typeof year === 'string' ? parseInt(year, 10) : defaultYear
+        typeof year === 'string' ? parseInt(year, 10) : defaultYear,
     );
     const [dataTypeFilter, setDataTypeFilter] = useState(
-        typeof dataType === 'string' ? dataType : defaultDataType
+        typeof dataType === 'string' ? dataType : defaultDataType,
     );
     const [startDateFilter, setStartDateFilter] = useState<Date | null>(
-        typeof startDate === 'string' ? new Date(startDate) : null
+        typeof startDate === 'string' ? new Date(startDate) : null,
     );
     const [endDateFilter, setEndDateFilter] = useState<Date | null>(
-        typeof endDate === 'string' ? new Date(endDate) : null
+        typeof endDate === 'string' ? new Date(endDate) : null,
     );
     const [groupKeyFilter, setGroupKeyFilter] = useState(
-        typeof groupKey === 'string' ? groupKey : defaultGroupKey
+        typeof groupKey === 'string' ? groupKey : defaultGroupKey,
     );
     const [paceFilter, setPaceFilter] = useState<Pace>({
         medianPace: undefined,
@@ -149,8 +161,15 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 return;
             }
 
-            items.set('startDate', getUrlDateString(startDateFilter));
-            items.set('endDate', getUrlDateString(endDateFilter));
+            // The backend assumes start > end (!), but we let the user specify any order
+            // and just rewrite in the request.
+            let startDateText = getUrlDateString(startDateFilter);
+            let endDateText = getUrlDateString(endDateFilter);
+            if (endDateText > startDateText) {
+                [startDateText, endDateText] = [endDateText, startDateText];
+            }
+            items.set('startDate', startDateText);
+            items.set('endDate', endDateText);
             items.set('groupKey', groupKeyFilter);
         }
 
@@ -191,11 +210,15 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
     ]);
 
     return (
-        <StackContainer style={{ position: 'relative', zIndex: 100 }}>
-            <Dropdown
+        <div
+            className={styles.stackContainer}
+            style={{ position: 'relative', zIndex: 100 }}
+        >
+            <select
+                className={styles.dropdown}
                 disabled={isLoading}
                 defaultValue={typeFilter}
-                onChange={(v) => {
+                onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                     setTypeFilter(v.currentTarget.value);
                 }}
             >
@@ -206,11 +229,12 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 <option value="NordicSki">NordicSki</option>
                 <option value="Swim">Swim</option>
                 <option value="Rowing">Rowing</option>
-            </Dropdown>
-            <Dropdown
+            </select>
+            <select
+                className={styles.dropdown}
                 disabled={isLoading}
                 defaultValue={durationFilter}
-                onChange={(v) => {
+                onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                     setDurationFilter(v.currentTarget.value);
                 }}
                 style={durationFilter === 'Year' ? { marginRight: '5px' } : {}}
@@ -220,12 +244,13 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 <option value="Last3Years">Last 3 years</option>
                 <option value="Year">Single year</option>
                 <option value="Custom">Custom range</option>
-            </Dropdown>
+            </select>
             {durationFilter === 'Year' && (
-                <Dropdown
+                <select
+                    className={styles.dropdown}
                     disabled={isLoading}
                     defaultValue={yearFilter}
-                    onChange={(v) => {
+                    onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                         setYearFilter(parseInt(v.currentTarget.value, 10));
                     }}
                 >
@@ -237,7 +262,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                             </option>
                         );
                     })}
-                </Dropdown>
+                </select>
             )}
             {durationFilter === 'Custom' && (
                 <DateRangePicker
@@ -254,24 +279,26 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                 durationFilter === 'Custom' ||
                 durationFilter === 'LastYear' ||
                 durationFilter === 'Last3Years') && (
-                <Dropdown
+                <select
+                    className={styles.dropdown}
                     disabled={isLoading}
                     defaultValue={groupKeyFilter}
-                    onChange={(v) => {
+                    onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                         setGroupKeyFilter(v.currentTarget.value);
                     }}
                 >
                     <option value="Week">Week</option>
                     <option value="Month">Month</option>
                     <option value="Quarter">Quarter</option>
-                </Dropdown>
+                </select>
             )}
             {disableDataTypeFilter !== true && (
                 <>
-                    <Dropdown
+                    <select
+                        className={styles.dropdown}
                         disabled={isLoading}
                         defaultValue={dataTypeFilter}
-                        onChange={(v) => {
+                        onChange={(v: React.ChangeEvent<HTMLSelectElement>) => {
                             setDataTypeFilter(v.currentTarget.value);
                         }}
                         style={
@@ -283,22 +310,25 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                         <option value="Activity">Show activity data</option>
                         <option value="Interval">Show interval data</option>
                         <option value="Threshold">Show threshold data</option>
-                    </Dropdown>
+                    </select>
                     {dataTypeFilter === 'Threshold' && (
                         <>
-                            <Input
+                            <input
+                                className={styles.input}
                                 type="number"
                                 style={{ width: '80px', marginRight: '5px' }}
                                 step="0.1"
                                 placeholder="4.30"
                                 value={paceFilter.minPace}
-                                onChange={(v) => {
+                                onChange={(
+                                    v: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
                                                   v.currentTarget.value
                                                       .replace(',', '.')
-                                                      .replace(':', '.')
+                                                      .replace(':', '.'),
                                               )
                                             : undefined;
                                     setPaceFilter({
@@ -308,19 +338,22 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                                     });
                                 }}
                             />
-                            <Input
+                            <input
+                                className={styles.input}
                                 type="number"
                                 style={{ width: '80px' }}
                                 step="0.1"
                                 placeholder="3.30"
                                 value={paceFilter.maxPace}
-                                onChange={(v) => {
+                                onChange={(
+                                    v: React.ChangeEvent<HTMLInputElement>,
+                                ) => {
                                     const pace =
                                         v.currentTarget.value.length > 0
                                             ? parseFloat(
                                                   v.currentTarget.value
                                                       .replace(',', '.')
-                                                      .replace(':', '.')
+                                                      .replace(':', '.'),
                                               )
                                             : undefined;
                                     setPaceFilter({
@@ -333,15 +366,15 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                             {paceFilter.minPace &&
                                 paceFilter.maxPace &&
                                 paceFilter.minPace <= paceFilter.maxPace && (
-                                    <WarningLabel>
+                                    <span className={styles.warningLabel}>
                                         Min/max pace is in wrong order.
-                                    </WarningLabel>
+                                    </span>
                                 )}
                             {paceFilter.medianPace && (
-                                <WarningLabel>
+                                <span className={styles.warningLabel}>
                                     Estimated threshold pace:{' '}
                                     {paceFilter.medianPace}
-                                </WarningLabel>
+                                </span>
                             )}
                             <button
                                 type="button"
@@ -359,8 +392,8 @@ const ActivityFilter: React.FC<ActivityFilterProps> = (props) => {
                     )}
                 </>
             )}
-        </StackContainer>
+        </div>
     );
-};
+}
 
 export default ActivityFilter;

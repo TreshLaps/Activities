@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import '../../../node_modules/react-vis/dist/style.css';
-import { useParams } from 'react-router';
-import { TableContainer } from '../../styles/styles';
+import { useParams } from 'react-router-dom';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { EmptyThead, Table } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 import ValueTh from '../utils/ValueTh';
 
@@ -16,19 +15,19 @@ interface ActivityGroup {
     items: Activity[];
 }
 
-const SimiliarActivitiesPage: React.FC = () => {
+const SimiliarActivitiesPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [activities, setActivities] = useState<ActivityGroup[]>();
 
     const { id } = useParams<{ id: string | undefined }>();
 
+    const [prevId, setPrevId] = useState(id);
+    if (id !== prevId) {
+        setPrevId(id);
+        setLoadingStatus(LoadingStatus.Loading); // The load will happen in useEffect() below.
+    }
+
     useEffect(() => {
-        if (activities !== undefined) {
-            return;
-        }
-
-        setLoadingStatus(LoadingStatus.Loading);
-
         fetch(`/api/activities/${id}/similar`)
             .then((response) => {
                 if (!response.ok) {
@@ -44,20 +43,20 @@ const SimiliarActivitiesPage: React.FC = () => {
                 setActivities([]);
                 setLoadingStatus(LoadingStatus.Error);
             });
-    }, [activities, id]);
+    }, [id]);
 
     const showLactate =
         (activities &&
             activities.filter(
                 (group) =>
                     group.items?.filter((activity) => activity.lactate).length >
-                        0 || false
+                        0 || false,
             ).length > 0) === true;
 
     const showFeeling =
         (activities &&
             activities.filter((group) =>
-                group.items?.filter((activity) => activity.feeling != null)
+                group.items?.filter((activity) => activity.feeling != null),
             ).length > 0) === true;
 
     const numberOfColumns = 7 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
@@ -67,8 +66,8 @@ const SimiliarActivitiesPage: React.FC = () => {
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>
-                    <TableContainer>
-                        <Table>
+                    <div className={styles.tableContainer}>
+                        <table className={tableStyles.table}>
                             {activities?.map((group) => (
                                 <React.Fragment key={group.name}>
                                     {group.items.length > 0 && (
@@ -130,7 +129,9 @@ const SimiliarActivitiesPage: React.FC = () => {
                                         </thead>
                                     )}
                                     {group.items.length === 0 && (
-                                        <EmptyThead>
+                                        <thead
+                                            className={tableStyles.emptyThead}
+                                        >
                                             <tr>
                                                 <th
                                                     colSpan={numberOfColumns}
@@ -139,7 +140,7 @@ const SimiliarActivitiesPage: React.FC = () => {
                                                     {group.name}
                                                 </th>
                                             </tr>
-                                        </EmptyThead>
+                                        </thead>
                                     )}
                                     <tbody>
                                         {group.items.map((activity) => (
@@ -153,8 +154,8 @@ const SimiliarActivitiesPage: React.FC = () => {
                                     </tbody>
                                 </React.Fragment>
                             ))}
-                        </Table>
-                    </TableContainer>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

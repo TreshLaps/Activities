@@ -1,0 +1,80 @@
+.layoutContainer {
+    margin: 0 auto;
+    max-width: 1400px;
+    padding-top: 20px;
+
+    @media (max-width: 1440px) {
+        padding: 20px 20px 0 20px;
+    }
+
+    @media (max-width: 768px) {
+        padding: 10px 10px 0 10px;
+    }
+}
+
+.menuWrapper {
+    background: #c90000;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.menuContainer {
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+.linkContainer {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex: 1 1 auto;
+    height: 64px;
+    line-height: 64px;
+
+    @media (max-width: 768px) {
+        height: 50px;
+        line-height: 50px;
+    }
+
+    li {
+        a {
+            transition: background-color 0.3s;
+            font-size: inherit;
+            color: #fff;
+            display: block;
+            padding: 0 20px;
+            text-decoration: none;
+
+            @media (max-width: 768px) {
+                padding: 0 10px;
+            }
+        }
+        a:hover,
+        .navLinkActive {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+.centerContainer {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.syncPercentage {
+    font-weight: bold;
+}
+
+.profileImage {
+    height: 48px;
+    vertical-align: middle;
+    border-radius: 99px;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}

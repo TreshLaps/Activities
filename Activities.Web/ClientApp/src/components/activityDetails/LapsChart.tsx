@@ -1,20 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import {
-    CustomSVGSeries,
-    Hint,
-    LabelSeries,
-    LineSeries,
-    VerticalRectSeries,
-} from 'react-vis';
-import styled from 'styled-components';
+import { useMemo } from 'react';
+import styles from './LapsChart.module.css';
 import { getKmString, getPaceString, getTimeString } from '../utils/Formatters';
-import Chart, { AxisTypes, DynamicChartData } from '../charts/Chart';
-
-const IntervalPaceContainer = styled.div`
-    margin-top: 20px;
-    font-size: 10px;
-    margin-bottom: -10px;
-`;
+import { Bar, LinePath } from '@visx/shape';
+import { Text } from '@visx/text';
+import { scaleLinear } from '@visx/scale';
 
 export interface Lap {
     averageCadence: number;
@@ -56,8 +45,8 @@ const isPauseLap = (index: number, laps: Lap[]) => {
 
 function NormalizeChartData<T extends BasicChart>(
     data: T[],
-    minValue?: number | undefined,
-    maxValue?: number | undefined
+    minValue?: number,
+    maxValue?: number,
 ) {
     if (data.length === 0) {
         return [];
@@ -97,16 +86,19 @@ interface HeartRateChartLap extends BasicChart {
     label: string;
 }
 
-const LapsChart: React.FC<{
+interface LapsChartProps {
     laps: Lap[];
     activityType: string;
     averageIntervalPace: number | undefined;
     last60DaysIntervalPace: number | undefined;
-}> = ({ laps, activityType, averageIntervalPace, last60DaysIntervalPace }) => {
-    const [hint, setHint] = useState<{
-        value: DynamicChartData;
-        owner: string;
-    } | null>();
+}
+
+function LapsChart({
+    laps,
+    activityType,
+    averageIntervalPace,
+    last60DaysIntervalPace,
+}: LapsChartProps) {
     const speedPadding = 0.1;
 
     const sortedBySpeed = [...laps]
@@ -127,21 +119,23 @@ const LapsChart: React.FC<{
             .map((lap) => lap.elapsedTime)
             .reduce((l1, l2) => l1 + l2);
         const barPadding = totalMovingTime * 0.005;
-        let currentMovingTime = 0.0;
+
+        const x0s = [0];
+        for (const lap of laps) {
+            x0s.push(x0s[x0s.length - 1] + lap.elapsedTime + barPadding);
+        }
 
         const chartLaps: ChartLap[] = laps.map((lap, lapIndex) => {
             const averageLapSpeed = isPauseLap(lapIndex, laps)
                 ? slowSpeed + minChartHeight
                 : lap.averageSpeed;
-            const x0 = currentMovingTime;
-            const x = x0 + lap.elapsedTime;
-            currentMovingTime = x + barPadding;
+            const x0 = x0s[lapIndex];
 
             return {
                 lap,
                 x0,
                 y0: -1,
-                x,
+                x: x0 + lap.elapsedTime,
                 y: averageLapSpeed,
                 yHeartrate: lap.averageHeartrate,
                 label: isPauseLap(lapIndex, laps)
@@ -150,13 +144,13 @@ const LapsChart: React.FC<{
                 hint: `Pace: ${getPaceString(
                     lap.averageSpeed,
                     activityType,
-                    true
+                    true,
                 )}
         Heartrate: ${lap.averageHeartrate}
         Distance: ${getKmString(lap.distance)}
       Duration: ${getTimeString(lap.elapsedTime)} (Moving time: ${getTimeString(
-                    lap.movingTime
-                )})
+          lap.movingTime,
+      )})
       ${lap.lactate ? `Lactate: ${lap.lactate.toFixed(1)}` : ''}`,
                 color: lap.isInterval ? 1 : 0,
             };
@@ -174,7 +168,7 @@ const LapsChart: React.FC<{
         return {
             laps: NormalizeChartData(chartLaps),
             heartrateLaps: NormalizeChartData(chartLapsHeartrate, 150, 190),
-            totalMovingTime: currentMovingTime - barPadding,
+            totalMovingTime: x0s[x0s.length - 1] - barPadding,
             barPadding,
         };
     }, [activityType, laps, minChartHeight, slowSpeed]);
@@ -187,13 +181,35 @@ const LapsChart: React.FC<{
                 yOffset: -4,
                 label: lap.label,
             })),
-        [chart.laps]
+        [chart.laps],
     );
 
-    const labelTicksComponent = (lap: ChartLap) => (
+    const xMax = 1000;
+    const yMax = 300;
+
+    const xScale = useMemo(
+        () =>
+            scaleLinear<number>({
+                range: [0, xMax],
+                round: true,
+                domain: [0, chart.totalMovingTime],
+            }),
+        [xMax, chart.totalMovingTime],
+    );
+    const yScale = useMemo(
+        () =>
+            scaleLinear<number>({
+                range: [yMax - 15, 5],
+                round: true,
+                domain: [-0.05, 1.05],
+            }),
+        [yMax],
+    );
+    const labelTicksComponent = (lap: ChartLap, index: number) => (
         <text
-            x={0}
-            y={25}
+            key={`labeltick-${index}`}
+            x={xScale(lap.x0 + (lap.x - lap.x0) / 2)}
+            y={yMax - 3}
             textAnchor="middle"
             style={{ fontSize: 10, letterSpacing: '-0.5px' }}
         >
@@ -201,96 +217,61 @@ const LapsChart: React.FC<{
         </text>
     );
 
-    const labelTicks = useMemo(
-        () =>
-            chart.laps
-                .filter(
-                    (_, index) =>
-                        !isPauseLap(
-                            index,
-                            chart.laps.map((chartLap) => chartLap.lap)
-                        )
-                )
-                .map((lap) => ({
-                    x: lap.x0 + (lap.x - lap.x0) / 2,
-                    y: 0,
-                    customComponent: () => labelTicksComponent(lap),
-                })),
-        [chart.laps]
-    );
-
-    const averageIntervalPaceData = useMemo(
-        () => [
-            {
-                x: 0,
-                y: averageIntervalPace ?? 0,
-                customComponent: () => (
-                    <line
-                        x1="0"
-                        y1="0"
-                        x2="100%"
-                        y2="0"
-                        stroke="#92b7f8"
-                        strokeDasharray="4"
-                    />
+    const labelTicks = chart.laps
+        .filter(
+            (_, index) =>
+                !isPauseLap(
+                    index,
+                    chart.laps.map((chartLap) => chartLap.lap),
                 ),
-            },
-            {
-                x: 0,
-                y: last60DaysIntervalPace ?? 0,
-                customComponent: () => (
-                    <line
-                        x1="0"
-                        y1="0"
-                        x2="100%"
-                        y2="0"
-                        stroke="#d6d6d6"
-                        strokeDasharray="4"
-                    />
-                ),
-            },
-        ],
-        [averageIntervalPace, last60DaysIntervalPace]
-    );
+        )
+        .map((lap, index) => labelTicksComponent(lap, index));
 
     return (
-        <div>
+        <div style={{ containerType: 'inline-size' }}>
             {chart.laps?.length > 1 && (
-                <Chart
-                    height={300}
-                    xDomain={[0, chart.totalMovingTime]}
-                    xAxisType={AxisTypes.None}
-                    yDomain={[-0.05, 1.05]}
-                    yTickFormat={(distancePerSecond) =>
-                        getPaceString(distancePerSecond, activityType)
-                    }
-                    margin={{ bottom: 15 }}
-                    hideYAxis
+                <svg
+                    style={{ width: '100%', height: 'min(300px, 66cqw)' }}
+                    viewBox={`0 0 ${xMax} ${yMax}`}
                 >
-                    <VerticalRectSeries
-                        data={chart.laps}
-                        onValueMouseOver={(value) =>
-                            setHint({ value, owner: 'pace' })
-                        }
-                        onValueMouseOut={() => setHint(null)}
-                        onValueClick={(value) => {
-                            window.location.hash = value.x.toString();
-                        }}
-                        stroke="0"
-                        colorRange={['#d6d6d6', '#92b7f8']}
-                    />
-                    <LabelSeries
-                        data={labelData}
-                        labelAnchorX="middle"
-                        labelAnchorY="top"
-                        style={{
-                            fontSize: 10,
-                            textShadow:
-                                '0 0 1px white, 0 0 2px white, 0 0 3px white',
-                        }}
-                    />
-                    <LineSeries
+                    {chart.laps.map((lap, index) => {
+                        const mixPercent = lap.y * 100 + '%';
+                        return (
+                            <Bar
+                                key={`bar-${index}`}
+                                x={xScale(lap.x0)}
+                                y={yScale(lap.y)}
+                                width={xScale(lap.x - lap.x0)}
+                                height={yScale(lap.y0 - lap.y)}
+                                fill={`color-mix(in oklab, #d6d6d6, #92b7f8 ${mixPercent})`}
+                                onClick={() => {
+                                    window.location.hash = lap.x.toString();
+                                }}
+                            />
+                        );
+                    })}
+                    {labelData.map((label, index) => {
+                        return (
+                            <Text
+                                key={`label-${index}`}
+                                x={xScale(label.x)}
+                                y={yScale(label.y) + label.yOffset}
+                                textAnchor="middle"
+                                verticalAnchor="end"
+                                style={{
+                                    fill: '#333',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                {label.label}
+                            </Text>
+                        );
+                    })}
+                    <LinePath
                         data={chart.heartrateLaps}
+                        x={(d) => xScale(d.x) ?? 0}
+                        y={(d) => yScale(d.y) ?? 0}
                         style={{
                             shapeRendering: 'geometricPrecision',
                             strokeWidth: '1.5px',
@@ -300,45 +281,35 @@ const LapsChart: React.FC<{
                         }}
                         stroke="red"
                     />
-                    <LabelSeries
-                        data={chart.heartrateLaps}
-                        labelAnchorX="middle"
-                        labelAnchorY="middle"
-                        style={{ fontSize: 8, textShadow: '0 0 1px white' }}
-                    />
-                    {false && averageIntervalPace && (
-                        <CustomSVGSeries data={averageIntervalPaceData} />
-                    )}
-                    <CustomSVGSeries data={labelTicks} />
-                    {hint?.value.label != null && hint?.owner === 'pace' && (
-                        <Hint value={hint.value}>
-                            <div
+                    {chart.heartrateLaps.map((lap, index) => {
+                        return (
+                            <Text
+                                key={`hrlabel-${index}`}
+                                x={xScale(lap.x)}
+                                y={yScale(lap.y) - lap.yOffset}
+                                textAnchor="middle"
+                                verticalAnchor="end"
                                 style={{
-                                    background: 'white',
-                                    boxShadow:
-                                        '1px 1px 6px rgba(0,0,0, 0.5), 1px 1px 4px rgba(0,0,0, 0.3)',
-                                    padding: '7px 10px',
-                                    color: 'black',
-                                    borderRadius: '2px',
-                                    fontSize: '12px',
-                                    lineHeight: 1.5,
-                                    whiteSpace: 'pre-line',
+                                    fill: '#333',
+                                    fontSize: 12,
+                                    fontWeight: 'bold',
                                 }}
                             >
-                                {hint.value.label}
-                            </div>
-                        </Hint>
-                    )}
-                </Chart>
+                                {lap.label}
+                            </Text>
+                        );
+                    })}
+                    {labelTicks}
+                </svg>
             )}
             {averageIntervalPace && (
-                <IntervalPaceContainer>
+                <div className={styles.intervalPaceContainer}>
                     <span>
                         Average interval pace:{' '}
                         <strong>
                             {getPaceString(
                                 averageIntervalPace || 0,
-                                activityType
+                                activityType,
                             )}
                         </strong>
                     </span>
@@ -348,14 +319,14 @@ const LapsChart: React.FC<{
                         <strong>
                             {getPaceString(
                                 last60DaysIntervalPace || 0,
-                                activityType
+                                activityType,
                             )}
                         </strong>
                     </span>
-                </IntervalPaceContainer>
+                </div>
             )}
         </div>
     );
-};
+}
 
 export default LapsChart;

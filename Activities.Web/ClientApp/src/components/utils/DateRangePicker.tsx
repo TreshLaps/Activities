@@ -1,12 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { DateRangeInput, START_DATE, END_DATE } from '@datepicker-react/styled';
-import styled, { ThemeProvider } from 'styled-components';
-
-const DatePickerWrapper = styled.div`
-    label {
-        width: 110px;
-    }
-`;
+import { useEffect, useState } from 'react';
+import styles from './DateRangePicker.module.css';
 
 interface DateRangePickerProps {
     startDate: Date | null;
@@ -15,15 +8,15 @@ interface DateRangePickerProps {
     onChange: (startDate: Date, endDate: Date) => void;
 }
 
-const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
-    const { startDate, endDate, onChange } = props;
+function DateRangePicker({
+    startDate,
+    endDate,
+    onChange,
+}: DateRangePickerProps) {
     const [startDateFilter, setStartDateFilter] = useState<Date | null>(
-        startDate
+        startDate,
     );
     const [endDateFilter, setEndDateFilter] = useState<Date | null>(endDate);
-    const [datepickerFocus, setDatepickerFocus] = useState<
-        typeof START_DATE | typeof END_DATE | null
-    >(null);
 
     useEffect(() => {
         if (!startDateFilter || !endDateFilter) {
@@ -34,47 +27,25 @@ const DateRangePicker: React.FC<DateRangePickerProps> = (props) => {
     }, [startDateFilter, endDateFilter, onChange]);
 
     return (
-        <ThemeProvider
-            theme={{
-                reactDatepicker: {
-                    fontFamily: 'Roboto, sans-serif',
-                    inputLabelBorder: 'thin solid #ddd',
-                    inputLabelBorderRadius: '3px',
-                    dateRangeStartDateInputPadding: '10px 15px',
-                    dateRangeEndDateInputPadding: '10px 15px',
-                    inputFontSize: '15px',
-                    inputActiveBoxShadow: '2px 2px 8px rgba(0, 0, 0, 0.1)',
-                    inputCalendarIconWidth: '0',
-                    dateRangeGridTemplateColumns: '1fr 10px 1fr',
-                },
-            }}
-        >
-            <DatePickerWrapper>
-                <DateRangeInput
-                    onDatesChange={(data) => {
-                        setStartDateFilter(data.endDate);
-                        setEndDateFilter(data.startDate);
-                        setDatepickerFocus(
-                            datepickerFocus === START_DATE
-                                ? END_DATE
-                                : START_DATE
-                        );
-                    }}
-                    onFocusChange={(data) => {
-                        setDatepickerFocus(data);
-                    }}
-                    startDate={endDateFilter}
-                    endDate={startDateFilter}
-                    focusedInput={datepickerFocus}
-                    displayFormat="dd.MM.yyyy"
-                    showClose={false}
-                    showResetDates={false}
-                    maxBookingDate={new Date()}
-                    numberOfMonths={1}
-                />
-            </DatePickerWrapper>
-        </ThemeProvider>
+        <div className={styles.datePickerWrapper}>
+            From:{' '}
+            <input
+                type="date"
+                value={startDateFilter?.toLocaleDateString('en-CA') ?? ''}
+                onChange={(e) => {
+                    setStartDateFilter(new Date(e.target.valueAsNumber));
+                }}
+            />{' '}
+            To:{' '}
+            <input
+                type="date"
+                value={endDateFilter?.toLocaleDateString('en-CA') ?? ''}
+                onChange={(e) => {
+                    setEndDateFilter(new Date(e.target.valueAsNumber));
+                }}
+            />
+        </div>
     );
-};
+}
 
 export default DateRangePicker;

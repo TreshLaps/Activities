@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import '../../../node_modules/react-vis/dist/style.css';
-import { TableContainer } from '../../styles/styles';
+import { useState, useEffect } from 'react';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
-import { FixedWidthTable } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
@@ -21,17 +21,22 @@ export interface ProgressResultItem extends ResultItem {
     lactate: ItemValue;
 }
 
-const ProgressPage: React.FC = () => {
+const ProgressPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [progress, setProgress] = useState<ProgressResultItem[]>();
+
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
 
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/progress/', filters))
             .then((response) => {
@@ -56,13 +61,13 @@ const ProgressPage: React.FC = () => {
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None &&
                 progress &&
                 progress.length > 0 && (
-                    <TableContainer>
-                        <FixedWidthTable>
+                    <div className={styles.tableContainer}>
+                        <table className={tableStyles.fixedWidthTable}>
                             <thead>
                                 <tr>
                                     <th>&nbsp;</th>
@@ -109,8 +114,8 @@ const ProgressPage: React.FC = () => {
                                     </tr>
                                 ))}
                             </tbody>
-                        </FixedWidthTable>
-                    </TableContainer>
+                        </table>
+                    </div>
                 )}
         </div>
     );

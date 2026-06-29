@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import queryString from 'query-string';
-import '../../../node_modules/react-vis/dist/style.css';
-import { AutoSizer } from 'react-virtualized';
-import {
-    ChartLabel,
-    HexbinSeries,
-    HorizontalGridLines,
-    VerticalGridLines,
-    XAxis,
-    XYPlot,
-    YAxis,
-} from 'react-vis';
+import { Axis, Grid, GlyphSeries, XYChart } from '@visx/xychart';
+import { ParentSize } from '@visx/responsive';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
-import { Box, Dropdown, StackContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import { getPaceString } from '../utils/Formatters';
 
 interface Item {
@@ -30,18 +21,25 @@ interface Item {
 
 interface Axis {
     format: ((value: number) => string) | undefined;
-    min: number | undefined;
-    max: number | undefined;
+    min: number;
+    max: number;
 }
 
-const getAxisSettings = (key: string, lockAxisFilter: boolean): Axis => {
+const getAxisSettings = (
+    data: Item[] | undefined,
+    key: keyof Item,
+    lockAxisFilter: boolean,
+): Axis => {
+    const dataMin = Math.min(...(data ?? []).map((d) => d[key]));
+    const dataMax = Math.max(...(data ?? []).map((d) => d[key]));
+
     if (key === 'pace') {
         // TODO: If this page is ever made public, apply the same logic with
         // propagating the activity type from the filter as in the other pages.
         return {
             format: (value: number) => getPaceString(value, ''),
-            min: lockAxisFilter ? 3.7 : undefined,
-            max: lockAxisFilter ? 5.5 : undefined,
+            min: lockAxisFilter ? 3.7 : dataMin,
+            max: lockAxisFilter ? 5.5 : dataMax,
         };
     }
     if (key === 'averageHeartrate' || key === 'maxHeartrate') {
@@ -54,16 +52,20 @@ const getAxisSettings = (key: string, lockAxisFilter: boolean): Axis => {
 
     return {
         format: undefined,
-        min: undefined,
-        max: undefined,
+        min: dataMin,
+        max: dataMax,
     };
 };
 
 const defaultYAxis: keyof Item = 'averageHeartrate';
 const defaultXAxis: keyof Item = 'pace';
 
-const ScatterPage: React.FC = () => {
-    const { yAxis, xAxis } = queryString.parse(window.location.search) as {
+const ScatterPage = () => {
+    const query: Record<string, string> = {};
+    new URLSearchParams(window.location.search).forEach((value, key) => {
+        query[key] = value;
+    });
+    const { yAxis, xAxis } = query as {
         yAxis: keyof Item;
         xAxis: keyof Item;
     };
@@ -71,19 +73,24 @@ const ScatterPage: React.FC = () => {
     const [filters, setFilters] = useState<Filters>();
     const [items, setItems] = useState<Item[]>();
     const [yAxisFilter, setYAxisFilter] = useState<keyof Item>(
-        typeof yAxis === 'string' ? yAxis : defaultYAxis
+        typeof yAxis === 'string' ? yAxis : defaultYAxis,
     );
     const [xAxisFilter, setXAxisFilter] = useState<keyof Item>(
-        typeof xAxis === 'string' ? xAxis : defaultXAxis
+        typeof xAxis === 'string' ? xAxis : defaultXAxis,
     );
     const [lockAxisFilter] = useState(false);
+
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
 
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/scatter/', filters))
             .then((response) => {
@@ -107,21 +114,24 @@ const ScatterPage: React.FC = () => {
         y: Number(item[yAxisFilter]),
     }));
 
-    const yAxisSettings = getAxisSettings(yAxisFilter, lockAxisFilter);
-    const xAxisSettings = getAxisSettings(xAxisFilter, lockAxisFilter);
+    const yAxisSettings = getAxisSettings(items, yAxisFilter, lockAxisFilter);
+    const xAxisSettings = getAxisSettings(items, xAxisFilter, lockAxisFilter);
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && items && (
                 <div>
-                    <StackContainer>
-                        <Dropdown
+                    <div className={styles.stackContainer}>
+                        <select
+                            className={styles.dropdown}
                             defaultValue={yAxisFilter}
-                            onChange={(v) => {
+                            onChange={(
+                                v: React.ChangeEvent<HTMLSelectElement>,
+                            ) => {
                                 setYAxisFilter(
-                                    v.currentTarget.value as keyof Item
+                                    v.currentTarget.value as keyof Item,
                                 );
                             }}
                         >
@@ -133,12 +143,15 @@ const ScatterPage: React.FC = () => {
                                 Average heartrate
                             </option>
                             <option value="maxHeartrate">Max heartrate</option>
-                        </Dropdown>
-                        <Dropdown
+                        </select>
+                        <select
+                            className={styles.dropdown}
                             defaultValue={xAxisFilter}
-                            onChange={(v) => {
+                            onChange={(
+                                v: React.ChangeEvent<HTMLSelectElement>,
+                            ) => {
                                 setXAxisFilter(
-                                    v.currentTarget.value as keyof Item
+                                    v.currentTarget.value as keyof Item,
                                 );
                             }}
                         >
@@ -150,86 +163,56 @@ const ScatterPage: React.FC = () => {
                                 Average heartrate
                             </option>
                             <option value="maxHeartrate">Max heartrate</option>
-                        </Dropdown>
-                    </StackContainer>
-                    <Box style={{ height: '80vh' }}>
-                        <AutoSizer>
-                            {(size) => (
-                                <XYPlot
-                                    width={size.width}
-                                    height={size.height}
-                                    xDomain={
-                                        xAxisSettings.min !== undefined &&
-                                        xAxisSettings.max !== undefined
-                                            ? [
-                                                  xAxisSettings.min,
-                                                  xAxisSettings.max,
-                                              ]
-                                            : undefined
-                                    }
-                                    yDomain={
-                                        yAxisSettings.min !== undefined &&
-                                        yAxisSettings.max !== undefined
-                                            ? [
-                                                  yAxisSettings.min,
-                                                  yAxisSettings.max,
-                                              ]
-                                            : undefined
-                                    }
+                        </select>
+                    </div>
+                    <div className={styles.box} style={{ height: '80vh' }}>
+                        <ParentSize>
+                            {({ width, height }) => (
+                                <XYChart
+                                    width={width}
+                                    height={height}
+                                    xScale={{
+                                        type: 'linear',
+                                        domain: [
+                                            // FIXME: For some reason, we are always bounded at zero.
+                                            xAxisSettings.min,
+                                            xAxisSettings.max,
+                                        ],
+                                    }}
+                                    yScale={{
+                                        type: 'linear',
+                                        domain: [
+                                            // FIXME: For some reason, we are always bounded at zero.
+                                            yAxisSettings.min,
+                                            yAxisSettings.max,
+                                        ],
+                                    }}
                                 >
-                                    <HorizontalGridLines />
-                                    <VerticalGridLines />
-                                    <HexbinSeries
-                                        sizeHexagonsWithCount
-                                        className="hexbin-size-example"
-                                        radius={15}
-                                        data={data}
-                                        style={{
+                                    <Grid />
+                                    <GlyphSeries
+                                        data={data ?? []}
+                                        dataKey="scatter"
+                                        xAccessor={(d) => (d ?? { x: 0 }).x}
+                                        yAccessor={(d) => (d ?? { y: 0 }).y}
+                                        /*style={{
                                             stroke: '#124890',
                                             strokeWidth: '1px',
-                                        }}
-                                        colorRange={['#124890', '#124890']}
+                                        }}*/
                                     />
-                                    <XAxis tickFormat={xAxisSettings.format} />
-                                    <YAxis tickFormat={yAxisSettings.format} />
-                                    <ChartLabel
-                                        text={xAxisFilter}
-                                        className="alt-x-label"
-                                        xPercent={
-                                            (1.0 / size.width) *
-                                            (size.width - 8)
-                                        }
-                                        yPercent={
-                                            (1.0 / size.height) *
-                                            (size.height - 85)
-                                        }
-                                        style={{
-                                            transform: 'rotate(90)',
-                                            textAnchor: 'end',
-                                        }}
+                                    <Axis
+                                        orientation="bottom"
+                                        tickFormat={xAxisSettings.format}
+                                        label={xAxisFilter}
                                     />
-
-                                    <ChartLabel
-                                        text={yAxisFilter}
-                                        className="alt-y-label"
-                                        xPercent={
-                                            1.0 -
-                                            (1.0 / size.width) *
-                                                (size.width - 50)
-                                        }
-                                        yPercent={
-                                            1.0 -
-                                            (1.0 / size.height) *
-                                                (size.height - -15)
-                                        }
-                                        style={{
-                                            textAnchor: 'start',
-                                        }}
+                                    <Axis
+                                        orientation="left"
+                                        tickFormat={yAxisSettings.format}
+                                        label={yAxisFilter}
                                     />
-                                </XYPlot>
+                                </XYChart>
                             )}
-                        </AutoSizer>
-                    </Box>
+                        </ParentSize>
+                    </div>
                 </div>
             )}
         </div>

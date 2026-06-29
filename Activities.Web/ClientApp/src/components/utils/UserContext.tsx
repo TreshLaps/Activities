@@ -7,5 +7,5 @@ export interface User {
 }
 
 export const UserContext = React.createContext<User | null | undefined>(
-    undefined
+    undefined,
 );

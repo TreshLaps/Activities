@@ -1,0 +1,31 @@
+.valueTdLabel {
+    z-index: 1;
+    position: relative;
+    display: block;
+    min-width: 60px;
+    padding: 2px 3px 1px 0px;
+
+    @media (max-width: 768px) {
+        min-width: 40px;
+    }
+}
+
+.valueTdFactor,
+.valueTdFactorBackground {
+    position: absolute;
+    right: 0;
+    top: -4px;
+    bottom: -4px;
+    opacity: 0.4;
+    max-width: 100%;
+    border-radius: 3px;
+}
+
+.valueTdFactorBackground {
+    opacity: 1;
+    width: 100%;
+}
+
+.valueContainer {
+    position: relative;
+}

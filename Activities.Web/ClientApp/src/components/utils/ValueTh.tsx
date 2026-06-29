@@ -1,5 +1,4 @@
-import React from 'react';
-import styled from 'styled-components';
+import styles from './ValueTh.module.css';
 import { ItemValue, ItemValueType, ResultItem } from '../models/ResultItem';
 import {
     AveragePace,
@@ -9,20 +8,16 @@ import {
     round,
 } from './Formatters';
 
-const Th = styled.th`
-    white-space: nowrap;
-`;
-
-const ValueTh: React.FC<{
+interface ValueThProps {
     items: ResultItem[];
     valueFunc: (item: ResultItem) => ItemValue;
     activityType?: string | undefined;
     title?: string | undefined;
-}> = (props) => {
-    const { items, valueFunc, activityType, title } = props;
+}
 
+function ValueTh({ items, valueFunc, activityType, title }: ValueThProps) {
     if (items == null || items.length === 0) {
-        return <Th>&nbsp;</Th>;
+        return <th className={styles.th}>&nbsp;</th>;
     }
 
     const values = items
@@ -30,7 +25,7 @@ const ValueTh: React.FC<{
         .map((item) => valueFunc(item).value);
 
     if (values.length === 0) {
-        return <Th>&nbsp;</Th>;
+        return <th className={styles.th}>&nbsp;</th>;
     }
 
     const { type } = valueFunc(items.filter((item) => valueFunc(item))[0]);
@@ -47,10 +42,10 @@ const ValueTh: React.FC<{
                 AveragePace(
                     items,
                     (item) => item.elapsedTime?.value,
-                    (item) => item.pace?.value
+                    (item) => item.pace?.value,
                 ) || 0,
                 activityType ?? '',
-                true
+                true,
             );
             break;
         case ItemValueType.TimeInSeconds:
@@ -66,7 +61,11 @@ const ValueTh: React.FC<{
         default:
     }
 
-    return <Th title={title}>{value}</Th>;
-};
+    return (
+        <th className={styles.th} title={title}>
+            {value}
+        </th>
+    );
+}
 
 export default ValueTh;

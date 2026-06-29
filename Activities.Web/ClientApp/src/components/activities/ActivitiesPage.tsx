@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import '../../../node_modules/react-vis/dist/style.css';
-import { TableContainer } from '../../styles/styles';
+import styles from '../../styles/styles.module.css';
 import Loader, { LoadingStatus } from '../utils/Loader';
 import ActivityFilter, {
+    filtersChanged,
     getUrlWithFilters,
     Filters,
 } from '../utils/ActivityFilter';
-import { EmptyThead, Table } from '../utils/Table';
+import tableStyles from '../utils/Table.module.css';
 import ActivityTr, { Activity } from '../utils/ActivityTr';
 import ValueTh from '../utils/ValueTh';
 
@@ -19,17 +19,22 @@ interface ActivityGroup {
     items: Activity[];
 }
 
-const ActivitiesPage: React.FC = () => {
+const ActivitiesPage = () => {
     const [loadingStatus, setLoadingStatus] = useState(LoadingStatus.None);
     const [filters, setFilters] = useState<Filters>();
     const [activities, setActivities] = useState<ActivityGroup[]>();
+
+    const onFilterChange = (newFilters: Filters) => {
+        if (filtersChanged(filters, newFilters)) {
+            setLoadingStatus(LoadingStatus.Loading);
+            setFilters(newFilters);
+        }
+    };
 
     useEffect(() => {
         if (filters === undefined) {
             return;
         }
-
-        setLoadingStatus(LoadingStatus.Loading);
 
         fetch(getUrlWithFilters('/api/activities/', filters))
             .then((response) => {
@@ -59,7 +64,7 @@ const ActivitiesPage: React.FC = () => {
             activities.filter(
                 (group) =>
                     group.items?.filter((activity) => activity.lactate).length >
-                        0 || false
+                        0 || false,
             ).length > 0) === true;
 
     const showFeeling =
@@ -67,19 +72,19 @@ const ActivitiesPage: React.FC = () => {
             activities.filter(
                 (group) =>
                     group.items?.filter((activity) => activity.feeling).length >
-                        0 || false
+                        0 || false,
             ).length > 0) === true;
 
     const numberOfColumns = 6 + (showFeeling ? 1 : 0) + (showLactate ? 1 : 0);
 
     return (
         <div>
-            <ActivityFilter onChange={setFilters} />
+            <ActivityFilter onChange={onFilterChange} />
             <Loader status={loadingStatus} />
             {loadingStatus === LoadingStatus.None && activities && (
                 <div>
-                    <TableContainer>
-                        <Table>
+                    <div className={styles.tableContainer}>
+                        <table className={tableStyles.table}>
                             {activities?.map((group) => (
                                 <React.Fragment key={group.name}>
                                     {group.items.length > 0 && (
@@ -135,7 +140,9 @@ const ActivitiesPage: React.FC = () => {
                                         </thead>
                                     )}
                                     {group.items.length === 0 && (
-                                        <EmptyThead>
+                                        <thead
+                                            className={tableStyles.emptyThead}
+                                        >
                                             <tr>
                                                 <th
                                                     colSpan={numberOfColumns}
@@ -144,7 +151,7 @@ const ActivitiesPage: React.FC = () => {
                                                     {group.name}
                                                 </th>
                                             </tr>
-                                        </EmptyThead>
+                                        </thead>
                                     )}
                                     <tbody>
                                         {group.items.map((activity) => (
@@ -158,8 +165,8 @@ const ActivitiesPage: React.FC = () => {
                                     </tbody>
                                 </React.Fragment>
                             ))}
-                        </Table>
-                    </TableContainer>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

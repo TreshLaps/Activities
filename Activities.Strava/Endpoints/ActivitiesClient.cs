@@ -83,6 +83,7 @@ namespace Activities.Strava.Endpoints
             activity = activity.TryParseLactateMeasurements();
             activity = activity.TryParseFeelingParameter();
             activity = activity.TryAdjustBislettLaps();
+            activity = activity.TryParseManualDistanceOverrides();
             return activity;
         }
 

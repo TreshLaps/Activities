@@ -1,19 +1,24 @@
-FROM docker.io/alpine:latest AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
+
+# Install Node.js 22 for frontend build (Debian repo ships v12, too old for Vite 8+)
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy files into image
 COPY . ./
-# Install dependencies, dotnet sdk 7 and dotnet runtime 6
-RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib dotnet7-sdk aspnetcore6-runtime nodejs npm curl
 # Restore as distinct layers
 RUN dotnet restore
 # Build and publish a release
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM docker.io/alpine:latest
-# Install dependencies and dotnet runtime 6
-RUN apk add aspnetcore6-runtime bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib nodejs npm curl
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+# Install curl for health check
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 # Setting workdir
 WORKDIR /app
 # Exposing ports for container

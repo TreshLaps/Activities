@@ -87,7 +87,7 @@ public static class BislettService
 
                     return lap with
                     {
-                        OriginalDistance = lap.Distance,
+                        OriginalDistance = lap.OriginalDistance > 0 ? lap.OriginalDistance : lap.Distance,
                         Distance = correctedDistance,
                         AverageSpeed = correctedDistance / lap.ElapsedTime
                     };

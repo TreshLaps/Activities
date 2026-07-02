@@ -46,7 +46,7 @@ namespace Activities.Strava.Activities
                             AverageSpeed = o.Speed,
                             MaxSpeed = o.Speed,
                             Distance = o.Speed * lap.ElapsedTime,
-                            OriginalDistance = lap.Distance
+                            OriginalDistance = lap.OriginalDistance > 0 ? lap.OriginalDistance : lap.Distance
                         } : lap)
                         .ToList()
                 };
@@ -76,7 +76,7 @@ namespace Activities.Strava.Activities
                             AverageSpeed = o.Distance / lap.ElapsedTime,
                             MaxSpeed = o.Distance / lap.ElapsedTime,
                             Distance = o.Distance,
-                            OriginalDistance = lap.Distance
+                            OriginalDistance = lap.OriginalDistance > 0 ? lap.OriginalDistance : lap.Distance
                         } : lap)
                         .ToList()
                 };

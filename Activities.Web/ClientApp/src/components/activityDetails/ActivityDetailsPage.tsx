@@ -122,12 +122,15 @@ const ActivityDetailsPage = () => {
     const hasIntervals =
         activity?.laps != null &&
         activity.laps.filter((lap) => lap.isInterval).length > 0;
-    const bislettIntervals =
-        activity?.laps === null || !activity?.isBislettInterval
-            ? []
-            : activity.laps
-                  .filter((lap) => lap.isInterval)
-                  .map((lap) => lap.originalDistance ?? lap.distance);
+    const adjustedIntervals = activity?.laps
+        ? activity.laps.filter(
+              (lap) =>
+                  lap.isInterval &&
+                  lap.distance &&
+                  lap.originalDistance &&
+                  lap.originalDistance !== lap.distance,
+          )
+        : [];
 
     if (id !== prevId) {
         setPrevId(id);
@@ -313,6 +316,10 @@ const ActivityDetailsPage = () => {
                         </li>
                     </ul>
 
+                    {adjustedIntervals.length > 0 && (
+                        <FootpodCalibration laps={adjustedIntervals} />
+                    )}
+
                     <h3>Actions</h3>
                     {hasIntervals && (
                         <>
@@ -333,18 +340,6 @@ const ActivityDetailsPage = () => {
                             </button>
                         </>
                     )}
-                    {bislettIntervals.length > 0 && (
-                        <a
-                            className={pageStyles.actionButton}
-                            href={
-                                `https://info.skvidar.run/intro/kalibrer-footpod#` +
-                                bislettIntervals.join(',')
-                            }
-                            rel="noopener noreferrer"
-                        >
-                            Calibrate footpod
-                        </a>
-                    )}
                     <a
                         className={pageStyles.actionButton}
                         href={`https://www.strava.com/activities/${activity.id}`}
@@ -363,5 +358,61 @@ const ActivityDetailsPage = () => {
         </>
     );
 };
+
+interface FootpodCalibrationProps {
+    laps: Lap[];
+}
+
+function FootpodCalibration({ laps }: FootpodCalibrationProps) {
+    const [existingFactor, setExistingFactor] = useState(100.0);
+
+    const lapsWithFactor = laps.map((lap) => ({
+        distance: lap.distance,
+        originalDistance: lap.originalDistance,
+        factor: (lap.distance * existingFactor) / lap.originalDistance!,
+    }));
+    const overallFactor = Math.pow(
+        lapsWithFactor.reduce((val, lap) => val * lap.factor, 1.0),
+        1.0 / lapsWithFactor.length,
+    );
+
+    return (
+        <>
+            <h3>Footpod calibration</h3>
+
+            <p>The following laps had their distances adjusted:</p>
+
+            <ul>
+                {lapsWithFactor.map((lap, index) => (
+                    <li key={'calibration-lap-' + index}>
+                        {lap.originalDistance!.toFixed(1)} m → {lap.distance} m,
+                        factor {lap.factor.toFixed(1)}
+                    </li>
+                ))}
+            </ul>
+
+            <p>
+                Geometric average (recommended new calibration factor):{' '}
+                <strong>{overallFactor.toFixed(1)}</strong>
+            </p>
+
+            <p>
+                Assume existing calibration factor:{' '}
+                <input
+                    type="number"
+                    value={existingFactor}
+                    min="1"
+                    max="200"
+                    step="0.1"
+                    onChange={(v) =>
+                        setExistingFactor(
+                            parseFloat(v.currentTarget.value) ?? 100,
+                        )
+                    }
+                />
+            </p>
+        </>
+    );
+}
 
 export default ActivityDetailsPage;
